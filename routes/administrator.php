@@ -1,0 +1,197 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ActionController;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DataController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\TestController;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+Route::group(['middleware' => ['auth']], function () {
+	#TEST Modul
+	# Admin 
+	Route::prefix('test')->group(function (){
+		Route::get('tinymce',[TestController::class,'viewHtml']);
+	});
+	Route::prefix('datasource')->group(function () {
+		Route::post('all-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
+		Route::post('district', [DataController::class, 'sourceDataDistrict'])->name('source-data-district');
+		Route::post('city', [DataController::class, 'sourceDataCities'])->name('source-data-city');
+		Route::post('province', [DataController::class, 'sourceDataProvinces'])->name('source-data-province');
+		#test & try
+		Route::get('all-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
+		Route::get('subdistrict', [DataController::class, 'sourceDataSubdistrict'])->name('source-data-subdistrict');
+	});
+	// Route::get('/', [HomeController::class, 'index']);
+	Route::get('home', [HomeController::class,'homeFunction']);
+	Route::post('dropzone/store', [CustomerController::class, 'dropzoneStore'])->name('dropzone.store');
+	# Customer
+	Route::prefix('customer')->group(function(){
+		Route::post('addr-districts', [DataController::class, 'dataDistricts'])->name('source-addr-districts');
+		Route::post('addr-cities', [DataController::class, 'dataCities'])->name('source-addr-cities');
+		Route::post('addr-province', [DataController::class, 'dataProvincies'])->name('source-addr-province');
+		#####
+		Route::match(['get', 'post'], 'information', [CustomerController::class, 'actionPageCustomerInformation'])->name('customer-load-page-information');
+		Route::match(['get', 'post'], 'activities', [CustomerController::class, 'actionPageCustomerActivities'])->name('customer-load-page-activities');
+		Route::match(['get', 'post'], 'leads', [CustomerController::class, 'actionPageCustomerLeads'])->name('customer-load-page-leads');
+		Route::match(['get', 'post'], 'opportunities', [CustomerController::class, 'actionPageCustomerOpportunities'])->name('customer-load-page-opportunities');
+		Route::match(['get', 'post'], 'create-new-opportunity-cst/{id}', [OpportunityController::class, 'formNewOpportunityCst'])->name('form-new-opportunity');
+		Route::match(['get', 'post'], 'purchased', [CustomerController::class, 'actionPageCustomerPurchased'])->name('customer-load-page-purchased');
+		Route::get('detail-customer/{id}', [CustomerController::class, 'detailCustomer']);
+		route::match(['get'], 'detail-customer-activities/{id}' , [CustomerController::class, 'activityCustomer']);
+		route::match(['get'], 'detail-customer-opportunities/{id}' , [CustomerController::class, 'actionPageCustomerOpportunity']);
+		#####
+		Route::get('/', [CustomerController::class,'CustomerDataView']);
+		Route::get('create-customer',[CustomerController::class,'viewFormCreateCustomer']);
+		Route::get('create-customer/{id}', [CustomerController::class, 'viewFormCreateCustomerFixed']);
+		Route::post('store-customer', [CustomerController::class, 'storeCreateCustomer'])->name('store-customer');
+		Route::post('source-data-individu', [CustomerController::class, 'sourceDataInvidu'])->name('source-data-individu');
+		Route::get('detail-customer/person-update/{id}', [CustomerController::class, 'updatePersonData']);
+		Route::get('detail-customer/company-update/{id}', [CustomerController::class, 'updateCompanyData']);
+		Route::patch('store-update-customer', [CustomerController::class, 'storeUpdateCustomer'])->name('store-update-customer');
+		Route::patch('store-update-personal', [CustomerController::class, 'storeUpdatePersonal'])->name('store-update-personal');
+		#####
+		Route::match(['get', 'post'], 'source-data-lead-cst', [DataController::class, 'sourceDataLeadCst'])->name('source-data-lead-cst');
+		Route::get('detail-customer-leads/{id}', [CustomerController::class, 'viewCustomerLead']);
+		Route::match(['get', 'post'],'person-contact',[CustomerController::class,'actionGetPersonContact'])->name('customer-person-contact');
+		Route::match(['get', 'post'],'activity-pic-contact',[CustomerController::class,'actionGeActivitiContact'])->name('activity-pic-contact');
+		Route::match(['get', 'post'],'sub-customers',[CustomerController::class,'actionGetSubcustomer'])->name('sub-customers');
+		Route::match(['get', 'post'],'action-get-city-select',[CustomerController::class,'actionGetCity'])->name('action-get-city-select');
+		Route::match(['get', 'post'],'action-get-district-select',[CustomerController::class,'actionGetDistrict'])->name('action-get-district-select');
+	
+		// Route::post('source-data-customer',[DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
+	});
+	# Leads
+	Route::prefix('leads')->group(function(){
+		#lead view
+		Route::get('/', [LeadController::class,'LeadDataView']);
+		Route::get('create-lead', [LeadController::class,'formCreateLead']);
+		Route::get('detail-lead/{id}', [LeadController::class, 'LeadDataDetailView']);
+		#lead source data
+		Route::match(['get', 'post'],'source-data-leads', [DataController::class, 'sourceDataLeads'])->name('source-data-leads');
+		#lead create
+		Route::post('store-data-i', [LeadController::class, 'storeLead'])->name('store-lead-data');
+		Route::post('store-data-ii', [LeadController::class, 'storeLeadVerII'])->name('store-lead-data-ver2');
+		Route::post('store-data-follow-up', [LeadController::class, 'storeLeadFollowUp'])->name('store-lead-data-follow-up');
+		Route::post('store-new-lead', [LeadController::class, 'storeLeadI'])->name('store-new-lead');
+		#lead_detail
+		Route::post('store-update-lead-status', [LeadController::class, 'storeUpdateStatusLead'])->name('store-update-lead-status');
+		Route::post('store-update-base-value', [LeadController::class, 'storeUpdateBaseValue'])->name('store-update-base-value');
+		Route::post('store-update-target-value', [LeadController::class, 'storeUpdateTargetValue'])->name('store-update-target-value');
+		Route::post('store-change-sales-lead', [LeadController::class, 'storeChangeSales'])->name('store-change-sales-lead');
+		Route::post('store-select-team', [LeadController::class, 'storeSelectTeam'])->name('store-select-team');
+		Route::post('store-identity-need', [LeadController::class, 'storeIdentificationQualification'])->name('store-identity-need');
+		#lead_contact
+		Route::post('store-add-lead-contact', [LeadController::class, 'storeContactLead'])->name('store-add-lead-contact');
+		Route::post('remove-lead-contact', [LeadController::class, 'actionRemoveContact'])->name('remove-lead-contact');
+		Route::post('optain-lead-project', [LeadController::class, 'actionGetCstProject'])->name('optain-lead-project');
+		#lead_activities
+		Route::match(['get', 'post'], 'lead-activities', [ActivityController::class, 'sourceLeadActivities'])->name('lead-activities');
+		Route::post('lead-activities-detail-info', [ActivityController::class, 'sourceActivityInfo'])->name('lead-activities-detail-info');
+		Route::post('lead-activities-detail', [ActivityController::class, 'sourceActivityDetail'])->name('lead-activities-detail');
+		Route::post('lead-activities-update-info', [ActivityController::class, 'updateActivityInfo'])->name('lead-activities-update-info');
+		Route::post('store-data-update-info', [ActivityController::class, 'actionUpdateActivityInfo'])->name('store-data-update-info');
+		
+	});
+	#Activity
+	Route::prefix('activity')->group(function () {
+		#load view activity
+		Route::get('/', [ActivityController::class, 'viewActivity']);
+		Route::get('activity-detail/{id}', [ActivityController::class, 'viewActivityDetail']);
+		#load data activity
+		Route::match(['get', 'post'],'source-data-activity', [DataController::class, 'sourceActivities'])->name('source-data-activity');
+		Route::post('source-data-activity-calender', [ActivityController::class, 'sourceDataActivityCalender'])->name('source-data-activity-calender');
+		Route::post('source-data-activity-calender-cst', [ActivityController::class, 'sourceDataActivityCalenderCst'])->name('source-data-activity-calender-cst');
+		Route::match(['get', 'post'],'source-data-activity-detail-calender', [ActivityController::class, 'sourceDataActivityDetailCalender'])->name('source-data-activity-detail-calender');
+		#storing activity date
+		Route::post('store-new-activty', [ActivityController::class, 'storeActivitiesNew'])->name('store-new-activty');
+		Route::post('store-data-lead-activities', [ActivityController::class, 'storeActivitiesLead'])->name('store-data-lead-activities');
+		Route::post('store-close-activity', [ActivityController::class, 'storeCloseActivities'])->name('store-close-activity');
+		Route::post('store-ticket-activity', [ActivityController::class, 'storeTicketActivities'])->name('store-ticket-activity');
+		#deleting data
+		Route::post('delete-data-lead-activities', [ActivityController::class, 'deleteActivitiesLead'])->name('delete-data-lead-activities');
+		#udating data
+		Route::post('update-data-lead-activities', [ActivityController::class, 'updateActivitiesLead'])->name('update-data-lead-activities');
+		Route::post('update-schedule-activities', [ActivityController::class, 'updateActivitiesScedule'])->name('update-schedule-activities');
+		Route::post('update-close-activities', [ActivityController::class, 'updateCloseActivities'])->name('update-close-activities');
+		Route::post('autosave-update-data-lead-activities', [ActivityController::class, 'autoSaveUpdateActivitiesLead'])->name('autosave-update-data-lead-activities');
+		Route::post('update-status-lead-activities', [ActivityController::class, 'updateAStatusActivitiesLead'])->name('update-status-lead-activities');
+		Route::post('update-describe-activity', [ActivityController::class, 'updateDescribeActivity'])->name('update-describe-activity');
+		Route::post('update-result-activity', [ActivityController::class, 'updateResultActivity'])->name('update-result-activity');
+	});
+	#Opportunities
+	Route::prefix('opportunities')->group(function () {
+		Route::get('/', [OpportunityController::class, 'viewOpportunities']);
+		Route::get('detail-opportunity/{id}', [OpportunityController::class, 'viewOpportunityDetail']);
+		Route::get('create-new-opportunity', [OpportunityController::class, 'formNewOpportunity'])->name('form-new-opportunity');
+		//
+		Route::post('store-new-opportunity', [OpportunityController::class, 'storeNewOpportunity'])->name('store-new-opportunity'); 
+		Route::post('store-new-opportunity-cst', [OpportunityController::class, 'storeNewOpportunityCst'])->name('store-new-opportunity-cst');
+		Route::post('store-opportunity-new-a', [OpportunityController::class, 'storeOpportunity_A'])->name('store-opportunity-new-a');
+		Route::post('store-opportunity-notes', [OpportunityController::class, 'storeOprNotes'])->name('store-opportunity-notes');
+		Route::post('store-value-opportunity', [OpportunityController::class, 'storeOprValue'])->name('store-value-opportunity');
+		Route::post('store-value-opportunity-hpp', [OpportunityController::class, 'storeOprValueHpp'])->name('store-value-opportunity-hpp');
+		Route::post('store-value-opportunity-tax', [OpportunityController::class, 'storeOprValueTax'])->name('store-value-opportunity-tax');
+		Route::post('store-value-opportunity-other', [OpportunityController::class, 'storeOprValueOther'])->name('store-value-opportunity-other');
+		Route::post('store-value-opportunity-revenue', [OpportunityController::class, 'storeOprValueRevenue'])->name('store-value-opportunity-revenue');
+		// 
+		Route::post('source-opportunities', [DataController::class, 'sourceDataOpportunities'])->name('source-opportunities');
+		Route::post('source-opportunities-cst', [DataController::class, 'sourceDataOpportunitiesCst'])->name('source-opportunities-cst');
+		Route::post('update-product-opportunity', [OpportunityController::class, 'updateProductOpportunity'])->name('update-product-opportunity');
+		Route::post('product-principle', [OpportunityController::class, 'listProductPrinciple'])->name('product-principle');
+		Route::post('update-status-opportunity', [OpportunityController::class, 'storeUpdateStatusOpr'])->name('update-status-opportunity');
+		Route::match(['get', 'post'],'customer-project',[OpportunityController::class,'sourceCustomerProject'])->name('customer-project');
+	});
+	# Setting
+	Route::prefix('setting')->group(function(){
+		Route::get('user', [SettingController::class,'UserDataView']);
+		Route::get('user/{id}', [SettingController::class,'UserDetailView']);
+		Route::get('create-user', [SettingController::class,'createUser']);
+		Route::get('user/detail-user/{id}', [SettingController::class,'viewUserDataDetail']);
+		Route::get('instansi', [SettingController::class,'InstansiDataView']);
+		Route::get('division', [SettingController::class,'viewDevision']);
+		Route::get('division/{id}', [SettingController::class,'updateDivision']);
+		Route::get('create-division', [SettingController::class,'createDivision']);
+		Route::get('team', [SettingController::class,'viewTeam']);
+		Route::get('team/{id}', [SettingController::class,'updateTeam']);
+		Route::get('create-team', [SettingController::class,'createTeam']);
+		# Post Data
+		Route::post('store-users', [SettingController::class, 'storeDataUser'])->name('store-users');
+		Route::post('store-update-users', [SettingController::class, 'storeDataUpdateUser'])->name('store-update-users');
+		Route::post('store-division', [SettingController::class, 'storeDataDivision'])->name('store-division');
+		Route::post('store-update-division', [SettingController::class, 'storeDataUpdateDivision'])->name('store-update-division');
+		Route::post('store-team', [SettingController::class, 'storeDataTeam'])->name('store-team');
+		Route::post('store-update-team', [SettingController::class, 'storeUpdateDataTeam'])->name('store-update-team');
+		# Source Data
+		Route::match(['get', 'post'], 'source-users', [SettingController::class, 'sourceDataUser'])->name('source-users');
+		Route::match(['get', 'post'], 'team-division', [SettingController::class, 'actionGetTean'])->name('team-division');
+		Route::match(['get', 'post'], 'source-division', [SettingController::class, 'sourceDataDevision'])->name('source-division');
+		Route::match(['get', 'post'], 'source-team', [SettingController::class, 'sourceDataTeam'])->name('source-team');
+	});
+	# Product
+	Route::prefix('product')->group(function () {
+		Route::post('ajaxlink-product-value', [ProductController::class, 'ajaxProductValue'])->name('ajaxlink-product-value');
+	});
+	# CRUD
+	Route::prefix('crud')->group(function(){
+		Route::post('store-user', [ActionController::class,'storeUser'])->name('store-user');
+		Route::post('store-update-user', [ActionController::class,'storeUpdateUser'])->name('store-update-user');
+		Route::post('delete-user', [ActionController::class,'deleteUser'])->name('delete-user');
+	});
+	// Route::group(['middleware' => ['rulesystem:ADM']], function () {
+	// });
+});
