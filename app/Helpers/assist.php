@@ -11,6 +11,19 @@ use App\Models\Opr_opportunity;
 use App\Models\User;
 use Illuminate\Support\Facades\Blade;
 
+
+function checkRule($arr_value){
+  $user = Auth::user();
+  if (is_array($arr_value)) {
+    if (in_array($user->level,$arr_value)) {
+      return true;
+    }else {
+      return false;
+    }
+  }else {
+    return "Data must be array. exp: array('a','b','...')";
+  }
+}
 function genIdUser(){
   $data = User::max('id');
   $new_id = $data + 1;

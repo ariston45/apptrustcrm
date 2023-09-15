@@ -633,97 +633,264 @@ class ActivityController extends Controller
 	public function sourceLeadActivities(Request $request)
 	{
 		$id_tmp = $request->lead_id;
-		// $id_tmp = 8;
-		$activitytLeadData = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-		->where('act_lead_id',$id_tmp)
-		->select('act_id','act_lead_id','act_lead_status','act_todo_type_id','act_run_status','act_todo_describe',
-		'act_todo_result','act_task_times','act_task_times_due','act_activities.created_at as activity_created','aat_type_name','aat_type_button','aat_icon','act_run_status')
-		->orderBy('act_task_times_due', 'desc')
-		->get();
-		$actRunningLeadData = $activitytLeadData->where('act_run_status','running');
-		$actBereadyLeadData = $activitytLeadData->where('act_run_status','beready');
-		$actFinishLeadData = $activitytLeadData->where('act_run_status','finished');
-		$tableDataSection1='';
-		$tableDataSection1.='<tr class="bg-teal-lt"><td colspan="6">
-		<button type="button" id="btn-area-run-act-min" class="badge badge-outline text-green" style="margin-right:1px;display:revert;" onclick="actionRunningListMin()">
-			<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
-		<button type="button" id="btn-area-run-act-plus" class="badge badge-outline text-green" style="margin-right:1px;display:none;" onclick="actionRunningListPlus()">
-			<i class="ri-add-line" style="vertical-align: middle;"></i></button>
-		<strong>RUNNING</strong></td></tr>';
-		foreach ($actRunningLeadData as $key => $value) {
-			$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
-			$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
-			$tableDataSection1.='<tr class="act-section-1">
-				<td><div class="dropdown">
-					<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
-					<div class="dropdown-menu dropdown-menu-end">
-						<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
-						<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
-					</div>
-				</div></td>
-				<td>'.$val_duedate[$key].'</td>
-				<td class="text-muted">'.$value->aat_type_button.'</td>
-				<td class="text-muted">'.$value->act_todo_result.'</td>
-				<td class="text-muted">'.$val_createdate[$key].'</td>
-				<td>
-				<button class="badge bg-green" onclick="actionChangeStatusAct('.$value->act_id.')">Running</button>
-				</td></tr>';
+		$user = Auth::user();
+		if (checkRule(array('ADM','AGM','MGR.PAS','MGR','MGR.TCH'))) {
+			# code...
+			$activitytLeadData = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_lead_id',$id_tmp)
+			->select('act_id','act_lead_id','act_lead_status','act_todo_type_id','act_run_status','act_todo_describe',
+			'act_todo_result','act_task_times','act_task_times_due','act_activities.created_at as activity_created','aat_type_name','aat_type_button','aat_icon','act_run_status')
+			->orderBy('act_task_times_due', 'desc')
+			->get();
+			$actRunningLeadData = $activitytLeadData->where('act_run_status','running');
+			$actBereadyLeadData = $activitytLeadData->where('act_run_status','beready');
+			$actFinishLeadData = $activitytLeadData->where('act_run_status','finished');
+			#
+			$tableDataSection1='';
+			$tableDataSection1.='<tr class="bg-teal-lt"><td colspan="6">
+			<button type="button" id="btn-area-run-act-min" class="badge badge-outline text-green" style="margin-right:1px;display:revert;" onclick="actionRunningListMin()">
+				<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
+			<button type="button" id="btn-area-run-act-plus" class="badge badge-outline text-green" style="margin-right:1px;display:none;" onclick="actionRunningListPlus()">
+				<i class="ri-add-line" style="vertical-align: middle;"></i></button>
+			<strong>RUNNING</strong></td></tr>';
+			foreach ($actRunningLeadData as $key => $value) {
+				$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+				$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+				$tableDataSection1.='<tr class="act-section-1">
+					<td><div class="dropdown">
+						<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+						<div class="dropdown-menu dropdown-menu-end">
+							<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+							<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+						</div>
+					</div></td>
+					<td>'.$val_duedate[$key].'</td>
+					<td class="text-muted">'.$value->aat_type_button.'</td>
+					<td class="text-muted">'.$value->act_todo_result.'</td>
+					<td class="text-muted">'.$val_createdate[$key].'</td>
+					<td>
+					<button class="badge bg-green" onclick="actionChangeStatusAct('.$value->act_id.')">Running</button>
+					</td></tr>';
+			}
+			#
+			$tableDataSection2='';
+			$tableDataSection2.='<tr class="bg-dark-lt"><td colspan="6">
+			<button type="button" id="btn-area-br-act-min" class="badge badge-outline text-dark" style="margin-right:1px;display:revert;" onclick="actionBereadyListMin()">
+				<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
+			<button type="button" id="btn-area-br-act-plus" class="badge badge-outline text-dark" style="margin-right:1px;display:none;" onclick="actionBereadyListPlus()">
+				<i class="ri-add-line" style="vertical-align: middle;"></i></button>
+			<strong>BEREADY</strong></td></tr>';
+			foreach ($actBereadyLeadData as $key => $value) {
+				$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+				$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+				$tableDataSection2.='<tr class="act-section-2">
+					<td><div class="dropdown">
+						<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+						<div class="dropdown-menu dropdown-menu-end">
+							<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+							<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+						</div>
+					</div></td>
+					<td>'.$val_duedate[$key].'</td>
+					<td class="text-muted">'.$value->aat_type_button.'</td>
+					<td class="text-muted">'.$value->act_todo_result.'</td>
+					<td class="text-muted">'.$val_createdate[$key].'</td>
+					<td><button class="badge bg-dark-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Beready</button></td></tr>';
+			}
+			#
+			$tableDataSection3='';
+			$tableDataSection3.='<tr class="bg-muted-lt"><td colspan="6">
+			<button type="button" id="btn-area-finish-act-min" class="badge badge-outline text-muted" style="margin-right:1px;display:none ;" onclick="actionFinishListMin()">
+				<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
+			<button type="button" id="btn-area-finish-act-plus" class="badge badge-outline text-muted" style="margin-right:1px;display:revert;" onclick="actionFinishListPlus()">
+				<i class="ri-add-line" style="vertical-align: middle;"></i></button>
+			<strong>FINISH</strong></td></tr>';
+			foreach ($actFinishLeadData as $key => $value) {
+				$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+				$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+				$tableDataSection3.='<tr class="act-section-3" style="display:none;">
+					<td><div class="dropdown">
+						<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+						<div class="dropdown-menu dropdown-menu-end">
+							<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+							<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+						</div>
+					</div></td>
+					<td>'.$val_duedate[$key].'</td>
+					<td class="text-muted">'.$value->aat_type_button.'</td>
+					<td class="text-muted">'.$value->act_todo_result.'</td>
+					<td class="text-muted">'.$val_createdate[$key].'</td>
+					<td><button class="badge bg-muted-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Finished</button></td></tr>';
+			}
+			#
+			$result = [
+				'param'=>true,
+				'data_activity_section_i' =>$tableDataSection1,
+				'data_activity_section_ii' =>$tableDataSection2,
+				'data_activity_section_iii' =>$tableDataSection3
+			];
+			return $result;
+		}elseif (checkRule(array('STF','STF.TCH'))) {
+			# code...
+			$activitytLeadData = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_lead_id',$id_tmp)
+			->select('act_id','act_lead_id','act_lead_status','act_todo_type_id','act_run_status','act_todo_describe',
+			'act_todo_result','act_task_times','act_task_times_due','act_activities.created_at as activity_created',
+			'aat_type_name','aat_type_button','aat_icon','act_run_status','act_user_teams','act_user_assigned')
+			->orderBy('act_task_times_due', 'desc')
+			->get();
+			$actRunningLeadData = $activitytLeadData->where('act_run_status','running');
+			$actBereadyLeadData = $activitytLeadData->where('act_run_status','beready');
+			$actFinishLeadData = $activitytLeadData->where('act_run_status','finished');
+			#
+			$tableDataSection1='';
+			$tableDataSection1.='<tr class="bg-teal-lt"><td colspan="6">
+			<button type="button" id="btn-area-run-act-min" class="badge badge-outline text-green" style="margin-right:1px;display:revert;" onclick="actionRunningListMin()">
+				<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
+			<button type="button" id="btn-area-run-act-plus" class="badge badge-outline text-green" style="margin-right:1px;display:none;" onclick="actionRunningListPlus()">
+				<i class="ri-add-line" style="vertical-align: middle;"></i></button>
+			<strong>RUNNING</strong></td></tr>';
+			foreach ($actRunningLeadData as $key => $value) {
+				$ids = explode(',',$value->act_user_teams);
+				if (in_array($user->id,$ids)) {
+					$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+					$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+					$tableDataSection1.='<tr class="act-section-1">
+						<td><div class="dropdown">
+							<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+							</div>
+						</div></td>
+						<td>'.$val_duedate[$key].'</td>
+						<td class="text-muted">'.$value->aat_type_button.'</td>
+						<td class="text-muted">'.$value->act_todo_result.'</td>
+						<td class="text-muted">'.$val_createdate[$key].'</td>
+						<td>
+						<button class="badge bg-green" onclick="actionChangeStatusAct('.$value->act_id.')">Running</button>
+						</td></tr>';
+				}elseif ($user->id == $value->act_user_assigned) {
+					# code...
+					$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+					$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+					$tableDataSection1.='<tr class="act-section-1">
+						<td><div class="dropdown">
+							<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+							</div>
+						</div></td>
+						<td>'.$val_duedate[$key].'</td>
+						<td class="text-muted">'.$value->aat_type_button.'</td>
+						<td class="text-muted">'.$value->act_todo_result.'</td>
+						<td class="text-muted">'.$val_createdate[$key].'</td>
+						<td>
+						<button class="badge bg-green" onclick="actionChangeStatusAct('.$value->act_id.')">Running</button>
+						</td></tr>';
+				}
+			}
+			#
+			$tableDataSection2='';
+			$tableDataSection2.='<tr class="bg-dark-lt"><td colspan="6">
+			<button type="button" id="btn-area-br-act-min" class="badge badge-outline text-dark" style="margin-right:1px;display:revert;" onclick="actionBereadyListMin()">
+				<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
+			<button type="button" id="btn-area-br-act-plus" class="badge badge-outline text-dark" style="margin-right:1px;display:none;" onclick="actionBereadyListPlus()">
+				<i class="ri-add-line" style="vertical-align: middle;"></i></button>
+			<strong>BEREADY</strong></td></tr>';
+			foreach ($actBereadyLeadData as $key => $value) {
+				$ids = explode(',',$value->act_user_teams);
+				if (in_array($user->id,$ids)) {
+					# code...
+					$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+					$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+					$tableDataSection2.='<tr class="act-section-2">
+						<td><div class="dropdown">
+							<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+							</div>
+						</div></td>
+						<td>'.$val_duedate[$key].'</td>
+						<td class="text-muted">'.$value->aat_type_button.'</td>
+						<td class="text-muted">'.$value->act_todo_result.'</td>
+						<td class="text-muted">'.$val_createdate[$key].'</td>
+						<td><button class="badge bg-dark-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Beready</button></td></tr>';
+				}elseif($user->id == $value->act_user_assigned){
+					$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+					$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+					$tableDataSection2.='<tr class="act-section-2">
+						<td><div class="dropdown">
+							<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+							</div>
+						</div></td>
+						<td>'.$val_duedate[$key].'</td>
+						<td class="text-muted">'.$value->aat_type_button.'</td>
+						<td class="text-muted">'.$value->act_todo_result.'</td>
+						<td class="text-muted">'.$val_createdate[$key].'</td>
+						<td><button class="badge bg-dark-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Beready</button></td></tr>';
+				}
+			}
+			#
+			$tableDataSection3='';
+			$tableDataSection3.='<tr class="bg-muted-lt"><td colspan="6">
+			<button type="button" id="btn-area-finish-act-min" class="badge badge-outline text-muted" style="margin-right:1px;display:none ;" onclick="actionFinishListMin()">
+				<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
+			<button type="button" id="btn-area-finish-act-plus" class="badge badge-outline text-muted" style="margin-right:1px;display:revert;" onclick="actionFinishListPlus()">
+				<i class="ri-add-line" style="vertical-align: middle;"></i></button>
+			<strong>FINISH</strong></td></tr>';
+			foreach ($actFinishLeadData as $key => $value) {
+				$ids = explode(',',$value->act_user_teams);
+				if (in_array($user->id,$ids)) {
+					$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+					$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+					$tableDataSection3.='<tr class="act-section-3" style="display:none;">
+						<td><div class="dropdown">
+							<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+							</div>
+						</div></td>
+						<td>'.$val_duedate[$key].'</td>
+						<td class="text-muted">'.$value->aat_type_button.'</td>
+						<td class="text-muted">'.$value->act_todo_result.'</td>
+						<td class="text-muted">'.$val_createdate[$key].'</td>
+						<td><button class="badge bg-muted-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Finished</button></td></tr>';
+				}elseif ($user->id == $value->act_user_assigned) {
+					# code...
+					$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
+					$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
+					$tableDataSection3.='<tr class="act-section-3" style="display:none;">
+						<td><div class="dropdown">
+							<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Detail Activity</a>
+								<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+							</div>
+						</div></td>
+						<td>'.$val_duedate[$key].'</td>
+						<td class="text-muted">'.$value->aat_type_button.'</td>
+						<td class="text-muted">'.$value->act_todo_result.'</td>
+						<td class="text-muted">'.$val_createdate[$key].'</td>
+						<td><button class="badge bg-muted-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Finished</button></td></tr>';
+				}
+			}
+			#
+			$result = [
+				'param'=>true,
+				'data_activity_section_i' =>$tableDataSection1,
+				'data_activity_section_ii' =>$tableDataSection2,
+				'data_activity_section_iii' =>$tableDataSection3
+			];
+			return $result;
 		}
-		$tableDataSection2='';
-		$tableDataSection2.='<tr class="bg-dark-lt"><td colspan="6">
-		<button type="button" id="btn-area-br-act-min" class="badge badge-outline text-dark" style="margin-right:1px;display:revert;" onclick="actionBereadyListMin()">
-			<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
-		<button type="button" id="btn-area-br-act-plus" class="badge badge-outline text-dark" style="margin-right:1px;display:none;" onclick="actionBereadyListPlus()">
-			<i class="ri-add-line" style="vertical-align: middle;"></i></button>
-		<strong>BEREADY</strong></td></tr>';
-		foreach ($actBereadyLeadData as $key => $value) {
-			$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
-			$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
-			$tableDataSection2.='<tr class="act-section-2">
-				<td><div class="dropdown">
-					<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
-					<div class="dropdown-menu dropdown-menu-end">
-						<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Edit Activity</a>
-						<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
-					</div>
-				</div></td>
-				<td>'.$val_duedate[$key].'</td>
-				<td class="text-muted">'.$value->aat_type_button.'</td>
-				<td class="text-muted">'.$value->act_todo_result.'</td>
-				<td class="text-muted">'.$val_createdate[$key].'</td>
-				<td><button class="badge bg-dark-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Beready</button></td></tr>';
-		}
-		$tableDataSection3='';
-		$tableDataSection3.='<tr class="bg-muted-lt"><td colspan="6">
-		<button type="button" id="btn-area-finish-act-min" class="badge badge-outline text-muted" style="margin-right:1px;display:none ;" onclick="actionFinishListMin()">
-			<i class="ri-subtract-line" style="vertical-align: middle;"></i></button>
-		<button type="button" id="btn-area-finish-act-plus" class="badge badge-outline text-muted" style="margin-right:1px;display:revert;" onclick="actionFinishListPlus()">
-			<i class="ri-add-line" style="vertical-align: middle;"></i></button>
-		<strong>FINISH</strong></td></tr>';
-		foreach ($actFinishLeadData as $key => $value) {
-			$val_duedate[$key] = date('D, d/M Y, h:i a', strtotime($value->act_task_times_due));
-			$val_createdate[$key] = date('D, d/M Y', strtotime($value->activity_created));
-			$tableDataSection3.='<tr class="act-section-3" style="display:none;">
-				<td><div class="dropdown">
-					<button href="#" class="badge bg-blue-lt" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-menu-2-line"></i></button>
-					<div class="dropdown-menu dropdown-menu-end">
-						<a class="dropdown-item" href="#init-page-activities" onclick="actionUpdateActivity('.$value->act_id.')"><i class="ri-edit-2-line" style="margin-right:6px;"></i>Edit Activity</a>
-						<a class="dropdown-item" href="#init-page-activities" onclick="actionRemoveAct('.$value->act_id.')"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
-					</div>
-				</div></td>
-				<td>'.$val_duedate[$key].'</td>
-				<td class="text-muted">'.$value->aat_type_button.'</td>
-				<td class="text-muted">'.$value->act_todo_result.'</td>
-				<td class="text-muted">'.$val_createdate[$key].'</td>
-				<td><button class="badge bg-muted-lt" onclick="actionChangeStatusAct('.$value->act_id.')">Finished</button></td></tr>';
-		}
-		$result = [
-			'param'=>true,
-			'data_activity_section_i' =>$tableDataSection1,
-			'data_activity_section_ii' =>$tableDataSection2,
-			'data_activity_section_iii' =>$tableDataSection3
-		];
-		return $result;
+		#
 	}
 	/* Tags: ajax resource get info activity lead */
 	public function sourceActivityInfo(Request $request)

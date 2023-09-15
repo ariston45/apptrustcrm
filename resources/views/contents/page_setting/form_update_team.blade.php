@@ -34,7 +34,7 @@
 							<i class="ri-save-3-line icon" style="font-size: 14px;margin-right: 4px; vertical-align: middle;"></i> Save
 						</div>
 					</button>
-					<a href="{{ url('setting/division') }}">
+					<a href="{{ url('setting/team') }}">
 						<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 							<div style="font-weight: 700;">
 								<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
@@ -56,7 +56,7 @@
 									<input name="team" id="id-team" type="text" class="form-control" value="{{ $team->uts_team_name }}">
 								</div>
 							</div>
-							<div class="mb-3 row">
+							{{-- <div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label required">Set Manager</label>
 								<div class="col">
 									<select type="text" id="select-user" class="form-select ts-input-custom" name="team_manager" placeholder="Select team"  value="">
@@ -70,7 +70,7 @@
 										@endforeach
 									</select>
 								</div>
-							</div>
+							</div> --}}
 						</div>
 						<div class="col-xl-6">
 							<div class="mb-3 row">
@@ -390,29 +390,6 @@ $(document).ready(function() {
 						type: 'green',
 						title: 'Success',
 						content: 'Data stored in database.',
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity',
-						buttons: {
-							goToLead:{
-								text:"Go To Users",
-								action:function () {  
-									window.location.href = "{{ url('setting/create-division') }}/";
-								}
-							},
-							createAgain:{
-								text:"Create Again",
-								action:function () {  
-									window.location.reload();
-								}
-							}
-						}
-					});
-				} else if(result.param == false) {
-					$.confirm({
-						type: 'orange',
-						title: 'Attention',
-						content: result.msg,
 						animateFromElement: false,
 						animation: 'opacity',
 						closeAnimation: 'opacity',

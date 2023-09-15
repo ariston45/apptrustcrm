@@ -12,6 +12,7 @@ use App\Models\Prs_lead;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Prs_salesperson;
+use App\Models\Prs_accessrule;
 use DataTables;
 use Str;
 use Auth;
@@ -321,37 +322,56 @@ class DataController extends Controller
 	{
 		$user = Auth::user();
 		if ($user->level == 'ADM' || $user->level == 'MGR.PAS' || $user->level == 'AGM') {
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_merge = array_merge($lead_user_head,$lead_user_member);
-			$ids = array();
-			foreach ($lead_merge as $key => $value) {
-				$ids[$key] = $value['slm_lead'];
-			}
-			$ids_string = implode(',',$ids);
-			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name')
-			// ->whereIn('lds_id',$lead_ids)
 			->get();
-		}elseif($user->level == 'MKT'|| $user->level == 'MGR'){
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_merge = array_merge($lead_user_head,$lead_user_member);
+		}elseif ($user->level == 'MGR') {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$ids = array();
-			foreach ($lead_merge as $key => $value) {
+			foreach ($lead_data as $key => $value) {
 				$ids[$key] = $value['slm_lead'];
 			}
-			$ids_string = implode(',',$ids);
 			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
+			function($join){
+				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
+			})
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name')
+			->whereIn('lds_id',$lead_ids)
+			->get();
+		}elseif($user->level == 'STF'){
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$ids = array();
+			foreach ($lead_data as $key => $value) {
+				$ids[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($ids);
+			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
+			function($join){
+				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
+			})
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name')
+			->whereIn('lds_id',$lead_ids)
+			->get();
+		}elseif($user->level == 'STF.TCH'||$user->level == 'MGR.TCH'){
+			$lead_user_master = Prs_accessrule::where('slm_rules','technical')->where('slm_user',$user->id)->select('slm_lead')->get();
+			$ids = array();
+			foreach ($lead_user_master as $key => $value) {
+				$ids[$key] = $value->slm_lead;
+			}
+			$lead_ids = array_unique($ids);
+			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -370,7 +390,6 @@ class DataController extends Controller
 			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
 			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
 			<a class="dropdown-item" href="'.url('leads/detail-lead').'/'.$lead_data->lds_id.'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Lead</a>
-			<a class="dropdown-item" href="#"><i class="ri-user-add-line" style="margin-right:6px;"></i>Update Status</a>
       </div>
 			</div>
 			';
@@ -407,8 +426,8 @@ class DataController extends Controller
 	{
 		$user = Auth::user();
 		if ($user->level == 'ADM' || $user->level == 'MGR.PAS' || $user->level == 'AGM') {
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lead_merge = array_merge($lead_user_head,$lead_user_member);
 			$ids = array();
 			foreach ($lead_merge as $key => $value) {
@@ -418,7 +437,7 @@ class DataController extends Controller
 			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -427,8 +446,8 @@ class DataController extends Controller
 			// ->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif($user->level == 'MKT'|| $user->level == 'MGR'){
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lead_merge = array_merge($lead_user_head,$lead_user_member);
 			$ids = array();
 			foreach ($lead_merge as $key => $value) {
@@ -438,7 +457,7 @@ class DataController extends Controller
 			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -493,8 +512,8 @@ class DataController extends Controller
 		$customer_id = $request->id;
 		$user = Auth::user();
 		if ($user->level == 'ADM' || $user->level == 'MGR.PAS' || $user->level == 'AGM') {
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lead_merge = array_merge($lead_user_head,$lead_user_member);
 			$ids = array();
 			foreach ($lead_merge as $key => $value) {
@@ -506,7 +525,7 @@ class DataController extends Controller
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -515,8 +534,8 @@ class DataController extends Controller
 			// ->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif($user->level == 'MKT'|| $user->level == 'MGR'){
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lead_merge = array_merge($lead_user_head,$lead_user_member);
 			$ids = array();
 			foreach ($lead_merge as $key => $value) {
@@ -528,7 +547,7 @@ class DataController extends Controller
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -584,8 +603,8 @@ class DataController extends Controller
 		$customer_id = $request->id;
 		$user = Auth::user();
 		if ($user->level == 'ADM' || $user->level == 'MGR.PAS' || $user->level == 'AGM') {
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lead_merge = array_merge($lead_user_head,$lead_user_member);
 			$ids = array();
 			foreach ($lead_merge as $key => $value) {
@@ -597,7 +616,7 @@ class DataController extends Controller
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -606,8 +625,8 @@ class DataController extends Controller
 			// ->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif($user->level == 'MKT'|| $user->level == 'MGR'){
-			$lead_user_head = Prs_salesperson::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_salesperson::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lead_merge = array_merge($lead_user_head,$lead_user_member);
 			$ids = array();
 			foreach ($lead_merge as $key => $value) {
@@ -619,7 +638,7 @@ class DataController extends Controller
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_salespersons join users on prs_salespersons.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
@@ -669,7 +688,6 @@ class DataController extends Controller
 		->rawColumns(['number_index','title', 'customer','status', 'salesperson','menu'])
 		->make('true');
 	}
-	
 	/* Tags:... */
 	public function sourceActivities(Request $request)
 	{
@@ -681,51 +699,90 @@ class DataController extends Controller
 			$status = array("beready","running","finished");
 		}
 		$user = Auth::user();
-		if ($request->act_param == 'act_total' || $request->act_param == null) {
-			$colect_data_a = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-			->where('act_activities.created_by','!=',$user->id)
-			->Where('act_user_assigned','=',$user->id)
-			->whereIn('act_run_status',$status)
-			->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
-			->get();
-			$colect_data_b = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-			->where('act_activities.created_by',$user->id)
-			->whereIn('act_run_status',$status)
-			->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
-			->get();
-			$cd_a = $colect_data_a->keyBy('act_id');
-			$cd_b = $colect_data_b->keyBy('act_id');
-			$colect_data = $cd_a->union($cd_b);
-		}else{
-			$colect_data_a = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-			->where('act_activity_types.aat_type_code',$request->act_param)
-			->where('act_activities.created_by','!=',$user->id)
-			->Where('act_user_assigned','=',$user->id)
-			->whereIn('act_run_status',$status)
-			->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
-			->get();
-			$colect_data_b = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-			->where('act_activity_types.aat_type_code',$request->act_param)
-			->where('act_activities.created_by',$user->id)
-			->whereIn('act_run_status',$status)
-			->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
-			->get();
-			$cd_a = $colect_data_a->keyBy('act_id');
-			$cd_b = $colect_data_b->keyBy('act_id');
-			$colect_data = $cd_a->union($cd_b);
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				->whereIn('act_run_status',$status)
+				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->get();
+			}else{
+				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				->where('act_activity_types.aat_type_code',$request->act_param)
+				->whereIn('act_run_status',$status)
+				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->get();
+			}
+		}elseif(checkRule(array('MGR'))){
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				->whereIn('act_run_status',$status)
+				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->get();
+			}else{
+				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				->where('act_activity_types.aat_type_code',$request->act_param)
+				->whereIn('act_run_status',$status)
+				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->get();
+			}
 		}
+		// if ($request->act_param == 'act_total' || $request->act_param == null) {
+		// 	$colect_data_a = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+		// 	->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+		// 	->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+		// 	->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+		// 	->where('act_activities.created_by','!=',$user->id)
+		// 	->Where('act_user_assigned','=',$user->id)
+		// 	->whereIn('act_run_status',$status)
+		// 	->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+		// 	->get();
+		// 	$colect_data_b = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+		// 	->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+		// 	->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+		// 	->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+		// 	->where('act_activities.created_by',$user->id)
+		// 	->whereIn('act_run_status',$status)
+		// 	->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+		// 	->get();
+		// 	$cd_a = $colect_data_a->keyBy('act_id');
+		// 	$cd_b = $colect_data_b->keyBy('act_id');
+		// 	$colect_data = $cd_a->union($cd_b);
+		// }else{
+		// 	$colect_data_a = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+		// 	->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+		// 	->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+		// 	->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+		// 	->where('act_activity_types.aat_type_code',$request->act_param)
+		// 	->where('act_activities.created_by','!=',$user->id)
+		// 	->Where('act_user_assigned','=',$user->id)
+		// 	->whereIn('act_run_status',$status)
+		// 	->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+		// 	->get();
+		// 	$colect_data_b = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+		// 	->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+		// 	->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+		// 	->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+		// 	->where('act_activity_types.aat_type_code',$request->act_param)
+		// 	->where('act_activities.created_by',$user->id)
+		// 	->whereIn('act_run_status',$status)
+		// 	->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+		// 	->get();
+		// 	$cd_a = $colect_data_a->keyBy('act_id');
+		// 	$cd_b = $colect_data_b->keyBy('act_id');
+		// 	$colect_data = $cd_a->union($cd_b);
+		// }
 		return DataTables::of($colect_data)
 		->addIndexColumn()
 		->addColumn('empty_str', function ($k) {

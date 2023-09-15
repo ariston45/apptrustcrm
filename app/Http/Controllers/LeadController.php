@@ -25,7 +25,7 @@ use App\Models\Prs_lead_statuses;
 use App\Models\Prs_product_offer;
 use App\Models\Prs_lead_value;
 use App\Models\Prs_qualification;
-use App\Models\Prs_salesperson;
+use App\Models\Prs_accessrule;
 use App\Models\User;
 use Illuminate\Database\Query\JoinClause;
 #Helpers
@@ -154,13 +154,13 @@ class LeadController extends Controller
 		foreach ($request->assign_team as $key => $value) {
 			$assign_team = [
 				"slm_user" => $value,
-				"slm_rules" => 'member',
+				"slm_rules" => 'colaborator',
 				"slm_lead" => $id,
 				"created_by" => $user->id
 			];
 		}
-		$actionStore_SalesTeam = Prs_salesperson::insert($assign_team);
-		$actionStore_Sales = Prs_salesperson::insert($assign_lead);
+		$actionStore_SalesTeam = Prs_accessrule::insert($assign_team);
+		$actionStore_Sales = Prs_accessrule::insert($assign_lead);
 		$actionStore_PersonLead = Prs_contact::insert($person_lead);
 		$actionStore_Person = Cst_personal::insert($person_to_store);
 		$actionStore_LeadValue = Prs_lead_value::insert($data_lead_value);
@@ -233,13 +233,13 @@ class LeadController extends Controller
 		foreach ($request->assign_team as $key => $value) {
 			$assign_team = [
 				"slm_user" => $value,
-				"slm_rules" => 'member',
+				"slm_rules" => 'colaborator',
 				"slm_lead" => $id,
 				"created_by" => $user->id
 			];
 		}
-		$actionStore_SalesTeam = Prs_salesperson::insert($assign_team);
-		$actionStore_Sales = Prs_salesperson::insert($assign_lead);
+		$actionStore_SalesTeam = Prs_accessrule::insert($assign_team);
+		$actionStore_Sales = Prs_accessrule::insert($assign_lead);
 		$actionStore_PersonLead = Prs_contact::insert($person_lead);
 		$actionStore_Person = Cst_personal::insert($person_to_store);
 		$actionStore_LeadValue = Prs_lead_value::insert($data_lead_value);
@@ -296,9 +296,16 @@ class LeadController extends Controller
 	public function LeadDataDetailView(Request $request)
 	{
 		$user = Auth::user();
-		$users = User::select('id','name','level')->get();
+		$users = User::join('user_structures','users.id','=','user_structures.usr_user_id')
+		->leftJoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+		->select('id','name','level','uts_team_name')
+		->whereNotIn('level',['ADM','AGM'])
+		->get();
 		$id_lead = $request->id;
-		$lead = Prs_lead::where('lds_id',$id_lead)->select('lds_id','lds_title','lds_status','lds_describe','lds_customer')->first();
+		$lead = Prs_lead::leftjoin('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+		->where('lds_id',$id_lead)
+		->select('lds_id','lds_title','lds_status','lds_describe','lds_customer','pls_status_name')
+		->first();
 		$lead_contacts = Prs_contact::join('cst_personals', 'prs_contacts.plc_attendant_id','=', 'cst_personals.cnt_id')
 		->leftjoin('cst_customers','cst_customers.cst_id','=','cst_personals.cnt_cst_id')
 		->select('plc_id', 'plc_lead_id', 'plc_attendant_id', 'plc_attendant_rule', 'plc_customer_id','cnt_id', 'cnt_fullname', 'cnt_company_position','cst_name')
@@ -323,28 +330,36 @@ class LeadController extends Controller
 			];
 			$lead_value = (object) $lead_value_set_null;
 		}
-		$user_marketing = $users->where('level','MKT');
-		$sales = Prs_salesperson::join('users','users.id','=','prs_salespersons.slm_user')->where('slm_lead',$id_lead)->select('users.id as userid','name','username', 'slm_rules')->get();
-		$sales_selected = $sales->where('slm_rules','head')->first();
+		$user_marketing = $users->whereIn('level',['STF','MGR','MGR.PAS']);
+		$user_tech = $users->whereIn('level',['STF.TCH','MGR.TCH']);
+		$sales = Prs_accessrule::join('users','users.id','=','prs_accessrules.slm_user')
+		->join('user_structures','prs_accessrules.slm_user','=','user_structures.usr_user_id')
+		->leftJoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+		->where('slm_lead',$id_lead)
+		->select('users.id as userid','name','username', 'slm_rules','uts_team_name')->get();
+		$sales_selected = $sales->where('slm_rules','master')->first();
 		if ($sales_selected == null) {
 			$sales_dataset_null = ['name' => null,'userid'=>null];
 			$sales_selected = (object) $sales_dataset_null;
 		}
-		$team_selected = $sales->where('slm_rules', 'member');
-		$team_member = array();
+		###
+		$team_selected = $sales->where('slm_rules', 'colaborator');
+		$team_member_id = array();
+		$team_member_name = array();
 		foreach ($team_selected as $key => $value) {
-			$team_member[$key] = $value->userid;
+			$team_member_id[$key] = $value->userid;
+			$team_member_name[$key] = $value->name;
 		}
-		$members='';
-		$i = 0;
-		foreach ($team_selected as $key => $value) {
-			if ($i == 0) {
-				$members.= $value->name;
-			}else {
-				$members .= ', '.$value->name;
-			}
-			$i++;
+		$member_name= implode(',',$team_member_name);
+		$tech_selected = $sales->where('slm_rules', 'technical');
+		$team_tech_id = array();
+		$team_tech_name = array();
+		foreach ($tech_selected as $key => $value) {
+			$team_tech_id[$key] = $value->userid;
+			$team_tech_name[$key] = $value->name;
 		}
+		$tech_name= implode(',',$team_tech_name);
+		###
 		$qualifying = Prs_qualification::where('lqs_lead_id', $id_lead)->get();
 		$ident_need = array('param' => null, 'textdata' => null);
 		$ident_budget = array('param' => null, 'textdata' => null);
@@ -362,13 +377,14 @@ class LeadController extends Controller
 			}else {
 			}
 		}
+		###
 		$principle = Prd_principle::get();
 		$activity_type = Act_activity_type::get();
 		$checkOppor = Opr_opportunity::where('opr_lead_id',$id_lead)->select('opr_id')->first();
 		return view('contents.page_lead.lead_detail',
 			compact(
-				'user','users','id_lead','status','lead','sales','members','team_member', 'sales_selected', 'team_selected',
-				'user_marketing','institution_names', 'lead_customer', 'lead_value',
+				'user','users','id_lead','status','lead','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
+				'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value',
 				'ident_need','ident_budget','all_contacts','lead_contacts','activity_type','principle','checkOppor'
 			)
 		);
@@ -443,7 +459,7 @@ class LeadController extends Controller
 		];
 		return $result;
 		}
-		$checkData = Prs_salesperson::where('slm_lead',$request->id)->where('slm_rules','head')->first();
+		$checkData = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','head')->first();
 		if ($checkData == null) {
 			$data = [
 				'slm_user' => $request->select_sales,
@@ -451,9 +467,9 @@ class LeadController extends Controller
 				'slm_rules' => 'head',
 				'created_by' => null
 			];
-			$actionAddSales = Prs_salesperson::insert($data);
+			$actionAddSales = Prs_accessrule::insert($data);
 		}else{
-			$actionChangeSales = Prs_salesperson::where('slm_lead',$request->id)->where('slm_rules','head')->update(['slm_user'=>$request->select_sales]);
+			$actionChangeSales = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','head')->update(['slm_user'=>$request->select_sales]);
 		}
 		$result = [
 			'param' => true,
@@ -464,17 +480,22 @@ class LeadController extends Controller
 	####
 	public function storeSelectTeam(Request $request)
 	{
+		if (!$request->select_tech) {
+			$ids = array();
+		}else{
+			$ids = $request->select_tech;
+		}
 		$ids = $request->select_teams;
-		$actionDeleteId = Prs_salesperson::where('slm_lead',$request->id)->where('slm_rules','member')->delete();
+		$actionDeleteId = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','colaborator')->delete();
 		$data = array();
 		foreach ($ids as $key => $value) {
 			$data[$key] = [
 				'slm_user' => $value,
 				'slm_lead' => $request->id,
-				'slm_rules' => 'member'
+				'slm_rules' => 'colaborator'
 			];
 		}
-		$actionStoreSales = Prs_salesperson::insert($data);
+		$actionStoreSales = Prs_accessrule::insert($data);
 		$data_user = User::whereIn('id',$ids)->get();
 		$str_user ='';
 		foreach ($data_user as $key => $value) {
@@ -487,6 +508,39 @@ class LeadController extends Controller
 		$result = [
 			'param' =>true,
 			'user_member' => $str_user
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function storeSelectTech(Request $request)
+	{
+		if (!$request->select_tech) {
+			$ids = array();
+		}else{
+			$ids = $request->select_tech;
+		}
+		$actionDeleteId = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','technical')->delete();
+		$data = array();
+		foreach ($ids as $key => $value) {
+			$data[$key] = [
+				'slm_user' => $value,
+				'slm_lead' => $request->id,
+				'slm_rules' => 'technical'
+			];
+		}
+		$actionStoreSales = Prs_accessrule::insert($data);
+		$data_user = User::whereIn('id',$ids)->get();
+		$str_user ='';
+		foreach ($data_user as $key => $value) {
+			if ($key == 0) {
+				$str_user.= $value->name;
+			}else {
+				$str_user.= ', '.$value->name;
+			}
+		}
+		$result = [
+			'param' =>true,
+			'user_tech' => $str_user
 		];
 		return $result;
 	}
@@ -596,7 +650,7 @@ class LeadController extends Controller
 	public function actionGetCstProject(Request $request)
 	{
 		$user = Auth::user();
-		$lead = Prs_lead::join('prs_salespersons','prs_leads.lds_id','=','prs_salespersons.slm_lead')
+		$lead = Prs_lead::join('prs_accessrules','prs_leads.lds_id','=','prs_accessrules.slm_lead')
 		->where('lds_customer',$request->id)
 		// ->where('slm_user',$user->id)
 		->select('lds_id','lds_title')

@@ -230,16 +230,6 @@ class SettingController extends Controller
 		}else {
 			$str_access = 'administrator';
 		}
-		if ($request->access == 'MGR' || $request->access == 'MGR.PAS') {
-			$check_user_mgr = User_structure::where('usr_team_id',$request->team)->where('usr_str_level','manager')->first();
-			if ($check_user_mgr != null) {
-				$result = [
-					'param'=>'manager_already',
-					'id_user' => $request->id
-				];
-				return $result;
-			}
-		}
 		$data_user = [
 			'name' => $request->user_fullname,
 			'username' => $request->username,
@@ -251,14 +241,31 @@ class SettingController extends Controller
 			'address' => $request->address,
 			'created_by' => $user->id
 		];
-		User::where('id',$request->id)->update($data_user);
+		
 		$data_usr_str = [
 			'usr_division_id' => $request->division,
 			'usr_team_id' => $request->team,
 			'usr_str_level' => $str_access,
 			'created_by' => $user->id
 		];
-		User_structure::where('usr_user_id',$request->id)->update($data_usr_str);
+		if ($request->access == 'MGR' || $request->access == 'MGR.PAS') {
+			$check_user_mgr = User_structure::where('usr_team_id',$request->team)->where('usr_str_level','manager')->first();
+			if ($check_user_mgr != null) {
+				#note : run when the team already manager user
+				$result = [
+					'param'=>'manager_already',
+					'id_user' => $request->id
+				];
+				return $result;
+			}else {
+				#note : run wehen codition mgr mutation manager
+				User_structure::where('usr_user_id',$request->id)->update($data_usr_str);
+				User::where('id',$request->id)->update($data_user);
+			}
+		}else{
+			User::where('id',$request->id)->update($data_user);
+			User_structure::where('usr_user_id',$request->id)->update($data_usr_str);
+		}
 		$result = [
 			'param'=>true,
 			'id_user' => $request->id
@@ -372,33 +379,33 @@ class SettingController extends Controller
 	/* Tags:... */
 	public function storeUpdateDataTeam(Request $request)
 	{
-		$user = Auth::user();	
-		$usr_structure = User_structure::where('usr_team_id',$request->id_team)
-		->where('usr_str_level','manager')
-		->first();
-		if ($request->team_manager == null) {
-			$result = [
-				'param'=>false,
-				'msg' => 'A team manager must be selected'
-			];
-		}else{
-			if ($usr_structure == null) {
-				User_structure::where('usr_user_id',$request->team_manager)->update(['usr_str_level'=>'manager']);
-				User::where('id',$request->team_manager)->update(['level'=>'MGR']);
-			}else{
-				if ($usr_structure->usr_user_id != $request->team_manager) {
-					User_structure::where('usr_user_id',$usr_structure->usr_user_id)->update(['usr_str_level'=>'staff']);
-					User_structure::where('usr_user_id',$request->team_manager)->update(['usr_str_level'=>'manager']);
-					User::where('id',$usr_structure->usr_user_id)->update(['level'=>'STF']);
-					User::where('id',$request->team_manager)->update(['level'=>'MGR']);
-				}
-			}
-		}
+		$user = Auth::user();
+		// $usr_structure = User_structure::where('usr_team_id',$request->id_team)
+		// ->where('usr_str_level','manager')
+		// ->first();
+		// if ($request->team_manager == null) {
+		// 	$result = [
+		// 		'param'=>false,
+		// 		'msg' => 'A team manager must be selected'
+		// 	];
+		// }else{ 
+		// 	if ($usr_structure == null) {
+		// 		User_structure::where('usr_user_id',$request->team_manager)->update(['usr_str_level'=>'manager']);
+		// 		User::where('id',$request->team_manager)->update(['level'=>'MGR']);
+		// 	}else{
+		// 		if ($usr_structure->usr_user_id != $request->team_manager) {
+		// 			User_structure::where('usr_user_id',$usr_structure->usr_user_id)->update(['usr_str_level'=>'staff']);
+		// 			User_structure::where('usr_user_id',$request->team_manager)->update(['usr_str_level'=>'manager']);
+		// 			User::where('id',$usr_structure->usr_user_id)->update(['level'=>'STF']);
+		// 			User::where('id',$request->team_manager)->update(['level'=>'MGR']);
+		// 		}
+		// 	}
+		// }
 		$data_team = [
 			'uts_team_name' => $request->team,
-			'uts_division' => $request->division,
 			'updated_by' => $user->id
 		];
+		// die();
 		User_team::where('uts_id',$request->id_team)->update($data_team);
 		$result = [
 			'param'=>true,

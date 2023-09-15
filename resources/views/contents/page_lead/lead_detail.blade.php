@@ -28,6 +28,7 @@ Leads
 	{{-- ========================================================================================================= --}}
 	<div class="card-body" style="padding-left:10px;padding-right:10px;padding-bottom: 0px;padding-top: 8px;">
 		<div class="row mb-2">
+			@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
 			<div class="col-xl-6 col-md-12">
 				<div id="btn-lead-status" class="btn-group" role="group" style="margin-right: 15px;">
 					@if ($checkOppor == null)
@@ -61,6 +62,11 @@ Leads
 					</input>
 				@endif
 			</div>
+			@else
+			<div class="col">
+				<span class="text-muted"><h3 class="mb-0">Status : {{ $lead->pls_status_name }}</h3></span>
+			</div>
+			@endif
 		</div>
 	</div>
 	{{-- ======================================================================================================== --}}
@@ -79,6 +85,7 @@ Leads
 			</div>
 		</div>
 		<div class="row mb-3">
+			@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
 			<div class="col-6">
 				<div class="mb-1 row">
 					<label class="text-muted col-4 col-3 pb-0 pt-0">Base Value</label>
@@ -95,6 +102,7 @@ Leads
 					</div>
 				</div>
 			</div>
+			@endif
 			<div class="col-6">
 				<div class="mb-1 row">
 					<label class="text-muted col-4 pb-0 pt-0">Salesperson</label>
@@ -102,20 +110,36 @@ Leads
 						<span id="user-sale">
 							{{ $sales_selected->name }}
 						</span>
+						@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
 						<button class="badge ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
+						@endif
 					</div>
 				</div>
 				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Team</label>
+					<label class="text-muted col-4 pb-0 pt-0">Colaborator</label>
 					<div class="col pb-0 pt-0 text-muted">
 						<span id="user-team">
-							{{ $members }}
+							{{ $member_name }}
 						</span>
+						@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
 						<button class="badge ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+						@endif
+					</div>
+				</div>
+				<div class="mb-1 row">
+					<label class="text-muted col-4 pb-0 pt-0">Technical</label>
+					<div class="col pb-0 pt-0 text-muted">
+						<span id="user-tech">
+							{{ $tech_name }}
+						</span>
+						@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
+						<button class="badge ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
+						@endif
 					</div>
 				</div>
 			</div>
 		</div>
+		@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
 		<div class="row mb-0">
 			<em class="text-muted lh-base mb-1"><i>Qualifying</i></em>
 			<div class="col-6 mb-2">
@@ -146,16 +170,8 @@ Leads
 				<textarea id="textingContent2" class="form-control" name="identification_budgets"
 				rows="3" placeholder="Describe something ..." oninput="actionIdentQualification('identification_budgets')">{{ $ident_budget['textdata'] }}</textarea>
 			</div>
-			{{-- <div class="col-6 mb-2">
-				<label class="form-label">
-					Timeline
-				</label>
-				<ol class="breadcrumb breadcrumb-arrows">
-					<li class="breadcrumb-item"><button class="badge bg-indigo btn-pill">Lead</button></li>
-					<li class="breadcrumb-item"><button class="badge bg-indigo btn-pill">Opportunity</button></li>
-				</ol>
-			</div> --}}
-		</div>
+		</div>	
+		@endif
 	</div>
 	{{-- ========================================================================================================= --}}
 	<div class="card-body pt-2 pb-2" style="padding-left: 10px;padding-right: 10px;background-color: whitesmoke;">
@@ -270,14 +286,19 @@ Leads
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
-				<h5 class="modal-title">Add Teams Member</h5>
+				<h5 class="modal-title">Add Colaborator</h5>
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent4" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					<select type="text" class="form-select select-teams" name="select_teams[]" multiple  id="select-user-team" value="">
 						{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
-						@foreach ($user_marketing as $list)
+						{{-- @foreach ($user_marketing as $list)
 						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member)) selected @endif >
 							{{ $list->name }}
+						</option>
+						@endforeach --}}
+						@foreach ($user_marketing as $list)
+						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member_id)) selected @endif>
+							<b>{{ $list->uts_team_name }}</b> - {{ $list->name }}
 						</option>
 						@endforeach
 					</select>
@@ -291,6 +312,36 @@ Leads
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
+<div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-body p-3">
+				<h5 class="modal-title">Add Technical</h5>
+				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+				<form id="formContent11" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+					<select type="text" class="form-select select-teams" name="select_tech[]" multiple  id="select-user-tech" value="">
+						{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
+						{{-- @foreach ($user_marketing as $list)
+						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member)) selected @endif >
+							{{ $list->name }}
+						</option>
+						@endforeach --}}
+						@foreach ($user_tech as $list)
+						<option value="{{ $list->id }}" @if (in_array($list->id, $team_tech_id)) selected @endif>
+							<b>{{ $list->uts_team_name }}</b> - {{ $list->name }}
+						</option>
+						@endforeach
+					</select>
+				</form>
+			</div>
+			<div class="modal-footer p-3 pt-0">
+				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+				<button type="submit" form="formContent11" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+{{-- ===================================================================================================== --}}
 <div id="modal-change-sale" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
@@ -299,9 +350,9 @@ Leads
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent3" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					<select type="text" class="form-select select-sales" name="select_sales" id="select-user-sales" value="">
-						<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
+						<option value="{{ $sales_selected->userid }}">{{ $sales_selected->uts_team_name }} - {{ $sales_selected->name }}</option>
 						@foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}">{{ $list->name }}</option>
+						<option value="{{ $list->id }}"><b>{{ $list->uts_team_name }}</b> - {{ $list->name }}</option>
 						@endforeach
 					</select>
 				</form>
@@ -422,9 +473,13 @@ Leads
 								<label class="col-3 col-form-label">Assigned to</label>
 								<div class="col">
 									<select type="text" id="select-signed-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
-										<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
-										@foreach ($team_selected as $list)
-										<option value="{{ $list->userid }}">{{ $list->name }}</option>
+										{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
+										@foreach ($users as $list)
+										@if ($list->id == $user->id)
+											<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>
+										@else
+											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
+										@endif
 										@endforeach
 									</select>
 									<button type="button" id="btn-add-team" class="badge mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
@@ -433,7 +488,7 @@ Leads
 										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team" value="">
 											<option value="{{ null }}"></option>
 											@foreach ($users as $list)
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
+											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
 											@endforeach
 										</select>
 									</div>
@@ -1124,6 +1179,9 @@ function actionChangeSales() {
 };
 function actionAddTeam() {  
 	$('#modal-add-team').modal('toggle');
+};
+function actionAddTechnical() {  
+	$('#modal-add-technical').modal('toggle');
 };
 function fcurrencyInput(x) {
 	var input_field = document.getElementById(x);
@@ -1949,6 +2007,28 @@ $(document).ready(function() {
 			}
 		});
 	});
+	/*=================================================================================================================*/
+	$("#formContent11").submit(function(e) {
+		e.preventDefault();
+		var formData11 = new FormData(this);
+		formData11.append("id", "{{ $id_lead }}");
+		$.ajaxSetup({
+			headers: {
+				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
+			}
+		});
+		$.ajax({
+			type: "POST",
+			url: "{{ route('store-select-tech') }}",
+			data: formData11,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function(result) {
+				$('#user-tech').html(result.user_tech);
+			}
+		});
+	});
 });
 </script>
 {{-- ============================================================================================ --}}
@@ -2019,7 +2099,7 @@ $(document).ready(function() {
 				'</div>';
 			},
 			item: function(data, escape) {
-				return '<div id="province-selected">' + escape(data.title) + '</div>';
+				return '<div id="select-user-sales">' + escape(data.title) + '</div>';
 			}
 		}
 	});
@@ -2037,7 +2117,24 @@ $(document).ready(function() {
 				'</div>';
 			},
 			item: function(data, escape) {
-				return '<div id="province-selected">' + escape(data.title) + '</div>';
+				return '<div id="select-user-team">' + escape(data.title) + '</div>';
+			}
+		}
+	});
+	var user_tech = new TomSelect("#select-user-tech",{
+		create: true,
+		valueField: 'id',
+		labelField: 'title',
+		searchField: 'title',
+		maxItems: 10,
+		render: {
+			option: function(data, escape) {
+				return '<div>' +
+				'<span class="title">' + escape(data.title) + '</span>' +
+				'</div>';
+			},
+			item: function(data, escape) {
+				return '<div id="select-user-tech">' + escape(data.title) + '</div>';
 			}
 		}
 	});

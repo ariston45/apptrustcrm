@@ -94,6 +94,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('store-update-target-value', [LeadController::class, 'storeUpdateTargetValue'])->name('store-update-target-value');
 		Route::post('store-change-sales-lead', [LeadController::class, 'storeChangeSales'])->name('store-change-sales-lead');
 		Route::post('store-select-team', [LeadController::class, 'storeSelectTeam'])->name('store-select-team');
+		Route::post('store-select-tech', [LeadController::class, 'storeSelectTech'])->name('store-select-tech');
 		Route::post('store-identity-need', [LeadController::class, 'storeIdentificationQualification'])->name('store-identity-need');
 		#lead_contact
 		Route::post('store-add-lead-contact', [LeadController::class, 'storeContactLead'])->name('store-add-lead-contact');
