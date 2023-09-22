@@ -28,12 +28,11 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('tinymce',[TestController::class,'viewHtml']);
 	});
 	Route::prefix('datasource')->group(function () {
-		Route::post('all-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
+		// Route::post('all-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
 		Route::post('district', [DataController::class, 'sourceDataDistrict'])->name('source-data-district');
 		Route::post('city', [DataController::class, 'sourceDataCities'])->name('source-data-city');
 		Route::post('province', [DataController::class, 'sourceDataProvinces'])->name('source-data-province');
 		#test & try
-		Route::get('all-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
 		Route::get('subdistrict', [DataController::class, 'sourceDataSubdistrict'])->name('source-data-subdistrict');
 	});
 	// Route::get('/', [HomeController::class, 'index']);
@@ -44,6 +43,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('addr-districts', [DataController::class, 'dataDistricts'])->name('source-addr-districts');
 		Route::post('addr-cities', [DataController::class, 'dataCities'])->name('source-addr-cities');
 		Route::post('addr-province', [DataController::class, 'dataProvincies'])->name('source-addr-province');
+		Route::match(['get','post'],'all-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
 		#####
 		Route::match(['get', 'post'], 'information', [CustomerController::class, 'actionPageCustomerInformation'])->name('customer-load-page-information');
 		Route::match(['get', 'post'], 'activities', [CustomerController::class, 'actionPageCustomerActivities'])->name('customer-load-page-activities');
@@ -115,6 +115,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('activity-detail/{id}', [ActivityController::class, 'viewActivityDetail']);
 		#load data activity
 		Route::match(['get', 'post'],'source-data-activity', [DataController::class, 'sourceActivities'])->name('source-data-activity');
+		Route::match(['get', 'post'],'source-data-activity-cst', [DataController::class, 'sourceActivitiesCst'])->name('source-data-activity-cst');
 		Route::post('source-data-activity-calender', [ActivityController::class, 'sourceDataActivityCalender'])->name('source-data-activity-calender');
 		Route::post('source-data-activity-calender-cst', [ActivityController::class, 'sourceDataActivityCalenderCst'])->name('source-data-activity-calender-cst');
 		Route::match(['get', 'post'],'source-data-activity-detail-calender', [ActivityController::class, 'sourceDataActivityDetailCalender'])->name('source-data-activity-detail-calender');

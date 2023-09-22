@@ -16,9 +16,9 @@ use App\Http\Controllers\DataController;
 Route::group(['middleware' => ['auth']], function () {
 	# Admin
 	Route::group(['middleware' => ['rulesystem:ADM']], function () {
-		Route::post('source-data-user', [DataController::class, 'sourceDataUser'])->name('source-data-user');
+		// Route::post('source-data-user', [DataController::class, 'sourceDataUser'])->name('source-data-user');
 		// Route::post('source-data-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
-		Route::match(['get', 'post'], 'source-data-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
+		// Route::match(['get', 'post'], 'source-data-customer', [DataController::class, 'sourceDataCustomer'])->name('source-data-customer');
 		
 	});
 });

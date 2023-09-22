@@ -107,61 +107,32 @@
           </h1>
           <div class="navbar-nav flex-row order-md-last" >
             <div class="d-none d-md-flex">
-              <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" title="Enable dark mode" data-bs-toggle="tooltip"data-bs-placement="bottom" style="margin-right: 8px;">
-                <i class="fa-regular fa-moon custom-icon" style="height: 24px;width:24px;"></i>
+              <a href="{{ url('logout') }}" class="nav-link text-white bg-transparent" title="Sign Out !" data-bs-toggle="tooltip" data-bs-placement="bottom" style="margin-right: 12px;">
+                <i class="ri-logout-box-r-line custom-icon" style="height: 24px;width:24px;margin-bottom: auto;"></i>
               </a>
-              <a href="?theme=light" class="nav-link px-0 hide-theme-light" title="Enable light mode" data-bs-toggle="tooltip" data-bs-placement="bottom" style="margin-right: 8px;">
-                <i class="fa-regular fa-sun custom-icon" style="height: 24px;width:24px;"></i>
-              </a>
-              <div class="nav-item dropdown d-none d-md-flex me-3">
-                <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
-                  <i class="fa-regular fa-bell custom-icon" style="height: 24px;width:24px;"></i>
-                  <span class="badge bg-red"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
-                  <div class="card">
-                    <div class="card-header">
-                      <h3 class="card-title">Last updates</h3>
-                    </div>
-                    <div class="list-group list-group-flush list-group-hoverable">
-                      <div class="list-group-item">
-                        <div class="row align-items-center">
-                          <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
-                          <div class="col text-truncate">
-                            <a href="#" class="text-body d-block">Example 1</a>
-                            <div class="d-block text-muted text-truncate mt-n1">
-                              Change deprecated html tags to text decoration classes (#29604)
-                            </div>
-                          </div>
-                          <div class="col-auto">
-                            <a href="#" class="list-group-item-actions">
-                              <!-- Download SVG icon from http://tabler-icons.io/i/star -->
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon text-muted" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" /></svg>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
             <div class="nav-item dropdown">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-                <span class="avatar avatar-sm" style="background-image: url(./static/avatars/000m.jpg)"></span>
+                <span class="avatar avatar-sm" style="background-image: ">
+                  @if (auth_user()->image == null)
+                  <img src="{{ url('static/apptrustcrm_user.png') }}" alt="User image">
+                  @else
+                  <img src="{{ url('static/apptrustcrm_user.png') }}" alt="User image">
+                  @endif
+                </span>
                 <div class="d-none d-xl-block ps-2">
-                  <div class="text-username">Paweł Kuna</div>
-                  <div class="mt-1 small text-userstatus">UI Designer</div>
+                  <div class="text-username">{{ auth_user()->name }}</div>
+                  <div class="mt-1 small text-userstatus">{{ auth_user()->uts_team_name }}</div>
                 </div>
               </a>
-              <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <a href="#" class="dropdown-item">Status</a>
+              {{-- <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"> --}}
+                {{-- <a href="#" class="dropdown-item">Status</a>
                 <a href="#" class="dropdown-item">Profile</a>
                 <a href="#" class="dropdown-item">Feedback</a>
-                <div class="dropdown-divider"></div>
-                <a href="./settings.html" class="dropdown-item">Settings</a>
-                <a href="{{ url('logout') }}" class="dropdown-item">Logout</a>
-              </div>
+                <div class="dropdown-divider"></div> --}}
+                {{-- <a href="./settings.html" class="dropdown-item">Settings</a> --}}
+                {{-- <a href="{{ url('logout') }}" class="dropdown-item">Logout</a> --}}
+              {{-- </div> --}}
             </div>
           </div>
         </div>

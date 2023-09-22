@@ -9,8 +9,18 @@ use App\Models\Cst_location;
 use App\Models\Prs_lead;
 use App\Models\Opr_opportunity;
 use App\Models\User;
+use App\Models\User_structure;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Database\Query\Builder;
 
+function auth_user(){
+  $usr = Auth::user();
+  $user = User::join('user_structures','users.id','=','user_structures.usr_user_id')
+  ->leftJoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+  ->where('id',$usr->id)
+  ->first();
+  return $user;
+}
 
 function checkRule($arr_value){
   $user = Auth::user();
@@ -23,6 +33,15 @@ function checkRule($arr_value){
   }else {
     return "Data must be array. exp: array('a','b','...')";
   }
+}
+function checkTeamMgr($id){
+  $user= User_structure::where('usr_user_id',$id)->select('usr_team_id')->first();
+  $user_structure = User_structure::where('usr_team_id',$user->usr_team_id)->select('usr_user_id')->get();
+  $ids = array();
+  foreach ($user_structure as $key => $value) {
+    $ids[$key] = $value->usr_user_id;
+  }
+  return $ids;
 }
 function genIdUser(){
   $data = User::max('id');

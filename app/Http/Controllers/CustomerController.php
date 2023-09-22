@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 #Models
 
 use App\Models\Act_activity;
+use App\Models\Act_activity_access;
 use App\Models\Addr_city;
 use App\Models\Addr_subdistrict;
 use App\Models\Addr_district;
 use App\Models\Addr_province;
 use App\Models\Cst_bussiness_field;
+use App\Models\Prs_accessrule;
 use Illuminate\Http\Request;
 #Helpers
 use Str;
@@ -133,27 +135,70 @@ class CustomerController extends Controller
     ->where('cst_id', $id)
     ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes','ins_name')
     ->first();
-    $user = Auth::user();
-		$users = User::select('id','name','level')->get();
+		$user = Auth::user();
+		$users = User::get();
 		$status_activity = Act_activity::get();
-		$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-		->where('act_activities.created_by',$user->id)
-		->select('act_id','aat_type_code')
-		->get();
-		$colect_data_a = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->where('act_activities.created_by','!=',$user->id)
-			->Where('act_user_assigned','=',$user->id)
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
+			# code...
+			$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+      ->where('act_cst', $id)
 			->select('act_id','aat_type_code')
 			->get();
-		$colect_data_b = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+		} elseif(checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_ids = array_unique($lds_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->where('act_activities.created_by',$user->id)
+      ->where('act_cst', $id)
+			->whereIn('act_activities.act_lead_id',$lds_ids)
 			->select('act_id','aat_type_code')
 			->get();
-		$cd_a = $colect_data_a->keyBy('act_id');
-		$cd_b = $colect_data_b->keyBy('act_id');
-		$all_activities = $cd_a->union($cd_b);
+		} elseif(checkRule(array('STF'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_ids = array_unique($lds_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+      ->where('act_cst', $id)
+			->whereIn('act_activities.act_lead_id',$lds_ids)
+			->select('act_id','aat_type_code')
+			->get();
+		} elseif(checkRule(array('MGR.TCH'))) {
+			$user = Auth::user();
+			$tech_team = checkTeamMgr($user->id);
+			$act_access = Act_activity_access::whereIn('acs_user_id',$tech_team)->select('acs_act_id')->get();
+			$act_idr = array();
+			foreach ($act_access as $key => $value) {
+				$act_idr[$key] = $value->acs_act_id;
+			}
+			$act_ids = array_unique($act_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+      ->where('act_cst', $id)
+			->whereIn('act_activities.act_id',$act_ids)
+			->select('act_id','aat_type_code')
+			->get();
+		} elseif(checkRule(array('STF.TCH','STF'))) {
+			$act_access = Act_activity_access::where('acs_user_id',$user->id)->select('acs_act_id')->get();
+			$act_idr = array();
+			foreach ($act_access as $key => $value) {
+				$act_idr[$key] = $value->acs_act_id;
+			}
+			$act_ids = array_unique($act_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+      ->where('act_cst', $id)
+			->whereIn('act_activities.act_id',$act_ids)
+			->select('act_id','aat_type_code')
+			->get();
+		}
 		$cnt_todo = $all_activities->where('aat_type_code','act_todo')->count();
 		$cnt_phone = $all_activities->where('aat_type_code','act_phone')->count();
 		$cnt_email = $all_activities->where('aat_type_code','act_email')->count();

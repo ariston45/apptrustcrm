@@ -26,6 +26,7 @@ opportunitys
 		</div>
 	</div>
 	{{-- ========================================================================================================= --}}
+	@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 	<div class="card-header card-header-custom" style="background-color: whitesmoke;">
 		<div class="col-8">
 			<div id="btn-opportunity-status" class="btn-group" role="group" style="margin-right: 15px;">
@@ -48,6 +49,7 @@ opportunitys
 			</input>
 		</div>
 	</div>
+	@endif
 	{{-- ======================================================================================================== --}}
 	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
 		<div class="row mb-3">
@@ -107,7 +109,9 @@ opportunitys
 			<div class="col-auto">
 				{{-- <button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeProduct()"><i class="ri-edit-2-line"></i></button> --}}
 				<div class="col-auto">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 					<button class="btn btn-primary btn-pill btn-sm" onclick="actionChangeProduct()" style="width: 130px;"><i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit Product</button>
+					@endif
 				</div>
 			</div>
 		</div>
@@ -115,6 +119,7 @@ opportunitys
 			<div class="col">
 				<label class="form-label text-muted col-2 pb-0 pt-0">NOTES :</label>
 			</div>
+			@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 			<div class="col-auto">
 				<button class="badge bg-blue btn-pill" onclick="actionUpdateNote()">Save Notes</button>
 			</div>
@@ -122,11 +127,17 @@ opportunitys
 				<textarea id="textingContent1" class="form-control" name="identification_needs"
 				rows="3" placeholder="Describe something ..." oninput="actionStoreOpporNotes()">{{ $opportunity->opr_notes }}</textarea>
 			</div>
+			@else
+			<div class="col-12 mb-2">
+				{!! html_entity_decode($opportunity->opr_notes) !!}
+			</div>
+			@endif
 		</div>
 	</div>
 	{{-- ======================================================================================================== --}}
 	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
 		<div class="row mb-3">
+			@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 			<div class="col-6">
 				<div class="mb-1 row">
 					<label class="text-muted col-4 col-3 pb-0 pt-0">Value / DPP</label>
@@ -165,6 +176,7 @@ opportunitys
 					</div>
 				</div>
 			</div>
+			@endif
 			<div class="col-6">
 				<div class="mb-1 row">
 					<label class="text-muted col-4 pb-0 pt-0">Salesperson</label>
@@ -172,25 +184,40 @@ opportunitys
 						<span id="user-sale">
 							{{ $sales_selected->name }}
 						</span>
+						@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
+						@endif
 					</div>
 				</div>
 				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Team</label>
+					<label class="text-muted col-4 pb-0 pt-0">Colaborator</label>
 					<div class="col pb-0 pt-0 text-muted">
 						<span id="user-team">
-							{{ $members }}
+							{{ $member_name }}
 						</span>
+						@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+						@endif
+					</div>
+				</div>
+				<div class="mb-1 row">
+					<label class="text-muted col-4 pb-0 pt-0">Technical</label>
+					<div class="col pb-0 pt-0 text-muted">
+						<span id="user-team">
+							{{ $tech_name }}
+						</span>
+						@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
+						@endif
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 	{{-- ======================================================================================================== --}}
-	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
+	{{-- <div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
 		<em class="text-muted lh-base mb-1"><i>Technical Report</i></em>
-	</div>
+	</div> --}}
 	{{-- ========================================================================================================= --}}
 	<div class="card-body pt-2 pb-2" style="padding-left: 10px;padding-right: 10px;background-color: whitesmoke;">
 		<div class="row mb-2 mt-2">
@@ -392,7 +419,7 @@ opportunitys
 				<form id="formContent7" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					<select type="text" class="form-select select-teams" name="select_teams[]" multiple  id="select-user-team" value="">
 						@foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member)) selected @endif >
+						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member_id)) selected @endif >
 							{{ $list->name }}
 						</option>
 						@endforeach
@@ -792,6 +819,35 @@ opportunitys
 		</div>
 	</div>
 </div>
+<div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-body p-3">
+				<h5 class="modal-title">Add Technical</h5>
+				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+				<form id="formContent14" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+					<select type="text" class="form-select select-teams" name="select_tech[]" multiple  id="select-user-tech" value="">
+						{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
+						{{-- @foreach ($user_marketing as $list)
+						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member)) selected @endif >
+							{{ $list->name }}
+						</option>
+						@endforeach --}}
+						@foreach ($user_tech as $list)
+						<option value="{{ $list->id }}" @if (in_array($list->id, $team_tech_id)) selected @endif>
+							<b>{{ $list->uts_team_name }}</b> - {{ $list->name }}
+						</option>
+						@endforeach
+					</select>
+				</form>
+			</div>
+			<div class="modal-footer p-3 pt-0">
+				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+				<button type="submit" form="formContent14" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
 {{-- ===================================================================================================== --}}
 @endsection
 @push('style')
@@ -1049,6 +1105,23 @@ var select_products = new TomSelect("#select-product",{
 		}
 	}
 });
+var user_tech = new TomSelect("#select-user-tech",{
+		create: true,
+		valueField: 'id',
+		labelField: 'title',
+		searchField: 'title',
+		maxItems: 10,
+		render: {
+			option: function(data, escape) {
+				return '<div>' +
+				'<span class="title">' + escape(data.title) + '</span>' +
+				'</div>';
+			},
+			item: function(data, escape) {
+				return '<div id="select-user-tech">' + escape(data.title) + '</div>';
+			}
+		}
+	});
 /*================================================================================================*/
 select_principles.on('change',function () {
 	var prd_id = select_principles.getValue();
@@ -1778,6 +1851,9 @@ function actionGetProduct(id) {
 	select_products.clearOptions();
 	select_products.addOptions(dataOption_2);
 };
+function actionAddTechnical() {  
+	$('#modal-add-technical').modal('toggle');
+};
 </script>
 {{-- ============================================================================================ --}}
 <script>
@@ -2173,6 +2249,28 @@ $(document).ready(function() {
 			}
 		});
 	});
+	$("#formContent14").submit(function(e) {
+		e.preventDefault();
+		var formData14 = new FormData(this);
+		formData14.append("id", "{{ $id_lead }}");
+		$.ajaxSetup({
+			headers: {
+				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
+			}
+		});
+		$.ajax({
+			type: "POST",
+			url: "{{ route('store-select-tech') }}",
+			data: formData14,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function(result) {
+				$('#user-tech').html(result.user_tech);
+			}
+		});
+	});
+});
 });
 </script>
 {{-- ============================================================================================ --}}

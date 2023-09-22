@@ -265,18 +265,24 @@ opportunitys
 								<label class="col-3 col-form-label">Assigned to</label>
 								<div class="col" style="padding: 0px;">
 									<select type="text" id="select-assign-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
-										<option value="{{ $user->id }}">{{ $user->name }}</option>
 										@foreach ($user_all as $list)
-										<option value="{{ $list->id }}">{{ $list->name }}</option>
+										@if ( $user->id == $list->id)
+										<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>
+										@else
+										<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
+										@endif
 										@endforeach
 									</select>
 									<button type="button" id="btn-add-team" class="badge mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
 									<button type="button" id="btn-remove-team" class="badge mt-1 mb-1" style="display: none;">x Close</button>
 									<div id="select-signed-user-team-area" style="display: none;">
 										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-team-user" value="">
-											<option value="{{ null }}"></option>
 											@foreach ($user_all as $list)
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
+											@if ( $user->id == $list->id)
+											<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>
+											@else
+											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
+											@endif
 											@endforeach
 										</select>
 									</div>
@@ -667,15 +673,15 @@ function mainDataActivity(type_act,status_act) {
 			$("#activity-table_filter.dataTables_filter")
 			.append('<label id="categoryFilter"><select id="filter_completion" class="form-control btn-square" onchange="actioFilterCompletion(this)" style="padding: 5px; border-color: #6f797a;"></select> </label>');
 			am_aplicacion_ids = [{'all-status': 'Filter Completion'}, {'beready': 'Beready'}, {'running': 'Running'}, {'finished': 'Finish'}];
-      for (var key in am_aplicacion_ids) {
-        var obj = am_aplicacion_ids[key];
-        for (var prop in obj) {
-          if (obj.hasOwnProperty(prop)) {
-            $('#filter_completion').append('<option value="' + prop + '">' + obj[prop] + '</option>');
-          }
-        }
-      }
-		},
+			for (var key in am_aplicacion_ids) {
+				var obj = am_aplicacion_ids[key];
+				for (var prop in obj) {
+					if (obj.hasOwnProperty(prop)) {
+						$('#filter_completion').append('<option value="' + prop + '">' + obj[prop] + '</option>');
+					}
+				}
+			}
+		}
 	});
 	return tableAct;
 };
@@ -906,6 +912,11 @@ function actionChangeStatusAct(id,status) {
 	var res_act = actionGetDataActivity(id);
 	$('#activity_id_i').val(res_act.act_id);
 	select_act_status.setValue([res_act.actstatus]);
+};
+function actionViewInputTeam() {  
+	$('#btn-add-team').hide();
+	$('#btn-remove-team').show(); 
+	$('#select-signed-user-team-area').slideDown();
 };
 </script>
 {{-- ============================================================================================ --}}

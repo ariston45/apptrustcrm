@@ -459,17 +459,17 @@ class LeadController extends Controller
 		];
 		return $result;
 		}
-		$checkData = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','head')->first();
+		$checkData = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','master')->first();
 		if ($checkData == null) {
 			$data = [
 				'slm_user' => $request->select_sales,
 				'slm_lead' => $request->id,
-				'slm_rules' => 'head',
+				'slm_rules' => 'master',
 				'created_by' => null
 			];
 			$actionAddSales = Prs_accessrule::insert($data);
 		}else{
-			$actionChangeSales = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','head')->update(['slm_user'=>$request->select_sales]);
+			$actionChangeSales = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','master')->update(['slm_user'=>$request->select_sales]);
 		}
 		$result = [
 			'param' => true,
@@ -480,12 +480,11 @@ class LeadController extends Controller
 	####
 	public function storeSelectTeam(Request $request)
 	{
-		if (!$request->select_tech) {
+		if (!$request->select_teams) {
 			$ids = array();
 		}else{
-			$ids = $request->select_tech;
+			$ids = $request->select_teams;
 		}
-		$ids = $request->select_teams;
 		$actionDeleteId = Prs_accessrule::where('slm_lead',$request->id)->where('slm_rules','colaborator')->delete();
 		$data = array();
 		foreach ($ids as $key => $value) {

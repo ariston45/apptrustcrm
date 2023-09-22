@@ -397,12 +397,13 @@ function mainDataActivity(type_act,status_act) {
 			search: "Find Activity"
 		},
 		ajax: {
-			'url': '{!! route("source-data-activity") !!}',
+			'url': '{!! route("source-data-activity-cst") !!}',
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',
 				'act_status' : status_act,
-				'act_param': type_act
+				'act_param': type_act,
+				'cst_id': '{{ $id }}'
 			}
 		},
 		columnDefs: [

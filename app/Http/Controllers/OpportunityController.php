@@ -13,6 +13,7 @@ use App\Models\Prd_product;
 use App\Models\Prs_contact;
 use App\Models\Prs_lead;
 use App\Models\Opr_stage_status;
+use App\Models\Prs_accessrule;
 use App\Models\Prs_lead_value;
 use App\Models\Prs_qualification;
 use App\Models\Prs_salesperson;
@@ -34,7 +35,11 @@ class OpportunityController extends Controller
 	{
 		$id_oppor = $request->id;
 		$user = Auth::user();
-		$users = User::select('id','name','level')->get();
+		$users = User::join('user_structures','users.id','=','user_structures.usr_user_id')
+		->leftJoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+		->select('id','name','level','uts_team_name')
+		->whereNotIn('level',['ADM','AGM'])
+		->get();
 		$opportunity = Opr_opportunity::join('prs_leads','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 		->where('opr_id',$id_oppor)->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes')->first();
 		$id_lead = $opportunity->lds_id;
@@ -78,28 +83,37 @@ class OpportunityController extends Controller
 			];
 			$lead_value = (object) $lead_value_set_null;
 		}
-		$user_marketing = $users->where('level','MKT');
-		$sales = Prs_salesperson::join('users','users.id','=','prs_salespersons.slm_user')->where('slm_lead',$id_lead)->select('users.id as userid','name','username', 'slm_rules')->get();
-		$sales_selected = $sales->where('slm_rules','head')->first();
+		$user_marketing = $users->whereIn('level',['STF','MGR','MGR.PAS']);
+		$user_tech = $users->whereIn('level',['STF.TCH','MGR.TCH']);
+		$sales = Prs_accessrule::join('users','users.id','=','prs_accessrules.slm_user')
+		->join('user_structures','prs_accessrules.slm_user','=','user_structures.usr_user_id')
+		->leftJoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+		->where('slm_lead',$id_lead)
+		->select('users.id as userid','name','username', 'slm_rules','uts_team_name')->get();
+		$sales_selected = $sales->where('slm_rules','master')->first();
+		$sales_selected = $sales->where('slm_rules','master')->first();
 		if ($sales_selected == null) {
 			$sales_dataset_null = ['name' => null,'userid'=>null];
 			$sales_selected = (object) $sales_dataset_null;
 		}
-		$team_selected = $sales->where('slm_rules', 'member');
-		$team_member = array();
+		###
+		$team_selected = $sales->where('slm_rules', 'colaborator');
+		$team_member_id = array();
+		$team_member_name = array();
 		foreach ($team_selected as $key => $value) {
-			$team_member[$key] = $value->userid;
+			$team_member_id[$key] = $value->userid;
+			$team_member_name[$key] = $value->name;
 		}
-		$members='';
-		$i = 0;
-		foreach ($team_selected as $key => $value) {
-			if ($i == 0) {
-				$members.= $value->name;
-			}else {
-				$members .= ', '.$value->name;
-			}
-			$i++;
+		$member_name= implode(',',$team_member_name);
+		$tech_selected = $sales->where('slm_rules', 'technical');
+		$team_tech_id = array();
+		$team_tech_name = array();
+		foreach ($tech_selected as $key => $value) {
+			$team_tech_id[$key] = $value->userid;
+			$team_tech_name[$key] = $value->name;
 		}
+		$tech_name= implode(',',$team_tech_name);
+		###
 		$opr_product = Opr_product_opportunity::join('prd_products','opr_product_opportunities.por_product_id','=','prd_products.psp_id')
 		->join('prd_principles','prd_products.psp_product_id','=','prd_principles.prd_id')
 		->where('opr_product_opportunities.por_opportunity_id',$id_oppor)
@@ -116,28 +130,10 @@ class OpportunityController extends Controller
 			$principle = $opr_product->first();
 		}
 		$allproduct = Prd_principle::get();
-		// $qualifying = Prs_qualification::where('lqs_lead_id', $id_lead)->get();
-		// $ident_need = array('param' => null, 'textdata' => null);
-		// $ident_budget = array('param' => null, 'textdata' => null);
-		// foreach ($qualifying as $key => $value) {
-		// 	if ($value->lqs_type_identification == 'identification_needs') {
-		// 		$ident_need = [
-		// 			'param' => $value->lqs_parameter,
-		// 			'textdata' => $value->lqs_describe
-		// 		];
-		// 	}elseif ($value->lqs_type_identification == 'identification_budgets') {
-		// 		$ident_budget = [
-		// 			'param' => $value->lqs_parameter,
-		// 			'textdata' => $value->lqs_describe
-		// 		];
-		// 	}else {
-		// 	}
-		// }
-		// $principle = Prd_principle::get();
 		$activity_type = Act_activity_type::get();
 		return view('contents.page_opportunity.opportunity_detail',compact(
-			'id_oppor','id_lead','user','users','id_lead','status','opportunity','sales','members','team_member', 'sales_selected', 'team_selected',
-			'user_marketing','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer',
+			'id_oppor','id_lead','user','users','id_lead','status','opportunity','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
+			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer',
 			'all_contacts','lead_contacts','activity_type','products','principle','allproduct'
 		));
 	}

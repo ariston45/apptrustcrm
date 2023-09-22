@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Act_activity_access;
 use App\Models\Opr_opportunity;
 use App\Models\Opr_product_opportunity;
 use App\Models\Opr_stage_status;
 use App\Models\Opr_value_assumtion;
 use App\Models\Prd_principle;
 use App\Models\Prd_product;
+use App\Models\Prs_accessrule;
 use App\Models\Prs_contact;
 use Illuminate\Http\Request;
 
@@ -33,6 +35,7 @@ use App\Models\Prs_lead_value;
 use App\Models\Prs_qualification;
 use App\Models\Prs_salesperson;
 use App\Models\User;
+use App\Models\User_structure;
 use DataTables;
 #Helpers
 use stdClass;
@@ -46,26 +49,64 @@ class ActivityController extends Controller
 	public function viewActivity(Request $request)
 	{
 		$user = Auth::user();
-		$users = User::select('id','name','level')->get();
+		$users = User::get();
 		$status_activity = Act_activity::get();
-		$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-		->where('act_activities.created_by',$user->id)
-		->select('act_id','aat_type_code')
-		->get();
-		$colect_data_a = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->where('act_activities.created_by','!=',$user->id)
-			->Where('act_user_assigned','=',$user->id)
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
+			# code...
+			$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->select('act_id','aat_type_code')
 			->get();
-		$colect_data_b = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+		} elseif(checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_ids = array_unique($lds_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-			->where('act_activities.created_by',$user->id)
+			->whereIn('act_activities.act_lead_id',$lds_ids)
 			->select('act_id','aat_type_code')
 			->get();
-		$cd_a = $colect_data_a->keyBy('act_id');
-		$cd_b = $colect_data_b->keyBy('act_id');
-		$all_activities = $cd_a->union($cd_b);
+		} elseif(checkRule(array('STF'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_ids = array_unique($lds_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->whereIn('act_activities.act_lead_id',$lds_ids)
+			->select('act_id','aat_type_code')
+			->get();
+		} elseif(checkRule(array('MGR.TCH'))) {
+			$user = Auth::user();
+			$tech_team = checkTeamMgr($user->id);
+			$act_access = Act_activity_access::whereIn('acs_user_id',$tech_team)->select('acs_act_id')->get();
+			$act_idr = array();
+			foreach ($act_access as $key => $value) {
+				$act_idr[$key] = $value->acs_act_id;
+			}
+			$act_ids = array_unique($act_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->whereIn('act_activities.act_id',$act_ids)
+			->select('act_id','aat_type_code')
+			->get();
+		} elseif(checkRule(array('STF.TCH','STF'))) {
+			$act_access = Act_activity_access::where('acs_user_id',$user->id)->select('acs_act_id')->get();
+			$act_idr = array();
+			foreach ($act_access as $key => $value) {
+				$act_idr[$key] = $value->acs_act_id;
+			}
+			$act_ids = array_unique($act_idr);
+			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->whereIn('act_activities.act_id',$act_ids)
+			->select('act_id','aat_type_code')
+			->get();
+		}
 		$cnt_todo = $all_activities->where('aat_type_code','act_todo')->count();
 		$cnt_phone = $all_activities->where('aat_type_code','act_phone')->count();
 		$cnt_email = $all_activities->where('aat_type_code','act_email')->count();
@@ -75,7 +116,11 @@ class ActivityController extends Controller
 		$cnt_video_call = $all_activities->where('aat_type_code','act_video_call')->count();
 		$cnt_total = $cnt_todo+$cnt_phone+$cnt_email+$cnt_visit+$cnt_poc+$cnt_webinar+$cnt_video_call;
 		$activity_type = Act_activity_type::get();
-		$user_all = User::whereIn('level',['MKT','MGR.PAS','MGR','AGM','TCK'])->get();
+		$user_all = User::join('user_structures','users.id','=','user_structures.usr_user_id')
+		->leftjoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+		->whereIn('level',['STF','STF.TCH','MGR.TCH','MGR.PAS','MGR','AGM','ADM'])
+		->select('id','name','uts_team_name')
+		->get();
 		$customer_all = Cst_customer::select('cst_id','cst_name')->get();
 		return view('contents.page_activity.activity',compact(
 			'activity_type','cnt_todo','cnt_phone','cnt_email','cnt_visit','cnt_poc','cnt_webinar','cnt_video_call','cnt_total','user_all','user','customer_all'
@@ -141,15 +186,75 @@ class ActivityController extends Controller
 		$end_date_arr = explode(" ",$request->end);
 		$end_date_str = $end_date_arr[3].'-'.$end_date_arr[1].'-'.$end_date_arr[2];
 		$end = date('Y-m-d',strtotime($end_date_str));
-		
-		$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-		->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-		->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-		->where('act_activities.created_by',$user->id)
-		->whereBetween('act_task_times_due',[$start,$end])
-		->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
-		'users.name as assign','aat_type_name','cst_name')
-		->get();
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
+			# code...
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}elseif(checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_id = array_unique($lds_idr);
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_lead_id',$lds_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}elseif(checkRule(array('STF'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_id = array_unique($lds_idr);
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_lead_id',$lds_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}elseif(checkRule(array('MGR.TCH'))) {
+			$tech_team = checkTeamMgr($user->id);
+			$act_access = Act_activity_access::whereIn('acs_user_id',$tech_team)->select('acs_act_id')->get();
+			$act_id = array();
+			foreach ($act_access as $key => $value) {
+				$act_id[$key] = $value->acs_act_id;
+			}
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_id',$act_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}elseif(checkRule(array('STF.TCH'))) {
+			$act_access = Act_activity_access::where('acs_user_id',$user->id)->select('acs_act_id')->get();
+			$act_id = array();
+			foreach ($act_access as $key => $value) {
+				$act_id[$key] = $value->acs_act_id;
+			}
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_id',$act_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}
 		$data = array();
 		foreach ($colect_data as $key => $value) {
 			$status[$key] = date('Y-m-d',strtotime($value->act_task_times_due))."T".date('H:i:s',strtotime($value->act_task_times_due));
@@ -178,15 +283,64 @@ class ActivityController extends Controller
 		$end_date_arr = explode(" ",$request->end);
 		$end_date_str = $end_date_arr[3].'-'.$end_date_arr[1].'-'.$end_date_arr[2];
 		$end = date('Y-m-d',strtotime($end_date_str));
-		$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-		->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-		->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-		->where('cst_id',$request->cst_id)
-		->where('act_activities.created_by',$user->id)
-		->whereBetween('act_task_times_due',[$start,$end])
-		->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
-		'users.name as assign','aat_type_name','cst_name')
-		->get();
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
+			# code...
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->where('act_cst',$request->cst_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		} elseif(checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_id = array_unique($lds_idr);
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_lead_id',$lds_id)
+			->where('act_cst',$request->cst_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}elseif (checkRule(array('MGR.TCH'))) {
+			$tech_team = checkTeamMgr($user->id);
+			$act_access = Act_activity_access::whereIn('acs_user_id',$tech_team)->select('acs_act_id')->get();
+			$act_id = array();
+			foreach ($act_access as $key => $value) {
+				$act_id[$key] = $value->acs_act_id;
+			}
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_id',$act_id)
+			->where('act_cst',$request->cst_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}elseif (checkRule(array('STF','STF.TCH'))) {
+			$act_access = Act_activity_access::where('acs_user_id',$user->id)->select('acs_act_id')->get();
+			$act_id = array();
+			foreach ($act_access as $key => $value) {
+				$act_id[$key] = $value->acs_act_id;
+			}
+			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
+			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+			->whereIn('act_id',$act_id)
+			->where('act_cst',$request->cst_id)
+			->whereBetween('act_task_times_due',[$start,$end])
+			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
+			'users.name as assign','aat_type_name','cst_name')
+			->get();
+		}
 		$data = array();
 		foreach ($colect_data as $key => $value) {
 			$status[$key] = date('Y-m-d',strtotime($value->act_task_times_due))."T".date('H:i:s',strtotime($value->act_task_times_due));
@@ -213,10 +367,10 @@ class ActivityController extends Controller
 		$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 		->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 		->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-		->where('act_activities.created_by',$user->id)
 		->where('act_id',$request->id)
 		->select('act_id','cst_name','act_activities.act_task_times_due','act_todo_result','act_todo_describe','users.name as assign','aat_type_name','act_run_status','act_user_teams','act_user_customer')
 		->first();
+
 		if ($colect_data->act_user_teams == "" || $colect_data->act_user_teams == null) {
 			$teams = '-';
 		}else {
@@ -258,6 +412,7 @@ class ActivityController extends Controller
 	{
 		$user = Auth::user();
 		$today =Carbon::now()->locale('id-ID');
+		$id = genIdActivity();
 		$act_task_times = date('Y-m-d h:i:s',strtotime($request->start_date));
 		$act_task_times_due = date('Y-m-d h:i:s', strtotime($request->due_date));
 		if ($request->todo_status == "done") {
@@ -271,14 +426,28 @@ class ActivityController extends Controller
 				$act_run_status = "beready";
 			}
 		}
-		$pic_user = implode(',',$request->pic_user);
+		if (isset($request->pic_user)) {
+			# code...
+			$pic_user = implode(',',$request->pic_user);
+		} else {
+			# code...
+			$pic_user = null;
+		}
 		$lead = Prs_lead::where('lds_id',$request->lead_project)->first();
 		if (isset($request->assignment_user_team)) {
 			$act_user_teams = implode(',',$request->assignment_user_team);
+			foreach ($request->assignment_user_team as $key => $value) {
+				$data_rule = [
+					'acs_act_id' => $id,
+					'acs_user_id' => $value,
+					'acs_rules' =>'member',
+				];
+				Act_activity_access::insert($data_rule);
+			}
 		}else{
 			$act_user_teams = null;
 		}
-		$id = genIdActivity();
+		
 		$data = [
 			"act_id" => $id,
 			"act_lead_id" => $request->lead_project,
@@ -288,15 +457,27 @@ class ActivityController extends Controller
 			"act_run_status" => $act_run_status,
 			'act_todo_priority' => null,
 			'act_user_customer' => $pic_user,
-			'act_todo_describe' => $request->activity_summary,
-			'act_todo_result' =>  $request->activity_summary,
+			'act_todo_describe' => $request->activity_describe,
+			'act_todo_result' =>  $request->activity_result,
 			'act_task_times' => null,
 			'act_task_times_due' => $act_task_times_due,
 			'act_user_assigned' => $request->assignment_user,
 			'act_user_teams' => $act_user_teams,
 			'created_by' => $user->id
 		];
-		// $actionStore = Act_activity::insert($data);
+		$actionStore = Act_activity::insert($data);
+		$data_rule_a = [
+			'acs_act_id' => $id,
+			'acs_user_id' => $user->id,
+			'acs_rules' =>'creator',
+		];
+		$actionStoreRule = Act_activity_access::insert($data_rule_a);
+		$data_rule_b = [
+			'acs_act_id' => $id,
+			'acs_user_id' => $request->assignment_user,
+			'acs_rules' =>'assignee',
+		];
+		$actionStoreRule = Act_activity_access::insert($data_rule_b);
 		$result = [
 			'param'=>true,
 			'idactivity' => $id 
@@ -409,6 +590,7 @@ class ActivityController extends Controller
   public function storeActivitiesLead(Request $request)
   {
     $user = Auth::user();
+		$id = genIdActivity(); 
 		$today =Carbon::now()->locale('id-ID');
 		$act_task_times = date('Y-m-d h:i:s',strtotime($request->start_date));
 		$act_task_times_due = date('Y-m-d h:i:s', strtotime($request->due_date));
@@ -426,11 +608,19 @@ class ActivityController extends Controller
 		$pic_user = implode(',',$request->pic_user);
 		if (isset($request->assignment_user_team)) {
 			$act_user_teams = implode(',',$request->assignment_user_team);
+			foreach ($request->assignment_user_team as $key => $value) {
+				$data_rule = [
+					'acs_act_id' => $id,
+					'acs_user_id' => $value,
+					'acs_rules' =>'member',
+				];
+				Act_activity_access::insert($data_rule);
+			}
 		}else{
 			$act_user_teams = null;
 		}
 		$data = [
-			'act_id' => genIdActivity(),
+			'act_id' => $id,
 			'act_lead_id' => $request->lead_id,
 			'act_lead_status' => $request->lead_status_id,
 			'act_cst' => $request->customer, 
@@ -447,6 +637,18 @@ class ActivityController extends Controller
 			'created_by' => $user->id
 		];
 		$actionStore = Act_activity::insert($data);
+		$data_rule_a = [
+			'acs_act_id' => $id,
+			'acs_user_id' => $user->id,
+			'acs_rules' =>'creator',
+		];
+		$actionStoreRule = Act_activity_access::insert($data_rule_a);
+		$data_rule_b = [
+			'acs_act_id' => $id,
+			'acs_user_id' => $request->assignment_user,
+			'acs_rules' =>'assignee',
+		];
+		$actionStoreRule = Act_activity_access::insert($data_rule_b);
     $result = [
       'param'=>true,
     ];
@@ -895,7 +1097,9 @@ class ActivityController extends Controller
 	/* Tags: ajax resource get info activity lead */
 	public function sourceActivityInfo(Request $request)
 	{
-		$activity_data = Act_activity::where('act_id',$request->id)->select('act_todo_describe','act_todo_result')->first();
+		$activity_data = Act_activity::where('act_id',$request->id)
+		->select('act_todo_describe','act_todo_result')
+		->first();
 		return $activity_data->act_todo_result;
 	}
 	/* Tags:... */
