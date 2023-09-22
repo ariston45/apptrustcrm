@@ -445,46 +445,86 @@ class DataController extends Controller
 	}
 	public function sourceDataLeadCst(Request $request)
 	{
+		$id = 50;
 		$user = Auth::user();
-		if ($user->level == 'ADM' || $user->level == 'MGR.PAS' || $user->level == 'AGM') {
-			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_merge = array_merge($lead_user_head,$lead_user_member);
-			$ids = array();
-			foreach ($lead_merge as $key => $value) {
-				$ids[$key] = $value['slm_lead'];
-			}
-			$ids_string = implode(',',$ids);
-			$lead_ids = array_unique($ids);
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
-			->where('lds_customer',$request->id)
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name')
-			// ->whereIn('lds_id',$lead_ids)
+			->where('lds_customer',$id)
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','prs_leads.created_at as created')
 			->get();
-		}elseif($user->level == 'MKT'|| $user->level == 'MGR'){
-			$lead_user_head = Prs_accessrule::where('slm_rules','head')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_user_member = Prs_accessrule::where('slm_rules','member')->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lead_merge = array_merge($lead_user_head,$lead_user_member);
+		}elseif (checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_id = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+			function($join){
+				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
+			})
+			->where('lds_customer',$id)
+			->whereIn('lds_id',$lead_id)
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','prs_leads.created_at as created')
+			->get();
+		} elseif (checkRule(array('MGR.TCH'))) {
+			# code...
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['technical'])->select('slm_lead')->get();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				# code...
+				$lds_idr[$key] = $value->slm_lead;
+			}
+			$lds_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+			function($join){
+				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
+			})
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','prs_leads.created_at as created')
+			->whereIn('lds_id',$lds_ids)
+			->get();
+		}elseif(checkRule(array('STF'))){
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$ids = array();
-			foreach ($lead_merge as $key => $value) {
+			foreach ($lead_data as $key => $value) {
 				$ids[$key] = $value['slm_lead'];
 			}
-			$ids_string = implode(',',$ids);
 			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="head") salesperson'),
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+			function($join){
+				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
+			})
+			->where('lds_customer',$id)
+			->whereIn('lds_id',$lead_ids)
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','prs_leads.created_at as created')
+			->get();
+		}elseif(checkRule(array('STF.TCH'))){
+			$lead_user_master = Prs_accessrule::where('slm_rules','technical')->where('slm_user',$user->id)->select('slm_lead')->get();
+			$ids = array();
+			foreach ($lead_user_master as $key => $value) {
+				$ids[$key] = $value->slm_lead;
+			}
+			$lead_ids = array_unique($ids);
+			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			->whereIn('lds_id',$lead_ids)
-			->where('lds_customer',$request->id)
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name')
+			->where('lds_customer',$id)
+			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','prs_leads.created_at as created')
 			->get();
 		}
 		return DataTables::of($lead_data)
@@ -493,6 +533,36 @@ class DataController extends Controller
 			return '';
 		})
 		->addColumn('menu', function ($lead_data) {
+			return '
+			<div style="text-align:center;">
+			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
+			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
+			<a class="dropdown-item" href="'.url('leads/detail-lead').'/'.$lead_data->lds_id.'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Lead</a>
+      </div>
+			</div>
+			';
+		})
+		->addColumn('number_index', function () {
+			return 1;
+		})
+		->addColumn('title', function ($lead_data) {
+			return $lead_data->lds_title;
+		})
+		->addColumn('customer', function ($lead_data) {
+			return $lead_data->cst_name;
+		})
+		->addColumn('created', function ($lead_data) {
+			$date = date('d M/Y',strtotime($lead_data->created));
+			return $date;
+		})
+		->addColumn('status', function ($lead_data) {
+			if ($lead_data->pls_code_name == 'prospecting') {
+				return '<span class="badge bg-blue-lt">Prospecting</span>';
+			}elseif ($lead_data->pls_code_name == 'qualifying') {
+				return '<span class="badge bg-azure-lt">Qualifying</span>';
+			}else{
+				return '<span class="badge bg-green-lt">Opportunity</span>';
+			}
 		})
 		->addColumn('salesperson', function ($lead_data) {
 			if ($lead_data->name == "" || $lead_data->name == null) {
@@ -501,29 +571,7 @@ class DataController extends Controller
 				return '<style="text-align:center;">'.$lead_data->name.'</style>';
 			}
 		})
-		->addColumn('project', function ($lead_data) {
-			return '<a href="'.url('leads/detail-lead/'.$lead_data->lds_id). '" style="text-decoration:none">
-			<strong>
-				<div class="row">
-					<div class="" style="float: left;width:10px;margin-right:6px;">
-						<i class="ri-folder-add-line" style="margin-right:6px;"></i> 
-					</div>
-					<div class="col" style="float: left;word-wrap: break-word;">
-						'.Str::ucfirst($lead_data->lds_title). '
-					</div>
-				</div>
-			</strong>
-			</a>';
-		})
-		->addColumn('status', function ($lead_data) {
-			$status = '<span class="badge '. $lead_data->pls_status_color.'">'. $lead_data->pls_status_name.'</span>';
-			return '<div style="text-align:left;">'.$status.'</div>';
-		})
-		->addColumn('created', function ($lead_data) {
-			$dt = Carbon::create($lead_data->create_date);
-			return '<div style="text-align:left;">'.$dt->toFormattedDateString().'</div>';       ;
-		})
-		->rawColumns(['menu','project', 'status', 'created','salesperson'])
+		->rawColumns(['number_index','title', 'customer','status', 'salesperson','menu','created'])
 		->make('true');
 	}
 	# <===========================================================================================================================================================>
