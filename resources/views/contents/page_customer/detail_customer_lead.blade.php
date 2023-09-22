@@ -365,7 +365,7 @@ $(document).ready(function() {
 		],
 		columns: [
 			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
-			{data: 'project', name: 'project', orderable: true, searchable: true },
+			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
 			{data: 'created', name: 'created', orderable: true, searchable: true },
