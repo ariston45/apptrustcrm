@@ -10,6 +10,7 @@ use App\Http\Controllers\DataController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TestController;
 /*
 |--------------------------------------------------------------------------
@@ -151,12 +152,17 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('store-value-opportunity-other', [OpportunityController::class, 'storeOprValueOther'])->name('store-value-opportunity-other');
 		Route::post('store-value-opportunity-revenue', [OpportunityController::class, 'storeOprValueRevenue'])->name('store-value-opportunity-revenue');
 		// 
-		Route::post('source-opportunities', [DataController::class, 'sourceDataOpportunities'])->name('source-opportunities');
+		Route::match(['post','get'],'source-opportunities', [DataController::class, 'sourceDataOpportunities'])->name('source-opportunities');
 		Route::post('source-opportunities-cst', [DataController::class, 'sourceDataOpportunitiesCst'])->name('source-opportunities-cst');
 		Route::post('update-product-opportunity', [OpportunityController::class, 'updateProductOpportunity'])->name('update-product-opportunity');
 		Route::post('product-principle', [OpportunityController::class, 'listProductPrinciple'])->name('product-principle');
 		Route::post('update-status-opportunity', [OpportunityController::class, 'storeUpdateStatusOpr'])->name('update-status-opportunity');
 		Route::match(['get', 'post'],'customer-project',[OpportunityController::class,'sourceCustomerProject'])->name('customer-project');
+	});
+	# Purchasing
+	Route::prefix('purchased')->group(function(){
+		Route::get('/', [PurchaseController::class,'PurchaseDataView']);
+		Route::match(['get', 'post'],'source-data-purchase', [PurchaseController::class, 'sourceDataPurchase'])->name('source-data-purchase');
 	});
 	# Setting
 	Route::prefix('setting')->group(function(){

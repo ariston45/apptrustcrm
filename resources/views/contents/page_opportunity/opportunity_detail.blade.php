@@ -85,7 +85,9 @@ opportunitys
 				@if ($opportunity->opr_status == 7) style="display:true;" @else style="display:none;"	@endif>
 			</div>
 		</div>
-		<hr class="mt-1 mb-3">
+		{{-- <hr class="mt-1 mb-3"> --}}
+	</div>
+	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
 		<div class="row mb-1">
 			<div class="col">
 				<div class="mb-1 row">
@@ -107,7 +109,6 @@ opportunitys
 				</div>
 			</div>
 			<div class="col-auto">
-				{{-- <button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeProduct()"><i class="ri-edit-2-line"></i></button> --}}
 				<div class="col-auto">
 					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 					<button class="btn btn-primary btn-pill btn-sm" onclick="actionChangeProduct()" style="width: 130px;"><i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit Product</button>
@@ -133,6 +134,87 @@ opportunitys
 			</div>
 			@endif
 		</div>
+		<table id="table-product-detail" class="table table-striped table-responsive">
+			<thead>
+				<tr>
+					<th style="width: 2%"></th>
+					<th style="width: 20%">Principle</th>
+					<th style="width: 35%">Product</th>
+					<th class="text-center" style="width: 5%">Qnt</th>
+					<th class="text-end" style="width: 15%">Unit</th>
+					<th class="text-end" style="width: 15%">Amount</th>
+					<th style="width: 8%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				@php
+					$no = 1;
+				@endphp
+				@foreach ($opr_product as $list)
+				<tr>
+					<td class="text-center">{{ $no }}</td>
+					<td><span class="strong">{{ $list->por_principle_name }}</span></td>
+					<td>
+						<div class="strong">{{ $list->por_product_name }}</div>
+						@if ($list->por_note == ''||$list->por_note == null)
+						<span class="text-muted">-</span>
+						@else
+						<span class="text-muted">{{ $list->por_note }}</span>
+						@endif
+					</td>
+					<td class="text-center">{{ $list->por_quantity }}</td>
+					<td class="text-end">{{ rupiahFormat( $list->por_unit_value ) }}</td>
+					<td class="text-end">$1.800,00</td>
+					<td class="text-center" style="vertical-align: middle;">
+						<button class="badge bg-blue-lt">EDIT</button>
+					</td>
+				</tr>
+				@php
+					$no++;
+				@endphp
+				@endforeach
+				<tr>
+					<td colspan="4" class="strong text-end"><i>Subtotal</i></td>
+					<td class="text-end"></td>
+					<td class="text-end">$25.000,00</td>
+					<td class="text-center" style="vertical-align: middle;">
+						<button class="badge bg-blue-lt">EDIT</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" class="strong text-end"><i>Tax Rate</i></td>
+					<td class="text-end">11%</td>
+					<td class="text-end">$25.000,00</td>
+					<td class="text-center" style="vertical-align: middle;">
+						<button class="badge bg-blue-lt">EDIT</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" class="strong text-end"><i>Other Cost</i></td>
+					<td class="text-end"></td>
+					<td rowspan="3" class="text-end" style="vertical-align: middle;">$25.000,00</td>
+					<td rowspan="3" class="text-center" style="vertical-align: middle;">
+						<button class="badge bg-blue-lt">EDIT</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" class="text-muted text-end"><i>Cost 1</i></td>
+					<td class="text-end">$25.000,00</td>
+				</tr>
+				<tr>
+					<td colspan="4" class="text-muted text-end"><i>Cost 2</i></td>
+					<td class="text-end">$25.000,00</td>
+				</tr>
+				<tr>
+					<td colspan="4" class="strong text-end"><i>Total Due</i></td>
+					<td class="text-end"></td>
+					<td class="text-end">$25.000,00</td>
+					<td class="text-center" style="vertical-align: middle;">
+						<button class="badge bg-blue-lt">EDIT</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 	{{-- ======================================================================================================== --}}
 	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
@@ -923,6 +1005,18 @@ opportunitys
   }
 	.img-status {
 		max-height: 200px;
+	}
+	#table-product-detail{
+		font-size: 13px;
+	}
+	#table-product-detail th{
+		padding-right: 2px;
+		padding-left: 2px;
+		background-color: #006dc0;
+		color: #e1e1e1;
+	}
+	#table-product-detail td{
+		padding: 2px;
 	}
 </style>
 @endpush
@@ -2270,7 +2364,6 @@ $(document).ready(function() {
 			}
 		});
 	});
-});
 });
 </script>
 {{-- ============================================================================================ --}}

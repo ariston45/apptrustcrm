@@ -6,8 +6,8 @@ use App\Models\Act_activity_type;
 use App\Models\Cst_customer;
 use App\Models\Cst_personal;
 use App\Models\Opr_opportunity;
-use App\Models\Opr_product_opportunity;
-use App\Models\Opr_value_assumtion;
+use App\Models\Opr_value_product;
+use App\Models\Opr_value;
 use App\Models\Prd_principle;
 use App\Models\Prd_product;
 use App\Models\Prs_contact;
@@ -43,7 +43,7 @@ class OpportunityController extends Controller
 		$opportunity = Opr_opportunity::join('prs_leads','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 		->where('opr_id',$id_oppor)->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes')->first();
 		$id_lead = $opportunity->lds_id;
-		$opportunity_value = Opr_value_assumtion::where('ovs_opportunity_id',$id_oppor)->first();
+		$opportunity_value = Opr_value::where('ovs_opr_id',$id_oppor)->first();
 		if ($opportunity_value == null) {
 			$opportunity_value = (object) [
 				"opr_value_dpp" => null,
@@ -114,11 +114,16 @@ class OpportunityController extends Controller
 		}
 		$tech_name= implode(',',$team_tech_name);
 		###
-		$opr_product = Opr_product_opportunity::join('prd_products','opr_product_opportunities.por_product_id','=','prd_products.psp_id')
-		->join('prd_principles','prd_products.psp_product_id','=','prd_principles.prd_id')
-		->where('opr_product_opportunities.por_opportunity_id',$id_oppor)
-		->select('psp_subproduct_name','prd_name')
+		$opr_product = Opr_value_product::where('opr_value_products.por_opr_id',$id_oppor)
+		->select('por_id','por_principle_name','por_product_name','por_note','por_quantity','por_unit_value','por_total_value')
 		->get();
+		// echo $opr_product;
+		// die();
+		// $opr_product = Opr_value_product::join('prd_products','opr_value_products.por_product_name','=','prd_products.psp_id')
+		// ->join('prd_principles','prd_products.psp_product_id','=','prd_principles.prd_id')
+		// ->where('opr_value_products.por_opr_id',$id_oppor)
+		// ->select('psp_subproduct_name','prd_name')
+		// ->get();
 		$products = array();
 		$principle = new StdClass();
 		if ($opr_product->count() == null) {
@@ -130,10 +135,12 @@ class OpportunityController extends Controller
 			$principle = $opr_product->first();
 		}
 		$allproduct = Prd_principle::get();
+
+		###
 		$activity_type = Act_activity_type::get();
 		return view('contents.page_opportunity.opportunity_detail',compact(
-			'id_oppor','id_lead','user','users','id_lead','status','opportunity','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
-			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer',
+			'id_oppor','id_lead','user','users','status','opportunity','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
+			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer','opr_product',
 			'all_contacts','lead_contacts','activity_type','products','principle','allproduct'
 		));
 	}
@@ -197,15 +204,15 @@ class OpportunityController extends Controller
 		foreach ($request->product as $key => $value) {
 			$data_opr_prd[$key] = [
 				"por_opportunity_id" => $opr_id,
-				"por_principle" => $request->product_principle,
-				"por_product_id" => $value,
+				"por_principle_name" => $request->product_principle,
+				"por_product_name" => $value,
 				"por_quantity" => null,
 				"por_unit_value" => null,
 				"por_total_value" => null
 			];
 		}
 		$actionStoreOpportunity = Opr_opportunity::insert($data_opr);
-		$actionStoreProduct = Opr_product_opportunity::insert($data_opr_prd);
+		$actionStoreProduct = Opr_value_product::insert($data_opr_prd);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -228,15 +235,15 @@ class OpportunityController extends Controller
 		foreach ($request->product as $key => $value) {
 			$data_opr_prd[$key] = [
 				"por_opportunity_id" => $opr_id,
-				"por_principle" => $request->product_principle,
-				"por_product_id" => $value,
+				"por_principle_name" => $request->product_principle,
+				"por_product_name" => $value,
 				"por_quantity" => null,
 				"por_unit_value" => null,
 				"por_total_value" => null
 			];
 		}
 		$actionStoreOpportunity = Opr_opportunity::insert($data_opr);
-		$actionStoreProduct = Opr_product_opportunity::insert($data_opr_prd);
+		$actionStoreProduct = Opr_value_product::insert($data_opr_prd);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -260,15 +267,15 @@ class OpportunityController extends Controller
 		foreach ($request->product as $key => $value) {
 			$data_opr_prd[$key] = [
 				"por_opportunity_id" => $opr_id,
-				"por_principle" => $request->product_principle,
-				"por_product_id" => $value,
+				"por_principle_name" => $request->product_principle,
+				"por_product_name" => $value,
 				"por_quantity" => null,
 				"por_unit_value" => null,
 				"por_total_value" => null
 			];
 		}
 		$actionStoreOpportunity = Opr_opportunity::insert($data_opr);
-		$actionStoreProduct = Opr_product_opportunity::insert($data_opr_prd);
+		$actionStoreProduct = Opr_value_product::insert($data_opr_prd);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -281,19 +288,19 @@ class OpportunityController extends Controller
 		foreach ($request->product as $key => $value) {
 			$data[$key] = [
 				"por_opportunity_id" => $request->oppor_id,
-				"por_principle" => $request->product_principle,
-				"por_product_id" => $value,
+				"por_principle_name" => $request->product_principle,
+				"por_product_name" => $value,
 				"por_quantity" => null,
 				"por_unit_value" => null,
 				"por_total_value" => null
 			];
 		}
-		$checkproduct = Opr_product_opportunity::where('por_opportunity_id',$request->oppor_id)->get();
+		$checkproduct = Opr_value_product::where('por_opportunity_id',$request->oppor_id)->get();
 		if ($checkproduct->count() == 0) {
-			$actionStoreProduct = Opr_product_opportunity::insert($data);
+			$actionStoreProduct = Opr_value_product::insert($data);
 		}else {
-			$actionDeleteProduct = Opr_product_opportunity::where('por_opportunity_id',$request->oppor_id)->delete();
-			$actionStoreProduct = Opr_product_opportunity::insert($data);
+			$actionDeleteProduct = Opr_value_product::where('por_opportunity_id',$request->oppor_id)->delete();
+			$actionStoreProduct = Opr_value_product::insert($data);
 		}
 		$principle = Prd_principle::where('prd_id',$request->product_principle)->first();
 		$products = Prd_product::whereIn('psp_id',$request->product)->get();
@@ -349,19 +356,19 @@ class OpportunityController extends Controller
 		$user = Auth::user();
 		$value =  Str::remove('.',Str::substr($request->opportunity_value,3));
 		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->first();
+		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
 		if ($checkBaseValue == null) {
 			$data = [
-				"ovs_opportunity_id" => $request->id,
+				"ovs_opr_id" => $request->id,
 				"opr_value_dpp" => $x,
 				"opr_value_hpp" => null,
 				"opr_tax" => null,
 				"opr_other" => null,
 				"opr_revenue" =>null
 			];
-			$actionStore = Opr_value_assumtion::insert($data);
+			$actionStore = Opr_value::insert($data);
 		}else{
-			$actionUpdate = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->update(['opr_value_dpp' => $x]);
+			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_value_dpp' => $x]);
 		}
 		$result = [
 			'param' => true,
@@ -375,19 +382,19 @@ class OpportunityController extends Controller
 		$user = Auth::user();
 		$value =  Str::remove('.',Str::substr($request->hpp_value,3));
 		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->first();
+		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
 		if ($checkBaseValue == null) {
 			$data = [
-				"ovs_opportunity_id" => $request->id,
+				"ovs_opr_id" => $request->id,
 				"opr_value_dpp" => null,
 				"opr_value_hpp" => $x,
 				"opr_tax" => null,
 				"opr_other" => null,
 				"opr_revenue" =>null
 			];
-			$actionStore = Opr_value_assumtion::insert($data);
+			$actionStore = Opr_value::insert($data);
 		}else{
-			$actionUpdate = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->update(['opr_value_hpp' => $x]);
+			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_value_hpp' => $x]);
 		}
 		$result = [
 			'param' => true,
@@ -401,19 +408,19 @@ class OpportunityController extends Controller
 		$user = Auth::user();
 		$value =  Str::remove('.',Str::substr($request->tax_value,3));
 		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->first();
+		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
 		if ($checkBaseValue == null) {
 			$data = [
-				"ovs_opportunity_id" => $request->id,
+				"ovs_opr_id" => $request->id,
 				"opr_value_dpp" => null,
 				"opr_value_hpp" => null,
 				"opr_tax" => $x,
 				"opr_other" => null,
 				"opr_revenue" =>null
 			];
-			$actionStore = Opr_value_assumtion::insert($data);
+			$actionStore = Opr_value::insert($data);
 		}else{
-			$actionUpdate = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->update(['opr_tax' => $x]);
+			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_tax' => $x]);
 		}
 		$result = [
 			'param' => true,
@@ -427,19 +434,19 @@ class OpportunityController extends Controller
 		$user = Auth::user();
 		$value =  Str::remove('.',Str::substr($request->other_value,3));
 		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->first();
+		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
 		if ($checkBaseValue == null) {
 			$data = [
-				"ovs_opportunity_id" => $request->id,
+				"ovs_opr_id" => $request->id,
 				"opr_value_dpp" => null,
 				"opr_value_hpp" => null,
 				"opr_tax" => null,
 				"opr_other" => $x,
 				"opr_revenue" =>null
 			];
-			$actionStore = Opr_value_assumtion::insert($data);
+			$actionStore = Opr_value::insert($data);
 		}else{
-			$actionUpdate = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->update(['opr_other' => $x]);
+			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_other' => $x]);
 		}
 		$result = [
 			'param' => true,
@@ -453,19 +460,19 @@ class OpportunityController extends Controller
 		$user = Auth::user();
 		$value =  Str::remove('.',Str::substr($request->revenue_value,3));
 		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->first();
+		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
 		if ($checkBaseValue == null) {
 			$data = [
-				"ovs_opportunity_id" => $request->id,
+				"ovs_opr_id" => $request->id,
 				"opr_value_dpp" => null,
 				"opr_value_hpp" => null,
 				"opr_tax" => null,
 				"opr_other" => null,
 				"opr_revenue" =>$x
 			];
-			$actionStore = Opr_value_assumtion::insert($data);
+			$actionStore = Opr_value::insert($data);
 		}else{
-			$actionUpdate = Opr_value_assumtion::where('ovs_opportunity_id',$request->id)->update(['opr_revenue' => $x]);
+			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_revenue' => $x]);
 		}
 		$result = [
 			'param' => true,
