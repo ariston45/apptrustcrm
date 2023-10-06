@@ -13,6 +13,7 @@ use App\Models\Prd_product;
 use App\Models\Prs_contact;
 use App\Models\Prs_lead;
 use App\Models\Opr_stage_status;
+use App\Models\Opr_value_other;
 use App\Models\Prs_accessrule;
 use App\Models\Prs_lead_value;
 use App\Models\Prs_qualification;
@@ -35,6 +36,8 @@ class OpportunityController extends Controller
 	{
 		$id_oppor = $request->id;
 		$user = Auth::user();
+		$allproduct = Prd_principle::get();
+		$activity_type = Act_activity_type::get();
 		$users = User::join('user_structures','users.id','=','user_structures.usr_user_id')
 		->leftJoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
 		->select('id','name','level','uts_team_name')
@@ -114,34 +117,48 @@ class OpportunityController extends Controller
 		}
 		$tech_name= implode(',',$team_tech_name);
 		###
-		$opr_product = Opr_value_product::where('opr_value_products.por_opr_id',$id_oppor)
+		$opr_value = Opr_value::where('ovs_opr_id',$id_oppor)->first();
+		$opr_product_src = Opr_value_product::where('opr_value_products.por_opr_id',$id_oppor)
 		->select('por_id','por_principle_name','por_product_name','por_note','por_quantity','por_unit_value','por_total_value')
 		->get();
-		// echo $opr_product;
-		// die();
-		// $opr_product = Opr_value_product::join('prd_products','opr_value_products.por_product_name','=','prd_products.psp_id')
-		// ->join('prd_principles','prd_products.psp_product_id','=','prd_principles.prd_id')
-		// ->where('opr_value_products.por_opr_id',$id_oppor)
-		// ->select('psp_subproduct_name','prd_name')
-		// ->get();
-		$products = array();
-		$principle = new StdClass();
-		if ($opr_product->count() == null) {
-			$principle->prd_name = null;
-		}else{
-			foreach ($opr_product as $key => $value) {
-				$products[$key] = $value->psp_subproduct_name;
-			}
-			$principle = $opr_product->first();
+		$prd_num = 1 ;
+		$opr_product = array();
+		foreach ($opr_product_src as $key => $value) {
+			$opr_product[$key] = [
+				"id" => $value->por_id,
+				"no" => $prd_num,
+				"principle" => $value->por_principle_name,
+				"product" => $value->por_product_name,
+				"note" => $value->por_note,
+				"quantity" =>  $value->por_quantity,
+				"unit" => $value->por_unit_value,
+				"total" => $value->por_total_value,
+			];
+			$prd_num++;
 		}
-		$allproduct = Prd_principle::get();
-
-		###
-		$activity_type = Act_activity_type::get();
+		$otr_num = 1 ;
+		$opr_other = array();
+		$opr_other_src = Opr_value_other::where('ots_opr_id',$id_oppor)->get();
+		foreach ($opr_other_src as $key => $value) {
+			$opr_other[$key] = [
+				"id" => $value->ots_id,
+				"no" => $otr_num,
+				"note" => $value->ots_name,
+				"coast" =>  $value->ots_value,
+			];
+			$otr_num++;
+		}
+		if (count($opr_other) == 0) {
+			$other_value = 0;
+			$tab_row = 1;
+		}else{
+			$other_value = $opr_value->ovs_value_other_cost;
+			$tab_row = 1 + count($opr_other);
+		}
 		return view('contents.page_opportunity.opportunity_detail',compact(
 			'id_oppor','id_lead','user','users','status','opportunity','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
-			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer','opr_product',
-			'all_contacts','lead_contacts','activity_type','products','principle','allproduct'
+			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer','opr_product','opr_other','opr_value','other_value','tab_row',
+			'all_contacts','lead_contacts','activity_type','allproduct'
 		));
 	}
 	/* Tags:... */
@@ -282,35 +299,95 @@ class OpportunityController extends Controller
 		];
 		return $result;
 	}
+	/* Tags: store new product */
+	public function storeProductOpportunity(Request $request)
+	{
+		$val_unit = Str::remove('.',Str::substr($request->unit_value,3));
+		$por_id = genIdProductList();
+		#
+		$unit_value = Str::replace(',', '.', $val_unit);
+		$val_total = $unit_value * $request->quantity;
+		$value_total =  Str::replace(',', '.', $val_total);
+		$data_product = [
+			"por_id" => $por_id,
+			"por_opr_id" => $request->oppor_id,
+			"por_principle_name" => $request->alt_principle,
+			"por_product_name" => $request->alt_product,
+			"por_note" => $request->product_note,
+			"por_quantity" => $request->quantity,
+			"por_unit_value" => $unit_value,
+			"por_total_value" => $value_total
+		];
+		$actionStoreProduct = Opr_value_product::insert($data_product);
+		# updating hpp
+		$valPrdRevenue = Opr_value_product::where('por_opr_id',$request->oppor_id)->sum('por_total_value');
+		$actionUpdateSubtototal = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_subtotal' => $valPrdRevenue ]);
+		# updating tax value
+		$valOpportunity_1 = Opr_value::where('ovs_opr_id',$request->oppor_id)->select('ovs_value_subtotal','ovs_rate_tax')->first();
+		$getPrdTax = ($valOpportunity_1->ovs_rate_tax / 100) * $valOpportunity_1->ovs_value_subtotal;
+		$actionUpdateRevenue = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_tax' => $getPrdTax ]);
+		#
+		$valOpportunity_2 = Opr_value::where('ovs_opr_id',$request->oppor_id)->select('ovs_value_subtotal','ovs_value_other_cost','ovs_value_tax')->first();
+		$valPrdRevenueTotal = $valOpportunity_2->ovs_value_subtotal + $valOpportunity_2->ovs_value_other_cost + $valOpportunity_2->ovs_value_tax ;
+		$actionUpdateTotal = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_total' => $valPrdRevenueTotal ]);
+		$rowNumber = Opr_value_product::where('por_opr_id',$request->oppor_id)->count();
+		$newRowData ='';
+		$newRowData.='<tr><td class="text-center">'.$rowNumber.'</td><td><span class="strong">'.$request->alt_principle.'</span></td><td><div class="strong">'.$request->alt_product.'</div>';
+		if ($request->product_note == null || $request->product_note =="") {
+			$newRowData.= '<span class="text-muted">-</span></td>';
+		} else {
+			$newRowData.= '<span class="text-muted">'.$request->product_note.'</span></td>';
+		}
+		$newRowData.='<td class="text-center">'.$request->quantity.'</td><td class="text-end">'.rupiahFormat( $unit_value ).'</td><td class="text-end">'.rupiahFormat( $value_total ).'</td>
+		<td class="text-center" style="vertical-align: middle;"><button class="badge bg-blue-lt" onclick="actionUpdateProduct('.$por_id.')"><i class="ri-edit-2-line"></i></button></td></tr>';
+		$result = [
+			'param' => true,
+			'new_row' => $newRowData,
+			'val_product' => rupiahFormat($value_total),
+			'val_subtotal' => rupiahFormat($valOpportunity_1->ovs_value_subtotal),
+			'val_tax' => rupiahFormat($getPrdTax),
+			'val_total' => rupiahFormat($valPrdRevenueTotal)
+		];
+		return $result;
+	}
 	/* Tags:... */
 	public function updateProductOpportunity(Request $request)
 	{
-		foreach ($request->product as $key => $value) {
-			$data[$key] = [
-				"por_opportunity_id" => $request->oppor_id,
-				"por_principle_name" => $request->product_principle,
-				"por_product_name" => $value,
-				"por_quantity" => null,
-				"por_unit_value" => null,
-				"por_total_value" => null
-			];
-		}
-		$checkproduct = Opr_value_product::where('por_opportunity_id',$request->oppor_id)->get();
-		if ($checkproduct->count() == 0) {
-			$actionStoreProduct = Opr_value_product::insert($data);
-		}else {
-			$actionDeleteProduct = Opr_value_product::where('por_opportunity_id',$request->oppor_id)->delete();
-			$actionStoreProduct = Opr_value_product::insert($data);
-		}
-		$principle = Prd_principle::where('prd_id',$request->product_principle)->first();
-		$products = Prd_product::whereIn('psp_id',$request->product)->get();
-		foreach ($products as $key => $value) {
-			$x[$key] = $value->psp_subproduct_name;
-		}
+		$val_unit = Str::remove('.',Str::substr($request->unit_value,3));
+		// $por_id = genIdProductList();
+		#
+		$unit_value = Str::replace(',', '.', $val_unit);
+		$val_total = $unit_value * $request->quantity;
+		$value_total =  Str::replace(',', '.', $val_total);
+		$data_product = [
+			"por_opr_id" => $request->oppor_id,
+			"por_principle_name" => $request->alt_principle,
+			"por_product_name" => $request->alt_product,
+			"por_note" => $request->product_note,
+			"por_quantity" => $request->quantity,
+			"por_unit_value" => $unit_value,
+			"por_total_value" => $value_total
+		];
+		$actionStoreProduct = Opr_value_product::where('por_id',$request->prd_id)->update($data_product);
+		# updating hpp
+		$valPrdRevenue = Opr_value_product::where('por_opr_id',$request->oppor_id)->sum('por_total_value');
+		$actionUpdateSubtototal = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_subtotal' => $valPrdRevenue ]);
+		# updating tax value
+		$valOpportunity_1 = Opr_value::where('ovs_opr_id',$request->oppor_id)->select('ovs_value_subtotal','ovs_rate_tax')->first();
+		$getPrdTax = ($valOpportunity_1->ovs_rate_tax / 100) * $valOpportunity_1->ovs_value_subtotal;
+		$actionUpdateRevenue = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_tax' => $getPrdTax ]);
+		#
+		$valOpportunity_2 = Opr_value::where('ovs_opr_id',$request->oppor_id)->select('ovs_value_subtotal','ovs_value_other_cost','ovs_value_tax')->first();
+		$valPrdRevenueTotal = $valOpportunity_2->ovs_value_subtotal + $valOpportunity_2->ovs_value_other_cost + $valOpportunity_2->ovs_value_tax ;
+		$actionUpdateTotal = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_total' => $valPrdRevenueTotal ]);
+		$rowNumber = Opr_value_product::where('por_opr_id',$request->oppor_id)->count();
+		
 		$result = [
-			'param'=>true,
-			'prin   ciple' => $principle->prd_name,
-			'product' => implode(', ',$x)
+			'param' => true,
+			'val_product' => rupiahFormat($value_total),
+			'val_subtotal' => rupiahFormat($valOpportunity_1->ovs_value_subtotal),
+			'val_tax' => rupiahFormat($getPrdTax),
+			'val_total' => rupiahFormat($valPrdRevenueTotal)
 		];
 		return $result;
 	}
@@ -502,5 +579,56 @@ class OpportunityController extends Controller
       'data' => $data
     ];
     return $result;
+	}
+	/* Tags:... */
+	public function sourceProductOppor(Request $request)
+	{
+		$product_opr = Opr_value_product::where('por_id',$request->idProduct)->first();
+		$principle = Prd_principle::where('prd_name',$product_opr->por_principle_name)
+		->select('prd_id')
+		->first();
+		
+		if ($principle == null) {
+			$id_principle = null;
+		} else {
+			$id_principle = $principle->prd_id;
+		}
+		$product = Prd_product::where('psp_subproduct_name',$product_opr->por_product_name)
+		->select('psp_id')
+		->first();
+		if ($product == null) {
+			$id_product = null;
+		} else {
+			$id_product = $product->psp_id;
+		}
+		$products = Prd_product::where('psp_product_id',$principle->prd_id)
+		->select('psp_id','psp_subproduct_name')
+		->get();
+		if ($products->count() == 0) {
+			$prd_ar[0] = [
+				'id' => null,
+				'title' => null
+			];
+		}else{
+			foreach ($products as $key => $value) {
+				$prd_ar[$key] = [
+					'id' => $value->psp_id,
+					'title' => $value->psp_subproduct_name
+				];
+			}
+		}
+		$result = [
+			'param'=>true,
+			'prd_id' => $product_opr->por_id,
+			'principle' => $product_opr->por_principle_name,
+			'principle_id' => $id_principle,
+			'product' => $product_opr->psp_subproduct_name,
+			'product_id' => $id_product,
+			'note' => $product_opr->por_note, 
+			'quantity' => $product_opr->por_quantity,
+			'unit' => $product_opr->por_unit_value,
+			'products' => $prd_ar
+		];
+		return $result;
 	}
 }

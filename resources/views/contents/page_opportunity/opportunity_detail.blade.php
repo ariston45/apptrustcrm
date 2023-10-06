@@ -61,10 +61,45 @@ opportunitys
 				@foreach ($opportunity_customer as $list)
 					<div class="page-pretitle-custom">{{ $list }}</div>
 				@endforeach
-			</div>
-			<div class="col-6" style="text-align: right;">
 				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
 				<div class="page-pretitle-custom mb-2">{{ html_entity_decode($institution_names) }}</div>
+			</div>
+			<div class="col-6" style="text-align: right;">
+				<div class="mb-1">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
+					@endif
+					<em class="text-muted lh-base mb-1"><i>Salesperson</i></em>
+					<div class="page-pretitle-custom">
+						{{ $sales_selected->name }}
+					</div>
+				</div>
+				<div class="mb-1">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+					@endif
+					<em class="text-muted lh-base mb-1"><i>Colaborator</i></em>
+					<div class="page-pretitle-custom">
+						@if ($member_name == null || $member_name == "")
+						-
+						@else
+						{{ $member_name }}
+						@endif
+					</div>
+				</div>
+				<div class="mb-1">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
+					@endif
+					<em class="text-muted lh-base mb-1"><i>Technical</i></em>
+					<div class="page-pretitle-custom">
+						@if ($tech_name == null || $tech_name == "")
+						-
+						@else
+						{{ $tech_name }}
+						@endif
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="row mb-3">
@@ -88,37 +123,105 @@ opportunitys
 		{{-- <hr class="mt-1 mb-3"> --}}
 	</div>
 	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<div class="row mb-1">
+		<div class="row mb-2">
 			<div class="col">
-				<div class="mb-1 row">
-					<label class="text-muted col-2 pb-0 pt-0"><b>PRINCIPLE</b></label>
-					<div class="col pb-0 pt-0 text-muted" style="vertical-align: middle">
-						<span id="opportunity-prd-priciple">{{ $principle->prd_name }}</span> 
-					</div>
-				</div>
-				<div class="mb-1 row">
-					<label class="text-muted col-2 pb-0 pt-0"><b>PRODUCT</b></label>
-					<div class="col pb-0 pt-0 text-muted" style="vertical-align: middle">
-						<span id="opportunity-prd-product">
-							@php
-								$prd = implode(", ", $products);
-							@endphp
-							{{ $prd }}
-						</span>
-					</div>
-				</div>
+				<label class="form-label text-muted col-2 pb-0 pt-0">Products And Services :</label>
 			</div>
 			<div class="col-auto">
-				<div class="col-auto">
-					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-					<button class="btn btn-primary btn-pill btn-sm" onclick="actionChangeProduct()" style="width: 130px;"><i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit Product</button>
-					@endif
-				</div>
+				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddProduct()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Product</button>
+				@endif
+			</div>
+		</div>
+		<div class="row mb-0">
+			<div class="col-12">
+				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+				<table id="table-product-detail" class="table table-striped table-responsive">
+					<thead>
+						<tr>
+							<th style="width: 2%"></th>
+							<th style="width: 20%">Principle</th>
+							<th style="width: 35%">Product</th>
+							<th class="text-center" style="width: 5%">Qnt</th>
+							<th class="text-end" style="width: 15%">Unit</th>
+							<th class="text-end" style="width: 15%">Amount</th>
+							<th style="width: 8%"></th>
+						</tr>
+					</thead>
+					<tbody id="tab_products">
+						@php
+							$count_product = count($opr_product);
+							$n_index_product_list = 1 + $count_product;
+						@endphp
+							@foreach ($opr_product as $list)
+							<tr>
+								<td class="text-center">{{ $list['no'] }}</td>
+								<td><span class="strong"><span id="opr_principle_{{ $list['id'] }}">{{ $list['principle'] }}</span></span></td>
+								<td>
+									<div class="strong"><span id="opr_product_{{ $list['id'] }}">{{ $list['product'] }}</span> </div>
+									@if ($list['note'] == ''||$list['note'] == null)
+									<span id="opr_product_note{{ $list['id'] }}" class="text-muted">-</span>
+									@else
+									<span id="opr_product_note{{ $list['id'] }}" class="text-muted">{{ $list['note'] }}</span>
+									@endif
+								</td>
+								<td class="text-center"><span id="opr_quantity{{ $list['id'] }}">{{ $list['quantity'] }}</span></td>
+								<td class="text-end"><span id="opr_unit_{{ $list['id'] }}"></span>{{ rupiahFormat( $list['unit'] ) }}</td>
+								<td class="text-end"><span id="opr_total_{{ $list['id'] }}"></span>{{ rupiahFormat( $list['total'] ) }}</td>
+								<td class="text-center" style="vertical-align: middle;">
+									<button class="badge bg-blue-lt" onclick="actionUpdateProduct({!! $list['id'] !!})"><i class="ri-edit-2-line"></i></button>
+								</td>
+							</tr>
+							@endforeach
+					</tbody>
+					<tbody id="tab_values">
+						<tr>
+							<td colspan="4" class="strong text-end"><i>Subtotal</i></td>
+							<td class="text-end"></td>
+							<td class="text-end"><span id="opr_suptotal"></span>{{ rupiahFormat($opr_value->ovs_value_subtotal) }}</td>
+							<td class="text-center" style="vertical-align: middle;">
+								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" class="strong text-end"><i>Tax Rate</i></td>
+							<td class="text-end"><span id="opr_tax_rate">{{ $opr_value->ovs_rate_tax }}</span>%</td>
+							<td class="text-end">{{ rupiahFormat($opr_value->ovs_value_tax) }}</td>
+							<td class="text-center" style="vertical-align: middle;">
+								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" class="strong text-end"><i>Other Cost</i></td>
+							<td class="text-end"></td>
+							<td rowspan="{{ $tab_row }}" class="text-end" style="vertical-align: middle;"><span id="opr_other_cost"></span>{{ rupiahFormat($opr_value->ovs_value_other_cost) }}</td>
+							<td rowspan="{{ $tab_row }}" class="text-center" style="vertical-align: middle;">
+								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+							</td>
+						</tr>
+						@foreach ($opr_other as $list)
+						<tr>
+							<td colspan="4" class="text-muted text-end"><i><span id="opr_other_note_{{ $list['id'] }}"></span>{{ $list['note'] }}</i></td>
+							<td class="text-end"><span id="opr_other_cost_{{ $list['id'] }}"></span>{{ rupiahFormat($list['coast'])  }}</td>
+						</tr>
+						@endforeach
+						<tr>
+							<td colspan="4" class="strong text-end"><i>Total Due</i></td>
+							<td class="text-end"></td>
+							<td class="text-end"><span id="opr_total">{{ rupiahFormat($opr_value->ovs_value_total) }}</span></td>
+							<td class="text-center" style="vertical-align: middle;">
+								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				@else
+				@endif
 			</div>
 		</div>
 		<div class="row mb-0">
 			<div class="col">
-				<label class="form-label text-muted col-2 pb-0 pt-0">NOTES :</label>
+				<label class="form-label text-muted col-2 pb-0 pt-0">Add Notes :</label>
 			</div>
 			@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 			<div class="col-auto">
@@ -134,164 +237,31 @@ opportunitys
 			</div>
 			@endif
 		</div>
-		<table id="table-product-detail" class="table table-striped table-responsive">
-			<thead>
-				<tr>
-					<th style="width: 2%"></th>
-					<th style="width: 20%">Principle</th>
-					<th style="width: 35%">Product</th>
-					<th class="text-center" style="width: 5%">Qnt</th>
-					<th class="text-end" style="width: 15%">Unit</th>
-					<th class="text-end" style="width: 15%">Amount</th>
-					<th style="width: 8%"></th>
-				</tr>
-			</thead>
-			<tbody>
-				@php
-					$no = 1;
-				@endphp
-				@foreach ($opr_product as $list)
-				<tr>
-					<td class="text-center">{{ $no }}</td>
-					<td><span class="strong">{{ $list->por_principle_name }}</span></td>
-					<td>
-						<div class="strong">{{ $list->por_product_name }}</div>
-						@if ($list->por_note == ''||$list->por_note == null)
-						<span class="text-muted">-</span>
-						@else
-						<span class="text-muted">{{ $list->por_note }}</span>
-						@endif
-					</td>
-					<td class="text-center">{{ $list->por_quantity }}</td>
-					<td class="text-end">{{ rupiahFormat( $list->por_unit_value ) }}</td>
-					<td class="text-end">$1.800,00</td>
-					<td class="text-center" style="vertical-align: middle;">
-						<button class="badge bg-blue-lt">EDIT</button>
-					</td>
-				</tr>
-				@php
-					$no++;
-				@endphp
-				@endforeach
-				<tr>
-					<td colspan="4" class="strong text-end"><i>Subtotal</i></td>
-					<td class="text-end"></td>
-					<td class="text-end">$25.000,00</td>
-					<td class="text-center" style="vertical-align: middle;">
-						<button class="badge bg-blue-lt">EDIT</button>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="4" class="strong text-end"><i>Tax Rate</i></td>
-					<td class="text-end">11%</td>
-					<td class="text-end">$25.000,00</td>
-					<td class="text-center" style="vertical-align: middle;">
-						<button class="badge bg-blue-lt">EDIT</button>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="4" class="strong text-end"><i>Other Cost</i></td>
-					<td class="text-end"></td>
-					<td rowspan="3" class="text-end" style="vertical-align: middle;">$25.000,00</td>
-					<td rowspan="3" class="text-center" style="vertical-align: middle;">
-						<button class="badge bg-blue-lt">EDIT</button>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="4" class="text-muted text-end"><i>Cost 1</i></td>
-					<td class="text-end">$25.000,00</td>
-				</tr>
-				<tr>
-					<td colspan="4" class="text-muted text-end"><i>Cost 2</i></td>
-					<td class="text-end">$25.000,00</td>
-				</tr>
-				<tr>
-					<td colspan="4" class="strong text-end"><i>Total Due</i></td>
-					<td class="text-end"></td>
-					<td class="text-end">$25.000,00</td>
-					<td class="text-center" style="vertical-align: middle;">
-						<button class="badge bg-blue-lt">EDIT</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-	{{-- ======================================================================================================== --}}
-	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<div class="row mb-3">
-			@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-			<div class="col-6">
-				<div class="mb-1 row">
-					<label class="text-muted col-4 col-3 pb-0 pt-0">Value / DPP</label>
-					<div class="col pb-0 pt-0 text-muted">
-						<span id="opportunity-value-dpp">{{ fcurrency($opportunity_value->opr_value_dpp) }}</span> 
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeValDPP()"><i class="ri-edit-2-line"></i></button>
-					</div>
-				</div>
-				<div class="mb-1 row">
-					<label class="text-muted col-4 col-3 pb-0 pt-0">HPP</label>
-					<div class="col pb-0 pt-0 text-muted">
-						<span id="opportunity-value-hpp">{{ fcurrency($opportunity_value->opr_value_hpp) }}</span> 
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeValHPP()"><i class="ri-edit-2-line"></i></button>
-					</div>
-				</div>
-				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Tax Value</label>
+		<div class="row mb-1">
+			<div class="col">
+				{{-- <div class="mb-1 row">
+					<label class="text-muted col-2 pb-0 pt-0"><b>PRINCIPLE</b></label>
 					<div class="col pb-0 pt-0 text-muted" style="vertical-align: middle">
-						<span id="opportunity-value-tax">{{ fcurrency($opportunity_value->opr_tax) }}</span> 
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeTax()"><i class="ri-edit-2-line"></i></button>
+						<span id="opportunity-prd-priciple">{{ $principle->prd_name }}</span> 
 					</div>
 				</div>
 				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Other</label>
+					<label class="text-muted col-2 pb-0 pt-0"><b>PRODUCT</b></label>
 					<div class="col pb-0 pt-0 text-muted" style="vertical-align: middle">
-						<span id="opportunity-value-other">{{ fcurrency($opportunity_value->opr_other) }}</span> 
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeValOther()"><i class="ri-edit-2-line"></i></button>
+						<span id="opportunity-prd-product">
+							@php
+								$prd = implode(", ", $products);
+							@endphp
+							{{ $prd }}
+						</span>
 					</div>
-				</div>
-				<hr class="mt-1 mb-1">
-				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0"><b>REVENUE</b></label>
-					<div class="col pb-0 pt-0 text-muted" style="vertical-align: middle">
-						<span id="opportunity-value-revenue">{{ fcurrency($opportunity_value->opr_revenue) }}</span> 
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeValRevenue()"><i class="ri-edit-2-line"></i></button>
-					</div>
-				</div>
+				</div> --}}
 			</div>
-			@endif
-			<div class="col-6">
-				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Salesperson</label>
-					<div class="col pb-0 pt-0 text-muted">
-						<span id="user-sale">
-							{{ $sales_selected->name }}
-						</span>
-						@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
-						@endif
-					</div>
-				</div>
-				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Colaborator</label>
-					<div class="col pb-0 pt-0 text-muted">
-						<span id="user-team">
-							{{ $member_name }}
-						</span>
-						@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
-						@endif
-					</div>
-				</div>
-				<div class="mb-1 row">
-					<label class="text-muted col-4 pb-0 pt-0">Technical</label>
-					<div class="col pb-0 pt-0 text-muted">
-						<span id="user-team">
-							{{ $tech_name }}
-						</span>
-						@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-cyan ms-0 p-0" style="margin-bottom: 3px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
-						@endif
-					</div>
+			<div class="col-auto">
+				<div class="col-auto">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<button class="btn btn-primary btn-pill btn-sm" onclick="actionChangeProduct()" style="width: 130px;"><i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit Product</button>
+					@endif
 				</div>
 			</div>
 		</div>
@@ -369,7 +339,7 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-change-base-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-change-base-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -387,9 +357,9 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
-<div id="modal-change-oppor-hpp" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-change-oppor-hpp" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -407,9 +377,9 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
-<div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -427,9 +397,9 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
-<div id="modal-change-other-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-change-other-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -447,9 +417,9 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
-<div id="modal-change-revenue-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-change-revenue-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -467,7 +437,7 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
 <div id="modal-change-sale" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
@@ -874,10 +844,11 @@ opportunitys
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent13" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					@csrf
+					<input type="text" id="prd-id" name="prd_id" value="">
 					<div class="mb-2 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Set Product Priciple</label>
 						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple"  value="">
+							<select type="text" id="select-principles-update" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple" >
 								<option value="{{ null }}">Select principle</option>
 								@foreach ($allproduct as $list)
 									<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
@@ -888,8 +859,26 @@ opportunitys
 					<div class="mb-2 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Set Product</label>
 						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-product" class="form-select ts-input-custom" multiple name="product[]" placeholder="Select your type activity" value="">
+							<select type="text" id="select-product-update" class="form-select ts-input-custom" name="product" placeholder="Select your type activity">
 							</select>
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Give Notes</label>
+						<div class="col" style="padding: 0px;">
+							<input type="text" id="prd-product-note-update" name="product_note" class="form-control p-1" placeholder="Product notes.." autocomplete="off" >
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Unit Value</label>
+						<div class="col" style="padding: 0px;">
+							<input type="text" id="prd-unit-value-update" name="unit_value" class="form-control p-1" oninput="fcurrencyInput('prd-unit-value-update')" placeholder="Unit value product">
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Quantity</label>
+						<div class="col" style="padding: 0px;">
+							<input type="number" id="prd-quantity-update" name="quantity" class="form-control p-1" placeholder="Quantity products.." autocomplete="off" >
 						</div>
 					</div>
 				</form>
@@ -897,10 +886,11 @@ opportunitys
 			<div class="modal-footer p-3 pt-0">
 				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
 				<button type="submit" form="formContent13" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>;.. 
+			</div>
 		</div>
 	</div>
 </div>
+{{-- ===================================================================================================== --}}
 <div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
@@ -931,6 +921,59 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
+<div id="modal-add-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
+		<div class="modal-content">
+			<div class="modal-body p-3">
+				<h5 class="modal-title">Add Products Opportunity</h5>
+				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+				<form id="formContent15" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+					@csrf
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Set Product Priciple</label>
+						<div class="col" style="padding: 0px;">
+							<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple" >
+								<option value="{{ null }}">Select principle</option>
+								@foreach ($allproduct as $list)
+									<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
+								@endforeach
+							</select>
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Set Product</label>
+						<div class="col" style="padding: 0px;">
+							<select type="text" id="select-product" class="form-select ts-input-custom" name="product" placeholder="Select your type activity">
+							</select>
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Give Notes</label>
+						<div class="col" style="padding: 0px;">
+							<input type="text" id="prd-product-note" name="product_note" class="form-control p-1" placeholder="Product notes.." autocomplete="off" >
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Unit Value</label>
+						<div class="col" style="padding: 0px;">
+							<input type="text" id="prd-unit-value" name="unit_value" class="form-control p-1" oninput="fcurrencyInput('prd-unit-value')" placeholder="Unit value product">
+						</div>
+					</div>
+					<div class="mb-2 row" style="margin-right: 0px;">
+						<label class="col-3 col-form-label">Quantity</label>
+						<div class="col" style="padding: 0px;">
+							<input type="number" id="prd-quantity" name="quantity" class="form-control p-1" placeholder="Quantity products.." autocomplete="off" >
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer p-3 pt-0">
+				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+				<button type="submit" form="formContent15" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
 @endsection
 @push('style')
 <link rel="stylesheet" href="{{ asset('customs/css/default.css') }}">
@@ -1185,6 +1228,22 @@ var select_principles = new TomSelect("#select-principles",{
 		}
 	}
 });
+var select_principles_update = new TomSelect("#select-principles-update",{
+	persist: false,
+	createOnBlur: true,
+	create: false,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="select-principles-update">'+escape(data.title)+'</div>';
+		}
+	}
+});
 var select_products = new TomSelect("#select-product",{
 	maxItem:15,			
 	valueField: 'id',
@@ -1196,6 +1255,20 @@ var select_products = new TomSelect("#select-product",{
 		},
 		item: function(data, escape) {
 			return '<div id="select-product">'+escape(data.title)+'</div>';
+		}
+	}
+});
+var select_products_update = new TomSelect("#select-product-update",{
+	maxItem:15,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="select-product-update">'+escape(data.title)+'</div>';
 		}
 	}
 });
@@ -1527,9 +1600,6 @@ function actionChangeValRevenue(){
 function actionChangeSales() {  
 	$('#modal-change-sale').modal('toggle');
 };
-function actionChangeProduct(){
-	$('#modal-change-product').modal('toggle');
-}
 function actionAddTeam() {  
 	$('#modal-add-team').modal('toggle');
 };
@@ -1948,6 +2018,56 @@ function actionGetProduct(id) {
 function actionAddTechnical() {  
 	$('#modal-add-technical').modal('toggle');
 };
+function actionAddProduct() {
+	$('#modal-add-product').modal('toggle');
+}
+function actionUpdateProduct(id) {  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('source-product-opportunity') }}",
+		data: {
+			'idOpportunity':'{{ $id_oppor }}',
+			'idProduct':id,
+		},
+		success: function(result) {
+			var product_lists = [];
+			for (let i = 0; i < result.products.length; i++) {
+				product_lists.push({id:result.products[i].id,title:result.products[i].title});
+			}
+			select_products_update.addOptions(product_lists);
+			select_products_update.setValue(result.product_id);
+			
+			select_principles_update.setValue(result.principle_id);
+			$('#prd-product-note-update').val(result.note);
+			var prd_val_unit = formatRupiah(result.unit.toString(),'Rp');
+			$('#prd-id').val(result.prd_id);
+			$('#prd-unit-value-update').val(prd_val_unit);
+			$('#prd-quantity-update').val(result.quantity);
+			
+			console.log(prd_val_unit);
+			
+		}	
+	});
+	$('#modal-change-product').modal('toggle');
+};
+function actionNewProduct(data) {
+	var tab_product_list = $('#tab_products');
+	var dataBarisBaru =
+	'<tr><td class="text-center">{{ $n_index_product_list }}</td>'
+	+'<td><span class="strong"></span></td>'
+	+'<td><div class="strong"></div><span class="text-muted">-</span></td>'
+	+'<td class="text-center"></td>'
+	+'<td class="text-end"></td>'
+	+'<td class="text-end"></td>'
+	+'<td class="text-center" style="vertical-align: middle;">'
+	+'<button class="badge bg-blue-lt" onclick="actionUpdateProduct(1)">EDIT</button></td></tr>';
+	tab_product_list.append(data.new_row);
+}
 </script>
 {{-- ============================================================================================ --}}
 <script>
@@ -2361,6 +2481,49 @@ $(document).ready(function() {
 			processData: false,
 			success: function(result) {
 				$('#user-tech').html(result.user_tech);
+			}
+		});
+	});
+	$('#formContent15').submit(function(e) {
+		e.preventDefault();
+		var formData15 = new FormData(this);
+		formData15.append("lead_id", "{{ $id_lead }}");
+		formData15.append("oppor_id", "{{ $id_oppor }}");
+		formData15.append("alt_principle",$("#select-principles option:selected").text());
+		formData15.append("alt_product",$("#select-product option:selected").text());
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: "{{ route('store-product-opportunity') }}",
+			data: formData15,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function(result) {
+				if (result.param == true) {
+					actionNewProduct(result);
+					$.alert({
+						type: 'green',
+						title: 'Success',
+						content: 'Data already updated.',
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
+				}else{
+					$.alert({
+						type: 'red',
+						title: 'Something error!',
+						content: result.message,
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
+				}
 			}
 		});
 	});

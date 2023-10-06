@@ -154,10 +154,12 @@ Route::group(['middleware' => ['auth']], function () {
 		// 
 		Route::match(['post','get'],'source-opportunities', [DataController::class, 'sourceDataOpportunities'])->name('source-opportunities');
 		Route::post('source-opportunities-cst', [DataController::class, 'sourceDataOpportunitiesCst'])->name('source-opportunities-cst');
+		Route::match(['post','get'],'store-product-opportunity', [OpportunityController::class, 'storeProductOpportunity'])->name('store-product-opportunity');
 		Route::post('update-product-opportunity', [OpportunityController::class, 'updateProductOpportunity'])->name('update-product-opportunity');
 		Route::post('product-principle', [OpportunityController::class, 'listProductPrinciple'])->name('product-principle');
 		Route::post('update-status-opportunity', [OpportunityController::class, 'storeUpdateStatusOpr'])->name('update-status-opportunity');
 		Route::match(['get', 'post'],'customer-project',[OpportunityController::class,'sourceCustomerProject'])->name('customer-project');
+		Route::match(['get', 'post'],'source-product-opportunity',[OpportunityController::class,'sourceProductOppor'])->name('source-product-opportunity');
 	});
 	# Purchasing
 	Route::prefix('purchased')->group(function(){

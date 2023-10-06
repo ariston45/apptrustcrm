@@ -6,6 +6,7 @@ use App\Models\Cst_company;
 use App\Models\Cst_customer;
 use App\Models\Cst_institution;
 use App\Models\Cst_location;
+use App\Models\Opr_value_product;
 use App\Models\Prs_lead;
 use App\Models\Opr_opportunity;
 use App\Models\User;
@@ -112,6 +113,12 @@ function fcurrency($value)
 function genIdOpportunity()
 {
   $data = Opr_opportunity::max('opr_id');
+  $new_id = $data + 1;
+  return $new_id;
+}
+function genIdProductList()
+{
+  $data = Opr_value_product::max('por_id');
   $new_id = $data + 1;
   return $new_id;
 }
