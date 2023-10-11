@@ -166,8 +166,8 @@ opportunitys
 									@endif
 								</td>
 								<td class="text-center"><span id="opr_quantity{{ $list['id'] }}">{{ $list['quantity'] }}</span></td>
-								<td class="text-end"><span id="opr_unit_{{ $list['id'] }}"></span>{{ rupiahFormat( $list['unit'] ) }}</td>
-								<td class="text-end"><span id="opr_total_{{ $list['id'] }}"></span>{{ rupiahFormat( $list['total'] ) }}</td>
+								<td class="text-end"><span id="opr_unit_{{ $list['id'] }}">{{ rupiahFormat( $list['unit'] ) }}</span></td>
+								<td class="text-end"><span id="opr_total_{{ $list['id'] }}">{{ rupiahFormat( $list['total'] ) }}</span></td>
 								<td class="text-center" style="vertical-align: middle;">
 									<button class="badge bg-blue-lt" onclick="actionUpdateProduct({!! $list['id'] !!})"><i class="ri-edit-2-line"></i></button>
 								</td>
@@ -178,17 +178,17 @@ opportunitys
 						<tr>
 							<td colspan="4" class="strong text-end"><i>Subtotal</i></td>
 							<td class="text-end"></td>
-							<td class="text-end"><span id="opr_suptotal"></span>{{ rupiahFormat($opr_value->ovs_value_subtotal) }}</td>
+							<td class="text-end"><span id="opr_suptotal">{{ rupiahFormat($opr_value->ovs_value_subtotal) }}</span></td>
 							<td class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+								<button class="badge bg-blue-lt" onclick="actionChangeSubvalue()"><i class="ri-edit-2-line"></i></button>
 							</td>
 						</tr>
 						<tr>
 							<td colspan="4" class="strong text-end"><i>Tax Rate</i></td>
 							<td class="text-end"><span id="opr_tax_rate">{{ $opr_value->ovs_rate_tax }}</span>%</td>
-							<td class="text-end">{{ rupiahFormat($opr_value->ovs_value_tax) }}</td>
+							<td class="text-end"><span id="opr_tax_value">{{ rupiahFormat($opr_value->ovs_value_tax) }}</span></td>
 							<td class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+								<button class="badge bg-blue-lt" onclick="actionChangeTax()"><i class="ri-edit-2-line"></i></button>
 							</td>
 						</tr>
 						<tr>
@@ -196,7 +196,7 @@ opportunitys
 							<td class="text-end"></td>
 							<td rowspan="{{ $tab_row }}" class="text-end" style="vertical-align: middle;"><span id="opr_other_cost"></span>{{ rupiahFormat($opr_value->ovs_value_other_cost) }}</td>
 							<td rowspan="{{ $tab_row }}" class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt"><i class="ri-edit-2-line"></i></button>
+								<button class="badge bg-blue-lt" onclick="actionChangeValOther()"><i class="ri-edit-2-line"></i></button>
 							</td>
 						</tr>
 						@foreach ($opr_other as $list)
@@ -339,11 +339,11 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-{{-- <div id="modal-change-base-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="modal-change-subvalue" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Value / DPP</h5>
+				<h5 class="modal-title">Change Subvalue</h5>
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					@csrf
@@ -357,7 +357,7 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div> --}}
+</div>
 {{-- ===================================================================================================== --}}
 {{-- <div id="modal-change-oppor-hpp" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
@@ -379,7 +379,7 @@ opportunitys
 	</div>
 </div> --}}
 {{-- ===================================================================================================== --}}
-{{-- <div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -387,8 +387,24 @@ opportunitys
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent3" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					@csrf
-					<input type="text" id="input-opportunity-tax" class="form-control pb-1 pt-1" name="tax_value" placeholder="Input placeholder" 
-					oninput="fcurrencyInput('input-opportunity-tax')" value="{{ fcurrency($opportunity_value->opr_tax) }}">
+					<div class="row mb-2">
+						<label class="col-3 col-form-label" >Tax Rate</label>
+						<div class="col">
+							<div class="input-icon">
+								<input type="number" id="input-opportunity-tax-rate" class="form-control pb-1 pt-1" name="tax_rate" oninput="actionTriggerTaxVal()">
+                  <span class="input-icon-addon">
+										<i class="ri-percent-line"></i>
+                  </span>
+                </div>
+						</div>
+					</div>
+					<div class="row">
+						<label class="col-3 col-form-label" >Tax Value</label>
+						<div class="col">
+							<input type="text" id="input-opportunity-tax" class="form-control pb-1 pt-1" name="tax_value" placeholder="Input placeholder" 
+							oninput="fcurrencyInput('input-opportunity-tax')" value="{{ fcurrency($opportunity_value->opr_tax) }}">
+						</div>
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer p-3 pt-0">
@@ -397,27 +413,56 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div> --}}
+</div>
 {{-- ===================================================================================================== --}}
-{{-- <div id="modal-change-other-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
+<div id="modal-change-other-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
 				<h5 class="modal-title">Change Other Value</h5>
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent4" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					@csrf
-					<input type="text" id="input-opportunity-other" class="form-control pb-1 pt-1" name="other_value" placeholder="Input placeholder" 
-					oninput="fcurrencyInput('input-opportunity-other')" value="{{ fcurrency($opportunity_value->opr_other) }}">
+					<table id="table-form-other-cost" class="table table-vcenter card-table table-custom-1">
+						<thead>
+							<tr>
+								<th style="width: 65%;">Other Cost</th>
+								<th style="width: 30%;">Amount</th>
+								<th style="width: 5%;"></th>
+							</tr>
+						</thead>
+						<tbody id="table-body-form-other-value">
+							{{-- <tr>
+								<td >
+									<input type="text" name="other_id[][]">
+									<input type="text" class="form-control pb-1 pt-1 col-auto" name="other_note[]">
+								</td>
+								<td>
+									<input type="text" id="input-opportunity-other" class="form-control pb-1 pt-1" name="other_value[]" placeholder="Input placeholder" 
+									oninput="fcurrencyInput('input-opportunity-other')" value="{{ fcurrency($opportunity_value->opr_other) }}" style="margin-right: 4px;">
+								</td>
+								<td style="text-align: center;">
+									<button type="button" class="btn btn-sm btn-ghost-danger" onclick="actionDelRowForm4(this)"><i class="ri-delete-bin-line"></i></button>
+								</td>
+							</tr> --}}
+						</tbody>
+					</table>
 				</form>
 			</div>
 			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent4" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				<div class="col m-0">
+					<button type="button" class="btn btn-sm" onclick="actionChangeValOtherData()" title="Reload other value data." data-bs-toggle="tooltip" data-bs-placement="top">
+						<i class="ri-refresh-line"></i>
+					</button>
+					<button type="button" class="btn btn-sm" onclick="actionAddRowForm4()" title="Add new row field input other value." data-bs-toggle="tooltip" data-bs-placement="top"><i class="ri-add-line" style="margin-right: 2px;"></i> New Row</button>
+				</div>
+				<div class="col-auto m-0">
+					<button type="submit" form="formContent4" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div> --}}
+</div>
 {{-- ===================================================================================================== --}}
 {{-- <div id="modal-change-revenue-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
@@ -494,7 +539,7 @@ opportunitys
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent8" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					<div class="row mb-2">
-						<label class="col-3 col-form-label required" for="">
+						<label class="col-3 col-form-label required" >
 							Name
 						</label>
 						<div class="col">
@@ -508,7 +553,7 @@ opportunitys
 					</div>
 					<span id="additional-form-contact" style="display: none;">
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Customer</label>
+							<label class="col-3 col-form-label" >Customer</label>
 							<div class="col">
 								<select type="text" class="form-select select-sales" name="customer" id="select-customer" value="">
 									<option value="{{ null }}"></option>
@@ -519,7 +564,7 @@ opportunitys
 							</div>
 						</div>
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Contact</label>
+							<label class="col-3 col-form-label" >Contact</label>
 							<div class="col">
 								<select type="text" class="form-select select-sales" name="type" id="select-type" value="">
 									<option value="{{ null }}"></option>
@@ -530,13 +575,13 @@ opportunitys
 							</div>
 						</div>
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Number/Email</label>
+							<label class="col-3 col-form-label" >Number/Email</label>
 							<div class="col">
 								<input type="text" class="form-control" name="textcontact" value="{{ null }}">
 							</div>
 						</div>
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Position</label>
+							<label class="col-3 col-form-label" >Position</label>
 							<div class="col">
 								<input type="text" class="form-control" name="position" value="{{ null }}">
 							</div>
@@ -848,7 +893,7 @@ opportunitys
 					<div class="mb-2 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Set Product Priciple</label>
 						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-principles-update" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple" >
+							<select type="text" id="select-principles-update" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple">
 								<option value="{{ null }}">Select principle</option>
 								@foreach ($allproduct as $list)
 									<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
@@ -1061,6 +1106,21 @@ opportunitys
 	#table-product-detail td{
 		padding: 2px;
 	}
+	#table-form-other-cost{
+		border-style: hidden;
+	}
+	#table-form-other-cost thead tr th{
+		padding-left: 4px;
+		border-style: none;
+	}
+	#table-form-other-cost tbody tr td{
+		padding-top: 4px;
+		padding-bottom: 4px;
+		padding-left: 0px;
+		padding-right: 2px;
+		border-style: none;
+	}
+	
 </style>
 @endpush
 @push('script')
@@ -1215,7 +1275,7 @@ var select_act_status = new TomSelect("#select-act-status",{
 var select_principles = new TomSelect("#select-principles",{
 	persist: false,
 	createOnBlur: true,
-	create: false,			
+	create: true,			
 	valueField: 'id',
 	labelField: 'title',
 	searchField: 'title',
@@ -1231,7 +1291,7 @@ var select_principles = new TomSelect("#select-principles",{
 var select_principles_update = new TomSelect("#select-principles-update",{
 	persist: false,
 	createOnBlur: true,
-	create: false,			
+	create: true,			
 	valueField: 'id',
 	labelField: 'title',
 	searchField: 'title',
@@ -1245,7 +1305,8 @@ var select_principles_update = new TomSelect("#select-principles-update",{
 	}
 });
 var select_products = new TomSelect("#select-product",{
-	maxItem:15,			
+	maxItem:15,
+	create: true,			
 	valueField: 'id',
 	labelField: 'title',
 	searchField: 'title',
@@ -1259,7 +1320,8 @@ var select_products = new TomSelect("#select-product",{
 	}
 });
 var select_products_update = new TomSelect("#select-product-update",{
-	maxItem:15,			
+	maxItem:15,
+	create: true,			
 	valueField: 'id',
 	labelField: 'title',
 	searchField: 'title',
@@ -1293,6 +1355,10 @@ var user_tech = new TomSelect("#select-user-tech",{
 select_principles.on('change',function () {
 	var prd_id = select_principles.getValue();
 	actionGetProduct(prd_id);
+});
+select_principles_update.on('change',function () {
+	var prd_id = select_principles_update.getValue();
+	actionGetProductUpdate(prd_id);
 });
 /*
 const picker_a = new easepick.create({
@@ -1582,16 +1648,68 @@ function actionStoreOpporNotes() {
 			}
 	});
 };
-function actionChangeValDPP() {  
-	$('#modal-change-base-value').modal('toggle');
+function actionChangeSubvalue() {
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('source-product-value') }}",
+		data: {
+			'idOpportunity':'{{ $id_oppor }}',
+		},
+		success: function(result) {
+			var subtotal_val = actionInstantIDR(result.value);
+			$("#input-base-value").val(subtotal_val);
+		}	
+	}); 
+	$('#modal-change-subvalue').modal('toggle');
 };
 function actionChangeValHPP() {  
 	$('#modal-change-oppor-hpp').modal('toggle');
 };
-function actionChangeTax() {  
+function actionChangeTax() {
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('source-tax-value') }}",
+		data: {
+			'idOpportunity':'{{ $id_oppor }}',
+		},
+		success: function(result) {
+			var tax_val = actionInstantIDR(result.tax_value);
+			$("#input-opportunity-tax").val(tax_val);
+			$("#input-opportunity-tax-rate").val(result.tax_rate);
+		}	
+	});   
 	$('#modal-change-tax').modal('toggle');
 };
+function actionChangeValOtherData() {
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		async: false,
+		url: "{{ route('source-other-value-data') }}",
+		data: {
+			'idOpportunity':'{{ $id_oppor }}',
+		},
+		success: function(result) {
+			$('#table-body-form-other-value').html(result.data);
+		}	
+	});
+};
 function actionChangeValOther() {
+	actionChangeValOtherData();
 	$('#modal-change-other-value').modal('toggle');
 }
 function actionChangeValRevenue(){
@@ -1603,23 +1721,29 @@ function actionChangeSales() {
 function actionAddTeam() {  
 	$('#modal-add-team').modal('toggle');
 };
-function fcurrencyInput(x) {
-	var input_field = document.getElementById(x);
-	input_field.value = formatRupiah(input_field.value, "Rp");
+function actionInstantIDR(number){
+	return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+		minimumFractionDigits: 3
+  }).format(number);
 }
-function formatRupiah(angka, prefix) {
-	var number_string = angka.replace(/[^,\d]/g, "").toString(),
-		split = number_string.split(","),
-		sisa = split[0].length % 3,
-		rupiah = split[0].substr(0, sisa),
-		ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-	// tambahkan titik jika yang di input sudah menjadi angka ribuan
-	if (ribuan) {
-		separator = sisa ? "." : "";
-		rupiah += separator + ribuan.join(".");
-	}
-	rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
-	return prefix == undefined ? rupiah : rupiah ? "Rp " + rupiah : "";
+function fcurrencyInput(elem) {
+	var inputElement = document.getElementById(elem);
+	inputElement.value = formatRupiah(inputElement.value, 'Rp ');
+}
+function formatRupiah(number, prefix) {
+	var number_string = number.replace(/[^,\d]/g, '').toString(),
+	split = number_string.split(','),
+	sisa = split[0].length % 3,
+	rupiah = split[0].substr(0, sisa),
+	ribuan = split[0].substr(sisa).match(/\d{3}/gi);  
+  if (ribuan) {
+		separator = sisa ? '.' : '';
+		rupiah += separator + ribuan.join('.');
+  }
+	rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+	return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
 };
 function handleChangeParam(parameter) {
 	if (parameter.checked == true) {
@@ -2015,12 +2139,39 @@ function actionGetProduct(id) {
 	select_products.clearOptions();
 	select_products.addOptions(dataOption_2);
 };
+function actionGetProductUpdate(id) {  
+	var dataOption_3 = [];  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('product-principle') }}",
+		async: false,
+		data: {
+			"id": id
+		},
+		success: function(result) {
+			for (let n = 0; n < result.product.length; n++) {
+				dataOption_3.push({
+					id:result.product[n].id,
+					title:result.product[n].title
+				});
+			}
+		}
+	});
+	// select_products_update.clear();
+	// select_products_update.clearOptions();
+	select_products_update.addOptions(dataOption_3);
+};
 function actionAddTechnical() {  
 	$('#modal-add-technical').modal('toggle');
 };
 function actionAddProduct() {
 	$('#modal-add-product').modal('toggle');
-}
+};
 function actionUpdateProduct(id) {  
 	$.ajaxSetup({
 		headers: {
@@ -2039,35 +2190,74 @@ function actionUpdateProduct(id) {
 			for (let i = 0; i < result.products.length; i++) {
 				product_lists.push({id:result.products[i].id,title:result.products[i].title});
 			}
+			select_products_update.addOptions([{id:result.product_id,title:result.product}]);
 			select_products_update.addOptions(product_lists);
 			select_products_update.setValue(result.product_id);
-			
+			var principle_list = [];
+			select_principles_update.addOptions([{id:result.principle_id,title:result.principle}]);
 			select_principles_update.setValue(result.principle_id);
 			$('#prd-product-note-update').val(result.note);
 			var prd_val_unit = formatRupiah(result.unit.toString(),'Rp');
 			$('#prd-id').val(result.prd_id);
 			$('#prd-unit-value-update').val(prd_val_unit);
 			$('#prd-quantity-update').val(result.quantity);
-			
-			console.log(prd_val_unit);
-			
 		}	
 	});
 	$('#modal-change-product').modal('toggle');
 };
-function actionNewProduct(data) {
+function triggerNewProduct(data) {
 	var tab_product_list = $('#tab_products');
-	var dataBarisBaru =
-	'<tr><td class="text-center">{{ $n_index_product_list }}</td>'
-	+'<td><span class="strong"></span></td>'
-	+'<td><div class="strong"></div><span class="text-muted">-</span></td>'
-	+'<td class="text-center"></td>'
-	+'<td class="text-end"></td>'
-	+'<td class="text-end"></td>'
-	+'<td class="text-center" style="vertical-align: middle;">'
-	+'<button class="badge bg-blue-lt" onclick="actionUpdateProduct(1)">EDIT</button></td></tr>';
 	tab_product_list.append(data.new_row);
-}
+	$('#opr_suptotal').html(data.val_subtotal);
+	$('#opr_tax_value').html(data.val_tax);
+	$('#opr_total').html(data.val_total);
+};
+function triggerUpdateProduct(data) {
+	$('#opr_principle_'+data.init_prd).html(data.init_prd_priciple);
+	$('#opr_product_'+data.init_prd).html(data.init_prd_product);
+	$('#opr_product_note'+data.init_prd).html(data.init_prd_note);
+	$('#opr_quantity'+data.init_prd).html(data.init_prd_quantity);
+	$('#opr_unit_'+data.init_prd).html(data.init_prd_unit);
+	$('#opr_total_'+data.init_prd).html(data.init_prd_total);
+	$('#opr_suptotal').html(data.val_subtotal);
+	$('#opr_tax_value').html(data.val_tax);
+	$('#opr_total').html(data.val_total);
+};
+function actionTriggerTaxVal() {
+	var tax_value_realtime = null;
+	var tax_rate = $('#input-opportunity-tax-rate').val();
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		async: false,
+		url: "{{ route('source-trigger-tax-value') }}",
+		data: {
+			'idOpportunity':'{{ $id_oppor }}',
+			'tax_rate' : tax_rate
+		},
+		success: function(result) {
+			tax_value_realtime = actionInstantIDR(result.value);
+			$('#input-opportunity-tax').val(tax_value_realtime);
+		}	
+	});
+};
+function actionAddRowForm4() {  
+	$('#table-body-form-other-value').append(
+		'<tr><td><input type="text" class="form-control pb-1 pt-1"></td>'
+		+'<td><input type="text" id="input-opportunity-other" class="form-control pb-1 pt-1" name="other_value" placeholder="Input placeholder"'
+		+'oninput="fcurrencyInput()" value="{{ fcurrency($opportunity_value->opr_other) }}" style="margin-right: 4px;"></td>'
+		+'<td style="text-align: center;"><button type="button" class="btn btn-sm btn-ghost-danger" onclick="actionDelRowForm4(this)"><i class="ri-delete-bin-line"></i></button></td></tr>'
+	);
+};
+function actionDelRowForm4(button) {  
+	var rowTabForm4 = button.parentNode.parentNode;
+	var tabForm4 = document.getElementById("table-form-other-cost");
+	tabForm4.deleteRow(rowTabForm4.rowIndex);
+};
 </script>
 {{-- ============================================================================================ --}}
 <script>
@@ -2085,13 +2275,15 @@ $(document).ready(function() {
 		});
 		$.ajax({
 			type: "POST",
-			url: "{{ route('store-value-opportunity') }}",
+			url: "{{ route('store-subvalue-opportunity') }}",
 			data: formData1,
 			cache: false,
 			contentType: false,
 			processData: false,
 			success: function(result) {
-				$('#opportunity-value-dpp').html(result.currency);
+				$('#opr_suptotal').html(result.val_subtotal);
+				$('#opr_tax_value').html(result.val_tax);
+				$('#opr_total').html(result.val_total);
 			}
 		});
 	});
@@ -2135,7 +2327,9 @@ $(document).ready(function() {
 			contentType: false,
 			processData: false,
 			success: function(result) {
-				$('#opportunity-value-tax').html(result.currency);
+				$('#opr_tax_rate').html(result.val_rate);
+				$('#opr_tax_value').html(result.val_tax);
+				$('#opr_total').html(result.val_total);
 			}
 		});
 	});
@@ -2426,6 +2620,8 @@ $(document).ready(function() {
 		var formData13 = new FormData(this);
 		formData13.append("lead_id", "{{ $id_lead }}");
 		formData13.append("oppor_id", "{{ $id_oppor }}");
+		formData13.append("alt_principle",$("#select-principles-update option:selected").text());
+		formData13.append("alt_product",$("#select-product-update option:selected").text());
 		$.ajaxSetup({
 			headers: {
 				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -2440,8 +2636,7 @@ $(document).ready(function() {
 			processData: false,
 			success: function(result) {
 				if (result.param == true) {
-					$('#opportunity-prd-priciple').html(result.principle);
-					$('#opportunity-prd-product').html(result.product);
+					triggerUpdateProduct(result);
 					$.alert({
 						type: 'green',
 						title: 'Success',
@@ -2505,7 +2700,7 @@ $(document).ready(function() {
 			processData: false,
 			success: function(result) {
 				if (result.param == true) {
-					actionNewProduct(result);
+					triggerNewProduct(result);
 					$.alert({
 						type: 'green',
 						title: 'Success',

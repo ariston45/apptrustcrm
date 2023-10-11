@@ -353,9 +353,8 @@ class OpportunityController extends Controller
 	/* Tags:... */
 	public function updateProductOpportunity(Request $request)
 	{
+		$por_id = $request->prd_id;
 		$val_unit = Str::remove('.',Str::substr($request->unit_value,3));
-		// $por_id = genIdProductList();
-		#
 		$unit_value = Str::replace(',', '.', $val_unit);
 		$val_total = $unit_value * $request->quantity;
 		$value_total =  Str::replace(',', '.', $val_total);
@@ -368,7 +367,7 @@ class OpportunityController extends Controller
 			"por_unit_value" => $unit_value,
 			"por_total_value" => $value_total
 		];
-		$actionStoreProduct = Opr_value_product::where('por_id',$request->prd_id)->update($data_product);
+		$actionStoreProduct = Opr_value_product::where('por_id',$por_id)->update($data_product);
 		# updating hpp
 		$valPrdRevenue = Opr_value_product::where('por_opr_id',$request->oppor_id)->sum('por_total_value');
 		$actionUpdateSubtototal = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_subtotal' => $valPrdRevenue ]);
@@ -381,9 +380,22 @@ class OpportunityController extends Controller
 		$valPrdRevenueTotal = $valOpportunity_2->ovs_value_subtotal + $valOpportunity_2->ovs_value_other_cost + $valOpportunity_2->ovs_value_tax ;
 		$actionUpdateTotal = Opr_value::where('ovs_opr_id',$request->oppor_id)->update(['ovs_value_total' => $valPrdRevenueTotal ]);
 		$rowNumber = Opr_value_product::where('por_opr_id',$request->oppor_id)->count();
+
+		if ($data_product['por_note'] == null) {
+			$notes = "-";
+		}else{
+			$notes = $data_product['por_note'];
+		}
 		
 		$result = [
 			'param' => true,
+			'init_prd' => $por_id,
+			'init_prd_priciple' => $data_product['por_principle_name'],
+			'init_prd_product' => $data_product['por_product_name'],
+			'init_prd_note' => $notes,
+			'init_prd_quantity' => $data_product['por_quantity'],
+			'init_prd_unit' => rupiahFormat($data_product['por_unit_value']),
+			'init_prd_total' => rupiahFormat($data_product['por_total_value']),
 			'val_product' => rupiahFormat($value_total),
 			'val_subtotal' => rupiahFormat($valOpportunity_1->ovs_value_subtotal),
 			'val_tax' => rupiahFormat($getPrdTax),
@@ -431,25 +443,17 @@ class OpportunityController extends Controller
 	public function storeOprValue(Request $request)
 	{
 		$user = Auth::user();
-		$value =  Str::remove('.',Str::substr($request->opportunity_value,3));
-		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
-		if ($checkBaseValue == null) {
-			$data = [
-				"ovs_opr_id" => $request->id,
-				"opr_value_dpp" => $x,
-				"opr_value_hpp" => null,
-				"opr_tax" => null,
-				"opr_other" => null,
-				"opr_revenue" =>null
-			];
-			$actionStore = Opr_value::insert($data);
-		}else{
-			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_value_dpp' => $x]);
-		}
+		$value = asNumber($request->opportunity_value);
+		$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['ovs_value_subtotal'=>$value]);
+		$dataOprValue = Opr_value::where('ovs_opr_id',$request->id)->first();
+		$dataTax = $dataOprValue->ovs_value_subtotal * $dataOprValue->ovs_rate_tax / 100 ;
+		$dataTotal = $dataOprValue->ovs_value_subtotal + $dataOprValue->ovs_value_other_cost + $dataTax;
+		$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['ovs_value_tax'=>$dataTax,'ovs_value_total'=>$dataTotal]);
 		$result = [
 			'param' => true,
-			'currency' => fcurrency($x)
+			'val_subtotal' => rupiahFormat($value),
+			'val_tax' => rupiahFormat($dataTax),
+			'val_total' => rupiahFormat($dataTotal)
 		];
 		return $result;
 	}
@@ -483,25 +487,23 @@ class OpportunityController extends Controller
 	public function storeOprValueTax(Request $request)
 	{
 		$user = Auth::user();
-		$value =  Str::remove('.',Str::substr($request->tax_value,3));
-		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
-		if ($checkBaseValue == null) {
-			$data = [
-				"ovs_opr_id" => $request->id,
-				"opr_value_dpp" => null,
-				"opr_value_hpp" => null,
-				"opr_tax" => $x,
-				"opr_other" => null,
-				"opr_revenue" =>null
-			];
-			$actionStore = Opr_value::insert($data);
+		$tax_value = asNumber($request->tax_value);
+		$tax_rate = $request->tax_rate;
+		$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['ovs_rate_tax'=>$tax_rate]);
+		$dataOprValue = Opr_value::where('ovs_opr_id',$request->id)->first();
+		$dataTax = ($dataOprValue->ovs_value_subtotal * $dataOprValue->ovs_rate_tax) / 100 ;
+		if ($dataTax != $tax_value) {
+			$tax_result = $tax_value;
 		}else{
-			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_tax' => $x]);
+			$tax_result = $dataTax;
 		}
+		$dataTotal = $dataOprValue->ovs_value_subtotal + $dataOprValue->ovs_value_other_cost + $tax_result;
+		$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['ovs_value_tax'=>$tax_result,'ovs_value_total'=>$dataTotal]);
 		$result = [
 			'param' => true,
-			'currency' => fcurrency($x)
+			'val_rate' => $tax_rate,
+			'val_tax' => rupiahFormat($dataTax),
+			'val_total' => rupiahFormat($dataTotal)
 		];
 		return $result;
 	}
@@ -585,25 +587,32 @@ class OpportunityController extends Controller
 	{
 		$product_opr = Opr_value_product::where('por_id',$request->idProduct)->first();
 		$principle = Prd_principle::where('prd_name',$product_opr->por_principle_name)
-		->select('prd_id')
+		->select('prd_id','prd_name')
 		->first();
 		
 		if ($principle == null) {
-			$id_principle = null;
+			$id_principle = $product_opr->por_principle_name;
+			$name_principle = $product_opr->por_principle_name;
+			$products = Prd_product::select('psp_id','psp_subproduct_name')->get();
 		} else {
 			$id_principle = $principle->prd_id;
+			$name_principle = $principle->prd_name;
+			$products = Prd_product::where('psp_product_id',$principle->prd_id)
+			->select('psp_id','psp_subproduct_name')
+			->get();
 		}
 		$product = Prd_product::where('psp_subproduct_name',$product_opr->por_product_name)
-		->select('psp_id')
+		->select('psp_id','psp_subproduct_name')
 		->first();
 		if ($product == null) {
-			$id_product = null;
+			$id_product = $product_opr->por_product_name;
+			$name_product = $product_opr->por_product_name;
 		} else {
 			$id_product = $product->psp_id;
+			$name_product = $product->psp_subproduct_name;
 		}
-		$products = Prd_product::where('psp_product_id',$principle->prd_id)
-		->select('psp_id','psp_subproduct_name')
-		->get();
+
+		
 		if ($products->count() == 0) {
 			$prd_ar[0] = [
 				'id' => null,
@@ -620,14 +629,72 @@ class OpportunityController extends Controller
 		$result = [
 			'param'=>true,
 			'prd_id' => $product_opr->por_id,
-			'principle' => $product_opr->por_principle_name,
+			'principle' => $name_principle,
 			'principle_id' => $id_principle,
-			'product' => $product_opr->psp_subproduct_name,
+			'product' => $name_product,
 			'product_id' => $id_product,
 			'note' => $product_opr->por_note, 
 			'quantity' => $product_opr->por_quantity,
 			'unit' => $product_opr->por_unit_value,
 			'products' => $prd_ar
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function sourceProductValue(Request $request)
+	{
+		// $valPrdRevenue = Opr_value_product::where('por_opr_id',$request->idOpportunity)->sum('por_total_value');
+		$valPrdRevenue = Opr_value::where('ovs_opr_id',$request->idOpportunity)->first();
+		$result = [
+			'param'=>true,
+			'value' => $valPrdRevenue->ovs_value_subtotal
+		];
+		return $result;
+	}
+	public function sourceTaxValue(Request $request)
+	{
+		// $valPrdRevenue = Opr_value_product::where('por_opr_id',$request->idOpportunity)->sum('por_total_value');
+		$valPrdRevenue = Opr_value::where('ovs_opr_id',$request->idOpportunity)->first();
+		$result = [
+			'param'=>true,
+			'tax_rate' => $valPrdRevenue->ovs_rate_tax,
+			'tax_value' => $valPrdRevenue->ovs_value_tax
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function sourceTriggerTaxValue(Request $request)
+	{
+		$valOpr = Opr_value::where('ovs_opr_id',$request->idOpportunity)->first();
+		$value = ($valOpr->ovs_value_subtotal*$request->tax_rate)/100;
+		$result = [
+			'param'=>true,
+			'value' => $value
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function sourceOtherValueData(Request $request)
+	{
+		$oprOtherValue = Opr_value_other::where('ots_opr_id',$request->idOpportunity)->get();
+		$data = '';
+		if ($oprOtherValue->count() > 0) {
+			foreach ($oprOtherValue as $key => $value) {
+				$data.='<tr>
+				<td><input type="hidden" name="other_id['.$value->ots_id.'][]" value="'.$value->ots_id.'"><input type="text" class="form-control pb-1 pt-1 col-auto" name="other_note['.$value->ots_id.'][]" value="'.$value->ots_name.'"></td>
+				<td><input type="text" id="input-opportunity-other-'.$value->ots_id.'" class="form-control pb-1 pt-1" name="other_value['.$value->ots_id.'][]" placeholder="Input placeholder" 
+					oninput="fcurrencyInput(\'input-opportunity-other-'.$value->ots_id.'\')" value="'.rupiahFormat($value->ots_value).'" style="margin-right: 4px;">
+				</td>
+				<td style="text-align: center;">
+					<button type="button" class="btn btn-sm btn-ghost-danger" onclick="actionDelRowForm4(this)"><i class="ri-delete-bin-line"></i></button>
+				</td></tr>';
+			}
+		}else{
+
+		}
+		$result = [
+			'param'=>true,
+			'data' => $data
 		];
 		return $result;
 	}

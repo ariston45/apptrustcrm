@@ -9,6 +9,7 @@ use App\Models\Cst_location;
 use App\Models\Opr_value_product;
 use App\Models\Prs_lead;
 use App\Models\Opr_opportunity;
+use App\Models\Opr_value_other;
 use App\Models\User;
 use App\Models\User_structure;
 use Illuminate\Support\Facades\Blade;
@@ -84,8 +85,8 @@ function genIdLead()
 
 function rupiahFormat($value)
 {
-  $informat = number_format($value, 2, ",", ".");
-  $outformat = "Rp".$informat;
+  $informat = number_format($value, 3, ",", ".");
+  $outformat = "Rp ".$informat;
   return $outformat;
 }
 
@@ -119,6 +120,20 @@ function genIdOpportunity()
 function genIdProductList()
 {
   $data = Opr_value_product::max('por_id');
+  $new_id = $data + 1;
+  return $new_id;
+}
+function asNumber($value) {
+  $cleanedString = preg_replace("/[^0-9,]/", "", $value);
+  $cleanedString = str_replace(",", ".", $cleanedString);
+  $number = (float) $cleanedString;
+  return $number;
+}
+
+
+function genIdOprValOther()
+{
+  $data = Opr_value_other::max('ots_id');
   $new_id = $data + 1;
   return $new_id;
 }

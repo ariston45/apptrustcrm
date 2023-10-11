@@ -146,7 +146,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('store-new-opportunity-cst', [OpportunityController::class, 'storeNewOpportunityCst'])->name('store-new-opportunity-cst');
 		Route::post('store-opportunity-new-a', [OpportunityController::class, 'storeOpportunity_A'])->name('store-opportunity-new-a');
 		Route::post('store-opportunity-notes', [OpportunityController::class, 'storeOprNotes'])->name('store-opportunity-notes');
-		Route::post('store-value-opportunity', [OpportunityController::class, 'storeOprValue'])->name('store-value-opportunity');
+		Route::post('store-subvalue-opportunity', [OpportunityController::class, 'storeOprValue'])->name('store-subvalue-opportunity');
 		Route::post('store-value-opportunity-hpp', [OpportunityController::class, 'storeOprValueHpp'])->name('store-value-opportunity-hpp');
 		Route::post('store-value-opportunity-tax', [OpportunityController::class, 'storeOprValueTax'])->name('store-value-opportunity-tax');
 		Route::post('store-value-opportunity-other', [OpportunityController::class, 'storeOprValueOther'])->name('store-value-opportunity-other');
@@ -160,6 +160,11 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('update-status-opportunity', [OpportunityController::class, 'storeUpdateStatusOpr'])->name('update-status-opportunity');
 		Route::match(['get', 'post'],'customer-project',[OpportunityController::class,'sourceCustomerProject'])->name('customer-project');
 		Route::match(['get', 'post'],'source-product-opportunity',[OpportunityController::class,'sourceProductOppor'])->name('source-product-opportunity');
+		// 
+		Route::match(['get', 'post'],'source-product-value',[OpportunityController::class,'sourceProductValue'])->name('source-product-value');
+		Route::match(['get', 'post'],'source-tax-value',[OpportunityController::class,'sourceTaxValue'])->name('source-tax-value');
+		Route::match(['get', 'post'],'source-trigger-tax-value',[OpportunityController::class,'sourceTriggerTaxValue'])->name('source-trigger-tax-value');
+		Route::match(['get', 'post'],'source-other-value-data',[OpportunityController::class,'sourceOtherValueData'])->name('source-other-value-data');
 	});
 	# Purchasing
 	Route::prefix('purchased')->group(function(){
