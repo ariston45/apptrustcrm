@@ -107,7 +107,7 @@
 								</div>
 							</div>
 							<div class="mb-3 row">
-								<label class="col-3 col-form-label custom-label">Add sales team</label>
+								<label class="col-3 col-form-label custom-label">Add Colaborator</label>
 								<div class="col">
 									<select type="text" class="form-select" name="assign_team[]" multiple id="select-assign-team" value="{{ $user->id }}" placeholder="Select marketing or sales here">
 										<option value="{{ null }}"></option>
@@ -428,6 +428,12 @@ $(document).ready(function() {
 								}
 							}
 						}
+					});
+				}else{
+					$.alert({
+						title: 'Warning.',
+						content: result.msg,
+						type: 'red',
 					});
 				}
 			}

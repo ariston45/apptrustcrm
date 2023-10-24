@@ -14,6 +14,7 @@ use App\Models\Prs_contact;
 use App\Models\Prs_lead;
 use App\Models\Opr_stage_status;
 use App\Models\Opr_value_other;
+use App\Models\Ord_purchase;
 use App\Models\Prs_accessrule;
 use App\Models\Prs_lead_value;
 use App\Models\Prs_qualification;
@@ -44,7 +45,8 @@ class OpportunityController extends Controller
 		->whereNotIn('level',['ADM','AGM'])
 		->get();
 		$opportunity = Opr_opportunity::join('prs_leads','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
-		->where('opr_id',$id_oppor)->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes')->first();
+		->where('opr_id',$id_oppor)->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes','opr_estimate_closing')->first();
+		$closing = date('d M/Y',strtotime($opportunity->opr_estimate_closing));
 		$id_lead = $opportunity->lds_id;
 		$opportunity_value = Opr_value::where('ovs_opr_id',$id_oppor)->first();
 		if ($opportunity_value == null) {
@@ -155,10 +157,11 @@ class OpportunityController extends Controller
 			$other_value = $opr_value->ovs_value_other_cost;
 			$tab_row = 1 + count($opr_other);
 		}
+		$purchase_data = Ord_purchase::where("pur_oppr_id",$id_oppor)->first();
 		return view('contents.page_opportunity.opportunity_detail',compact(
 			'id_oppor','id_lead','user','users','status','opportunity','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
 			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer','opr_product','opr_other','opr_value','other_value','tab_row',
-			'all_contacts','lead_contacts','activity_type','allproduct'
+			'all_contacts','lead_contacts','activity_type','allproduct','closing','purchase_data'
 		));
 	}
 	/* Tags:... */
@@ -218,18 +221,16 @@ class OpportunityController extends Controller
 			'opr_estimate_closing' => $est_closing,
 			'opr_notes' => $request->opportunities_notes
 		];
-		foreach ($request->product as $key => $value) {
-			$data_opr_prd[$key] = [
-				"por_opportunity_id" => $opr_id,
-				"por_principle_name" => $request->product_principle,
-				"por_product_name" => $value,
-				"por_quantity" => null,
-				"por_unit_value" => null,
-				"por_total_value" => null
-			];
-		}
 		$actionStoreOpportunity = Opr_opportunity::insert($data_opr);
-		$actionStoreProduct = Opr_value_product::insert($data_opr_prd);
+		$data_value = [
+			'ovs_opr_id' => $opr_id,
+			'ovs_value_subtotal' => null,
+			'ovs_rate_tax' => $request->est_tax_rate,
+			'ovs_value_tax' => null,
+			'ovs_value_other_cost' => null,
+			'ovs_value_total' =>null,
+		];
+		$actionStoreOpportunity = Opr_value::insert($data_value);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -249,18 +250,12 @@ class OpportunityController extends Controller
 			'opr_estimate_closing' => $est_closing,
 			'opr_notes' => $request->opportunities_notes
 		];
-		foreach ($request->product as $key => $value) {
-			$data_opr_prd[$key] = [
-				"por_opportunity_id" => $opr_id,
-				"por_principle_name" => $request->product_principle,
-				"por_product_name" => $value,
-				"por_quantity" => null,
-				"por_unit_value" => null,
-				"por_total_value" => null
-			];
-		}
+		$data_opr_value = [
+			"ovs_opr_id" => $opr_id,
+			"ovs_rate_tax" => 11
+		];
 		$actionStoreOpportunity = Opr_opportunity::insert($data_opr);
-		$actionStoreProduct = Opr_value_product::insert($data_opr_prd);
+		$actionStoreProduct = Opr_value::insert($data_opr_value);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -436,6 +431,7 @@ class OpportunityController extends Controller
 		$actionStoreNotes = Opr_opportunity::where('opr_id',$request->id)->update(['opr_notes'=>$request->notes]);
 		$result = [
 			'param'=>true,
+			'note' => $request->notes,
 		];
 		return $result;
 	}
@@ -458,32 +454,6 @@ class OpportunityController extends Controller
 		return $result;
 	}
 	/* Tags:... */
-	public function storeOprValueHpp(Request $request)
-	{
-		$user = Auth::user();
-		$value =  Str::remove('.',Str::substr($request->hpp_value,3));
-		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
-		if ($checkBaseValue == null) {
-			$data = [
-				"ovs_opr_id" => $request->id,
-				"opr_value_dpp" => null,
-				"opr_value_hpp" => $x,
-				"opr_tax" => null,
-				"opr_other" => null,
-				"opr_revenue" =>null
-			];
-			$actionStore = Opr_value::insert($data);
-		}else{
-			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_value_hpp' => $x]);
-		}
-		$result = [
-			'param' => true,
-			'currency' => fcurrency($x)
-		];
-		return $result;
-	}
-	/* Tags:... */
 	public function storeOprValueTax(Request $request)
 	{
 		$user = Auth::user();
@@ -502,7 +472,7 @@ class OpportunityController extends Controller
 		$result = [
 			'param' => true,
 			'val_rate' => $tax_rate,
-			'val_tax' => rupiahFormat($dataTax),
+			'val_tax' => rupiahFormat($tax_result),
 			'val_total' => rupiahFormat($dataTotal)
 		];
 		return $result;
@@ -510,52 +480,58 @@ class OpportunityController extends Controller
 	/* Tags:... */
 	public function storeOprValueOther(Request $request)
 	{
-		$user = Auth::user();
-		$value =  Str::remove('.',Str::substr($request->other_value,3));
-		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
-		if ($checkBaseValue == null) {
-			$data = [
-				"ovs_opr_id" => $request->id,
-				"opr_value_dpp" => null,
-				"opr_value_hpp" => null,
-				"opr_tax" => null,
-				"opr_other" => $x,
-				"opr_revenue" =>null
+		$data = array();
+		$id = genIdOprValOther();
+		foreach ($request->other_note as $key => $value) {
+			$data[$key] = [
+				'ots_id' => $id,
+				'ots_opr_id' => $request->id,
+				'ots_name' => $value,
+				'ots_value' => asNumber($request->other_value[$key])
 			];
-			$actionStore = Opr_value::insert($data);
-		}else{
-			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_other' => $x]);
+			$data_value[$key] = asNumber($request->other_value[$key]);
+			$id++;
+		}
+		$actionDelete = Opr_value_other::where('ots_opr_id',$request->id)->delete();
+		$actionStoreOther = Opr_value_other::insert($data);
+		$dataOprValue = Opr_value::where('ovs_opr_id',$request->id)->first();
+		$other_value = array_sum($data_value);
+		$dataTotal = $dataOprValue->ovs_value_subtotal + $dataOprValue->ovs_value_tax + $other_value;
+		$actionStoreValueOpr = Opr_value::where('ovs_opr_id',$request->id)->update(['ovs_value_other_cost' => $other_value,'ovs_value_total'=>$dataTotal]);
+		$tab_row = 1 + count($data_value);
+		$data_other ='';
+		$data_other.= '<tr>
+			<td colspan="4" class="strong text-end"><i>Other Cost</i></td>
+			<td class="text-end"></td>
+			<td rowspan="'.$tab_row.'" class="text-end" style="vertical-align: middle;"><span id="opr_other_cost"></span>'.rupiahFormat($other_value).'</td>
+			<td rowspan="'.$tab_row.'" class="text-center" style="vertical-align: middle;">
+				<button class="badge bg-blue-lt" onclick="actionChangeValOther()"><i class="ri-edit-2-line"></i></button>
+			</td>
+		</tr>';
+		foreach ($data as $key => $value) {
+			# code...
+			$data_other.='<tr>
+				<td colspan="4" class="text-muted text-end"><i><span id="opr_other_note_'.$value['ots_id'].'"></span>'.$value['ots_name'].'</i></td>
+				<td class="text-end"><span id="opr_other_cost_'.$value['ots_id'].'"></span>'.rupiahFormat($value['ots_value']).'</td>
+			</tr>';
 		}
 		$result = [
 			'param' => true,
-			'currency' => fcurrency($x)
+			'val_other' => $other_value,
+			'val_total' => rupiahFormat($dataTotal),
+			'item_other' => $data_other
 		];
 		return $result;
 	}
 	/* Tags:... */
 	public function storeOprValueRevenue(Request $request)
 	{
-		$user = Auth::user();
-		$value =  Str::remove('.',Str::substr($request->revenue_value,3));
-		$x = Str::replace(',', '.', $value);
-		$checkBaseValue = Opr_value::where('ovs_opr_id',$request->id)->first();
-		if ($checkBaseValue == null) {
-			$data = [
-				"ovs_opr_id" => $request->id,
-				"opr_value_dpp" => null,
-				"opr_value_hpp" => null,
-				"opr_tax" => null,
-				"opr_other" => null,
-				"opr_revenue" =>$x
-			];
-			$actionStore = Opr_value::insert($data);
-		}else{
-			$actionUpdate = Opr_value::where('ovs_opr_id',$request->id)->update(['opr_revenue' => $x]);
-		}
+		$value = asNumber($request->revenue_value);
+		$actionStore = Opr_value::where('ovs_opr_id',$request->id)->update(['ovs_value_total'=>$value]);
 		$result = [
-			'param' => true,
-			'currency' => fcurrency($x)
+			'param'=>true,
+			'val_total' => rupiahFormat($value
+			)
 		];
 		return $result;
 	}
@@ -680,21 +656,40 @@ class OpportunityController extends Controller
 		$data = '';
 		if ($oprOtherValue->count() > 0) {
 			foreach ($oprOtherValue as $key => $value) {
+				$randomIndex = quickRandom(6);
 				$data.='<tr>
-				<td><input type="hidden" name="other_id['.$value->ots_id.'][]" value="'.$value->ots_id.'"><input type="text" class="form-control pb-1 pt-1 col-auto" name="other_note['.$value->ots_id.'][]" value="'.$value->ots_name.'"></td>
-				<td><input type="text" id="input-opportunity-other-'.$value->ots_id.'" class="form-control pb-1 pt-1" name="other_value['.$value->ots_id.'][]" placeholder="Input placeholder" 
-					oninput="fcurrencyInput(\'input-opportunity-other-'.$value->ots_id.'\')" value="'.rupiahFormat($value->ots_value).'" style="margin-right: 4px;">
+				<td><input type="text" class="form-control pb-1 pt-1 col-auto" name="other_note[]" value="'.$value->ots_name.'" placeholder="Input description"></td>
+				<td><input type="text" id="input-opportunity-other-'.$randomIndex.'" class="form-control pb-1 pt-1" name="other_value[]" placeholder="Input value" 
+					oninput="fcurrencyInput(\'input-opportunity-other-'.$randomIndex.'\')" value="'.rupiahFormat($value->ots_value).'" style="margin-right: 4px;">
 				</td>
 				<td style="text-align: center;">
 					<button type="button" class="btn btn-sm btn-ghost-danger" onclick="actionDelRowForm4(this)"><i class="ri-delete-bin-line"></i></button>
 				</td></tr>';
 			}
-		}else{
-
 		}
 		$result = [
 			'param'=>true,
 			'data' => $data
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function sourceTotalValue(Request $request)
+	{
+		$opr_value = Opr_value::where('ovs_opr_id',$request->idOpportunity)->first();
+		$result = [
+			'param'=>true,
+			'val_total' => $opr_value->ovs_value_total
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function sourceOpporNotes(Request $request)
+	{
+		$notes = Opr_opportunity::where('opr_id',$request->idOpportunity)->first();
+		$result = [
+			'param'=>true,
+			'note' => $notes->opr_notes,
 		];
 		return $result;
 	}

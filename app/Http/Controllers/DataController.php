@@ -445,7 +445,7 @@ class DataController extends Controller
 	}
 	public function sourceDataLeadCst(Request $request)
 	{
-		$id = 50;
+		$id = $request->id;
 		$user = Auth::user();
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
@@ -458,10 +458,10 @@ class DataController extends Controller
 			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','prs_leads.created_at as created')
 			->get();
 		}elseif (checkRule(array('MGR'))) {
-			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get();
 			$lds_idr = array();
 			foreach ($lead_data as $key => $value) {
-				$lds_idr[$key] = $value['slm_lead'];
+				$lds_idr[$key] = $value->slm_lead;
 			}
 			$lead_id = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')

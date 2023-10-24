@@ -29,33 +29,41 @@ Leads
 	<div class="card-body" style="padding-left:10px;padding-right:10px;padding-bottom: 0px;padding-top: 8px;">
 		<div class="row mb-2">
 			@if (checkRule(array('ADM','AGM','MGR','MGR.PAS','STF')))
-			<div class="col-xl-6 col-md-12">
-				<div id="btn-lead-status" class="btn-group" role="group" style="margin-right: 15px;">
-					@if ($checkOppor == null)
+			<div class="col-xl-6 col-md-6" @if ($checkOppor != null) style="display:none;" @endif>
+				@if ($checkOppor == null)
+					<a href="" id="btn-go-page-opportunity-ii" target="_blank" style="display: none;">
+						<button type="button" class="btn pr-2 pb-1 pt-1 ml-3">
+							<i class="ri-zoom-in-line" style="margin-right: 8px;"></i> View Opportunity
+						</button>
+					</a>
+					<div id="btn-lead-status" class="btn-group mb-0" role="group" style="margin-right: 15px;">
 						@foreach ($status as $list)
 						<input type="button" id="btn-{{ $list->pls_code_name }}" 
 							class="btn active pr-2 pb-1 pt-1 @if ($lead->lds_status == $list->pls_id) btn-ghost-primary @else btn-ghost-light bg-blue-lt @endif" 
 							value="{{ $list->pls_status_name }}" onclick="actionChangeStatus('{{ $list->pls_code_name }}','{{ $list->pls_id }}')">
 						</input>
 						@endforeach
-					@endif
-				</div>
+					</div>
+				@endif
 			</div>
 			<div class="col">
 				<input type="hidden" id="param-button-crt-oppor" value="">
 				@if ($checkOppor == null)
-				<input type="button" id="btn-go-opportunity" class="btn active pr-2 pb-1 pt-1 ml-3 btn-ghost-success" value="Create Opportunity" 
+				<button type="button" id="btn-go-opportunity" class="btn active pr-2 pb-1 pt-1 ml-3 btn-ghost-success" value="Create Opportunity" 
 					onclick="actionGoOpportunity()" @if ($lead->lds_status == 3) style="display: true;" @else style="display: none;" @endif >
+					Create Opportunity
+				</button>
 				@else
-				<a href="{{ url('opportunities/detail-opportunity') }}/{{ $checkOppor->opr_id }}" id="btn-go-page-opportunity">
-					<input type="button" class="btn active pr-2 pb-1 pt-1 ml-3 btn-ghost-success" value="Go To Opportunity">
+				<a href="{{ url('opportunities/detail-opportunity') }}/{{ $checkOppor->opr_id }}" id="btn-go-page-opportunity" target="_blank">
+					<button type="button" class="btn pr-2 pb-1 pt-1 ml-3"><i class="ri-zoom-in-line" style="margin-right: 8px;"></i> View Opportunity</button>
 				</a>
 				@endif
 			</div>
 			<div class="col-auto">
 				@if ($checkOppor == null)
 					<button type="button" id="btn-lock" class="btn active pr-2 pb-1 pt-1 btn-ghost-light bg-muted-lt" 
-					@if ($lead->lds_status == 3) style="display: true;" @else style="display: none;" @endif> <i class="ri-lock-2-line"></i></button>
+						@if ($lead->lds_status == 3) style="display: true;" @else style="display: none;" @endif> <i class="ri-lock-2-line"></i>
+					</button>
 					<input type="button" id="btn-death-end" 
 						class="btn active pr-2 pb-1 pt-1  @if ($lead->lds_status == 0) btn-ghost-danger @else btn-ghost-light bg-red-lt @endif" 
 						value="Dead End" onclick="actionChangeStatus('dead_end','0')" @if ($lead->lds_status == 3) style="display: none;" @else style="display: true;" @endif>
@@ -727,7 +735,7 @@ Leads
 				<form id="formContent10" name="form_content10" enctype="multipart/form-data" action="javascript:void(0)" method="post">
 					@csrf
 					{{-- <input type="hidden" id="activity_id_i" name="act_id" value=""> --}}
-					<div class="mb-2 row" style="margin-right: 0px;">
+					{{-- <div class="mb-2 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Set Product Priciple</label>
 						<div class="col" style="padding: 0px;">
 							<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple"  value="">
@@ -751,7 +759,7 @@ Leads
 						<div class="col" style="padding:0px;">
 							<input type="text" id="product-count" name="product_count" class="form-control p-1" placeholder="Count" autocomplete="off">
 						</div>
-					</div>
+					</div> --}}
 					<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Estimate Close</label>
 						<div class="col" style="padding: 0px;margin-left: 0px;">
@@ -1001,6 +1009,7 @@ var select_act_status = new TomSelect("#select-act-status",{
 		}
 	}
 });
+/*
 var select_principles = new TomSelect("#select-principles",{
 	persist: false,
 	createOnBlur: true,
@@ -1034,7 +1043,9 @@ var select_products = new TomSelect("#select-product",{
 		}
 	}
 });
+*/
 /*================================================================================================*/
+/*
 select_principles.on('change',function () {
 	var prd_id = select_principles.getValue();
 	actionGetProduct(prd_id);
@@ -1973,8 +1984,9 @@ $(document).ready(function() {
 				$('#btn-go-opportunity').hide();
 				$('#btn-death-end').hide();
 				$('#btn-lock').hide();
-				$('#btn-go-page-opportunity').show();
+				$('#btn-go-page-opportunity-ii').show();
 				if (result.param == true) {
+					
 					$.confirm({
 						type: 'green',
 						title: 'Success',
@@ -1986,7 +1998,7 @@ $(document).ready(function() {
 							goToLead:{
 								text:"Open Opportunity",
 								action:function () {  
-									window.location.href = "{{ url('opportunities/detail-opportunity') }}/"+result.id_opr;
+									window.open("{{ url('opportunities/detail-opportunity') }}/"+result.id_opr);
 								}
 							},
 							close:{

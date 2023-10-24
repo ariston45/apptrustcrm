@@ -540,14 +540,7 @@ var select_assign_user = new TomSelect("#select-assign-user",{
 	valueField: 'id',
 	labelField: 'title',
 	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user">'+escape(data.title)+'</div>';
-		}
-	}
+	render: {}
 });
 /*===============================================================================================*/
 var select_team_user = new TomSelect("#select-team-user",{
@@ -557,14 +550,7 @@ var select_team_user = new TomSelect("#select-team-user",{
 	valueField: 'id',
 	labelField: 'title',
 	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user">'+escape(data.title)+'</div>';
-		}
-	}
+	render: {}
 });
 /*===============================================================================================*/
 var select_customer_contact = new TomSelect("#select-customer-contact",{

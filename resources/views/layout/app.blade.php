@@ -138,9 +138,9 @@
         </div>
       </header>
       {{-- MENUS --}}
-      <div class="navbar-expand-md" style="background-color: ">
+      <div class="navbar-expand-md" >
         <div class="collapse navbar-collapse" id="navbar-menu">
-          <div class="navbar navbar-light">
+          <div class="navbar navbar-light" style="background-color: whitesmoke;">
             <div class="container-xl">
               <ul class="navbar-nav">
                 @foreach ($menus as $menu)
@@ -193,13 +193,13 @@
               <div class="col-12 col-lg-auto mt-3 mt-lg-0">
                 <ul class="list-inline list-inline-dots mb-0">
                   <li class="list-inline-item">
-                    Copyright &copy; 2022
-                    <a href="." class="link-secondary">Tabler</a>.
+                    Copyright &copy; 2023
+                    <a href="." class="link-secondary">TRUST</a>.
                     All rights reserved.
                   </li>
                   <li class="list-inline-item">
                     <a href="./changelog.html" class="link-secondary" rel="noopener">
-                      v1.0.0-beta16
+                      v2
                     </a>
                   </li>
                 </ul>

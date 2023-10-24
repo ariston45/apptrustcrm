@@ -147,7 +147,6 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('store-opportunity-new-a', [OpportunityController::class, 'storeOpportunity_A'])->name('store-opportunity-new-a');
 		Route::post('store-opportunity-notes', [OpportunityController::class, 'storeOprNotes'])->name('store-opportunity-notes');
 		Route::post('store-subvalue-opportunity', [OpportunityController::class, 'storeOprValue'])->name('store-subvalue-opportunity');
-		Route::post('store-value-opportunity-hpp', [OpportunityController::class, 'storeOprValueHpp'])->name('store-value-opportunity-hpp');
 		Route::post('store-value-opportunity-tax', [OpportunityController::class, 'storeOprValueTax'])->name('store-value-opportunity-tax');
 		Route::post('store-value-opportunity-other', [OpportunityController::class, 'storeOprValueOther'])->name('store-value-opportunity-other');
 		Route::post('store-value-opportunity-revenue', [OpportunityController::class, 'storeOprValueRevenue'])->name('store-value-opportunity-revenue');
@@ -165,11 +164,24 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-tax-value',[OpportunityController::class,'sourceTaxValue'])->name('source-tax-value');
 		Route::match(['get', 'post'],'source-trigger-tax-value',[OpportunityController::class,'sourceTriggerTaxValue'])->name('source-trigger-tax-value');
 		Route::match(['get', 'post'],'source-other-value-data',[OpportunityController::class,'sourceOtherValueData'])->name('source-other-value-data');
+		Route::match(['get', 'post'],'source-total-value',[OpportunityController::class,'sourceTotalValue'])->name('source-total-value');
+		Route::match(['get', 'post'],'source-opportunity-note',[OpportunityController::class,'sourceOpporNotes'])->name('source-opportunity-note');
+		
 	});
 	# Purchasing
 	Route::prefix('purchased')->group(function(){
 		Route::get('/', [PurchaseController::class,'PurchaseDataView']);
 		Route::match(['get', 'post'],'source-data-purchase', [PurchaseController::class, 'sourceDataPurchase'])->name('source-data-purchase');
+		Route::match(['get', 'post'],'store-data-purchase-i', [PurchaseController::class, 'storeDataPurchase_a'])->name('store-data-purchase-i');
+		Route::match(['get', 'post'],'action-check-purchase', [PurchaseController::class,'actionCheckPurchase'])->name('action-check-purchase');
+		Route::match(['get'],'detail/{id}', [PurchaseController::class,'detailPurchase']);
+		Route::match(['get', 'post'],'action-get-invoice-number', [PurchaseController::class,'actionCheckInvoice'])->name('action-get-invoice-number');
+		Route::match(['get', 'post'],'store-invoice-number', [PurchaseController::class,'storeInvoiceNumber'])->name('store-invoice-number');
+		Route::match(['get', 'post'],'action-get-purchase-date', [PurchaseController::class,'actionGetDatePurchase'])->name('action-get-purchase-date');
+		Route::match(['get', 'post'],'store-purchase-date', [PurchaseController::class,'storeDatePurchase'])->name('store-purchase-date');
+		Route::match(['get', 'post'],'source-data-purchased', [PurchaseController::class, 'sourceDataPurchased'])->name('source-data-purchased');
+		Route::match(['get', 'post'],'action-check-opportunity', [PurchaseController::class, 'actionCheckOpr'])->name('action-check-opportunity');
+		
 	});
 	# Setting
 	Route::prefix('setting')->group(function(){

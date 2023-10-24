@@ -98,78 +98,119 @@ class LeadController extends Controller
 		$user = Auth::user();
 		$id = genIdLead();
 		$user = Auth::user();
+		$err = array();
 		$base_val =  Str::remove('.',Str::substr($request->base_value,3));
 		$base_x = Str::replace(',', '.', $base_val);
 		$target_val =  Str::remove('.',Str::substr($request->target_value,3));
 		$target_x = Str::replace(',', '.', $target_val);
-		$data_lead = [
-			"lds_id" => $id,
-			"lds_title" => $request->lead_title,
-			"lds_status" => 1,
-			"lds_customer" => $request->customer
-		];
+		if ($request->lead_title != null && $request->customer != null) {
+			# code...
+			$data_lead = [
+				"lds_id" => $id,
+				"lds_title" => $request->lead_title,
+				"lds_status" => 1,
+				"lds_customer" => $request->customer
+			];
+		} else {
+			$err[] = "Data of Project title or Customer Select input is null, please enter the data correctly.";
+		}
+		
+		#action store
 		$data_lead_value = [
 			"lvs_lead_id" => $id,
 			"lvs_base_value" => $base_x,
 			"lvs_target_value" => $target_x,
 		];
+		#action store
 		$person_lead = array();
 		$person_to_store = array();
 		$new_id_person = genIdPerson();
-		foreach ($request->customer_pic_contact as $key => $value) {
-			if (is_numeric($value) == false) {
-				$person_to_store[$key] = [
-					"cnt_id" => $new_id_person,
-					"cnt_cst_id" => $request->customer,
-					"cnt_fullname" => $value,
-					"cnt_nickname" => null,
-					"cnt_company_position" => null,
-					"cnt_notes" => null,
-					"view_option" => 'PUBLIC',
-					"created_by" => $user->id
-				];
-				$person_lead[$key] = [
-					"plc_lead_id" => $id,
-					"plc_attendant_id" => $new_id_person,
-					"plc_customer_id" => $request->customer,
-					"created_by" => $user->id
-				];
-				$new_id_person++;
-			}else{
-				$person_lead[$key] = [
-					"plc_lead_id" => $id,
-					"plc_attendant_id" => $value,
-					"plc_customer_id" => $request->customer,
-					"created_by" => $user->id
-				];
+		if (is_array($request->customer_pic_contact)) {
+			foreach ($request->customer_pic_contact as $key => $value) {
+				if (is_numeric($value) == false) {
+					$person_to_store[$key] = [
+						"cnt_id" => $new_id_person,
+						"cnt_cst_id" => $request->customer,
+						"cnt_fullname" => $value,
+						"cnt_nickname" => null,
+						"cnt_company_position" => null,
+						"cnt_notes" => null,
+						"view_option" => 'PUBLIC',
+						"created_by" => $user->id
+					];
+					$person_lead[$key] = [
+						"plc_lead_id" => $id,
+						"plc_attendant_id" => $new_id_person,
+						"plc_customer_id" => $request->customer,
+						"created_by" => $user->id
+					];
+					$new_id_person++;
+				}else{
+					$person_lead[$key] = [
+						"plc_lead_id" => $id,
+						"plc_attendant_id" => $value,
+						"plc_customer_id" => $request->customer,
+						"created_by" => $user->id
+					];
+				}
 			}
+		}else{
+			$err[] = "The data for the person in charge of the project has not been entered, please input the data first";
 		}
-		$assign_lead = [
-			"slm_user" => $request->assign_sales,
-			"slm_rules" => 'head',
-			"slm_lead" => $id,
-			"created_by" => $user->id
-		];
-		$assign_team = array();
-		foreach ($request->assign_team as $key => $value) {
-			$assign_team = [
-				"slm_user" => $value,
-				"slm_rules" => 'colaborator',
+		if ($request->assign_sales != null) {
+			# code...
+			$assign_lead = [
+				"slm_user" => $request->assign_sales,
+				"slm_rules" => 'master',
 				"slm_lead" => $id,
 				"created_by" => $user->id
 			];
+		}else{
+			$err[] = "User assignment data has not been input yet, please input it first.";
 		}
-		$actionStore_SalesTeam = Prs_accessrule::insert($assign_team);
-		$actionStore_Sales = Prs_accessrule::insert($assign_lead);
-		$actionStore_PersonLead = Prs_contact::insert($person_lead);
-		$actionStore_Person = Cst_personal::insert($person_to_store);
-		$actionStore_LeadValue = Prs_lead_value::insert($data_lead_value);
-		$actionStore_Lead = Prs_lead::insert($data_lead);
-		$result = [
-			'param'=>true,
-			'idlead' => $id
-		];
-		return $result;
+		
+		if (is_array($request->assign_team)) {
+			if ($request->assign_team[0] != null) {
+				foreach ($request->assign_team as $key => $value) {
+					$assign_team = [
+						"slm_user" => $value,
+						"slm_rules" => 'colaborator',
+						"slm_lead" => $id,
+						"created_by" => $user->id
+					];
+				}
+				$actionStore_SalesTeam = Prs_accessrule::insert($assign_team);
+			}
+		}else {
+			$assign_team = array();
+		}
+		if (count($err)>0) {
+			$msg = '';
+			$num = 1;
+			$msg.='<ul>';
+			foreach ($err as $key => $value) {
+				$msg.='<li>'.$value.'</li>';
+				$num++;
+			}
+			$msg.='</ul>';
+			$result = [
+				'param'=>false,
+				'msg' => $msg
+			];
+			return $result;
+		}else {
+			# code...
+			$actionStore_Master = Prs_accessrule::insert($assign_lead);
+			$actionStore_Person = Cst_personal::insert($person_to_store);
+			$actionStore_PersonLead = Prs_contact::insert($person_lead);
+			$actionStore_Lead = Prs_lead::insert($data_lead);
+			$actionStore_LeadValue = Prs_lead_value::insert($data_lead_value);
+			$result = [
+				'param'=>true,
+				'idlead' => $id
+			];
+			return $result;
+		}
 	}
 	public function storeLeadVerII(Request $request)
 	{
@@ -180,12 +221,16 @@ class LeadController extends Controller
 		$base_x = Str::replace(',', '.', $base_val);
 		$target_val =  Str::remove('.',Str::substr($request->target_value,3));
 		$target_x = Str::replace(',', '.', $target_val);
-		$data_lead = [
-			"lds_id" => $id,
-			"lds_title" => $request->lead_title,
-			"lds_status" => 1,
-			"lds_customer" => $request->idcustomer
-		];
+		if ($request->lead_title != null && $request->customer != null) {
+			$data_lead = [
+				"lds_id" => $id,
+				"lds_title" => $request->lead_title,
+				"lds_status" => 1,
+				"lds_customer" => $request->idcustomer
+			];
+		}else{
+			$err[] = "Data of Project title or Customer Select input is null, please enter the data correctly.";
+		}
 		$data_lead_value = [
 			"lvs_lead_id" => $id,
 			"lvs_base_value" => $base_x,
@@ -194,61 +239,91 @@ class LeadController extends Controller
 		$person_lead = array();
 		$person_to_store = array();
 		$new_id_person = genIdPerson();
-		foreach ($request->customer_pic_contact as $key => $value) {
-			if (is_numeric($value) == false) {
-				$person_to_store[$key] = [
-					"cnt_id" => $new_id_person,
-					"cnt_cst_id" => $request->idcustomer,
-					"cnt_fullname" => $value,
-					"cnt_nickname" => null,
-					"cnt_company_position" => null,
-					"cnt_notes" => null,
-					"view_option" => 'PUBLIC',
-					"created_by" => $user->id
-				];
-				$person_lead[$key] = [
-					"plc_lead_id" => $id,
-					"plc_attendant_id" => $new_id_person,
-					"plc_customer_id" => $request->idcustomer,
-					"created_by" => $user->id
-				];
-				$new_id_person++;
-			}else{
-				$person_lead[$key] = [
-					"plc_lead_id" => $id,
-					"plc_attendant_id" => $value,
-					"plc_customer_id" => $request->idcustomer,
-					"created_by" => $user->id
-				];
+		if (is_array($request->customer_pic_contact)) {
+			# code...
+			foreach ($request->customer_pic_contact as $key => $value) {
+				if (is_numeric($value) == false) {
+					$person_to_store[$key] = [
+						"cnt_id" => $new_id_person,
+						"cnt_cst_id" => $request->idcustomer,
+						"cnt_fullname" => $value,
+						"cnt_nickname" => null,
+						"cnt_company_position" => null,
+						"cnt_notes" => null,
+						"view_option" => 'PUBLIC',
+						"created_by" => $user->id
+					];
+					$person_lead[$key] = [
+						"plc_lead_id" => $id,
+						"plc_attendant_id" => $new_id_person,
+						"plc_customer_id" => $request->idcustomer,
+						"created_by" => $user->id
+					];
+					$new_id_person++;
+				}else{
+					$person_lead[$key] = [
+						"plc_lead_id" => $id,
+						"plc_attendant_id" => $value,
+						"plc_customer_id" => $request->idcustomer,
+						"created_by" => $user->id
+					];
+				}
 			}
+		} else {
+			$err[] = "The data for the person in charge of the project has not been entered, please input the data first";
 		}
-
-		$assign_lead = [
-			"slm_user" => $request->assign_sales,
-			"slm_rules" => 'head',
-			"slm_lead" => $id,
-			"created_by" => $user->id
-		];
-		$assign_team = array();
-		foreach ($request->assign_team as $key => $value) {
-			$assign_team = [
-				"slm_user" => $value,
-				"slm_rules" => 'colaborator',
+		if ($request->assign_sales != null) {
+			# code...
+			$assign_lead = [
+				"slm_user" => $request->assign_sales,
+				"slm_rules" => 'head',
 				"slm_lead" => $id,
 				"created_by" => $user->id
 			];
+		} else {
+			$err[] = "User assignment data has not been input yet, please input it first.";
 		}
-		$actionStore_SalesTeam = Prs_accessrule::insert($assign_team);
-		$actionStore_Sales = Prs_accessrule::insert($assign_lead);
-		$actionStore_PersonLead = Prs_contact::insert($person_lead);
-		$actionStore_Person = Cst_personal::insert($person_to_store);
-		$actionStore_LeadValue = Prs_lead_value::insert($data_lead_value);
-		$actionStore_Lead = Prs_lead::insert($data_lead);
-		$result = [
-			'param'=>true,
-			'idlead' => $id
-		];
-		return $result;
+		if (is_array($request->assign_team)) {
+			if ($request->assign_team[0] != null) {
+				foreach ($request->assign_team as $key => $value) {
+					$assign_team = [
+						"slm_user" => $value,
+						"slm_rules" => 'colaborator',
+						"slm_lead" => $id,
+						"created_by" => $user->id
+					];
+				}
+				$actionStore_SalesTeam = Prs_accessrule::insert($assign_team);
+			}
+		}else {
+			$assign_team = array();
+		}
+		if (count($err)>0) {
+			$msg = '';
+			$num = 1;
+			$msg.='<ul>';
+			foreach ($err as $key => $value) {
+				$msg.='<li>'.$value.'</li>';
+				$num++;
+			}
+			$msg.='</ul>';
+			$result = [
+				'param'=>false,
+				'msg' => $msg
+			];
+			return $result;
+		}else{
+			$actionStore_Sales = Prs_accessrule::insert($assign_lead);
+			$actionStore_Person = Cst_personal::insert($person_to_store);
+			$actionStore_PersonLead = Prs_contact::insert($person_lead);
+			$actionStore_Lead = Prs_lead::insert($data_lead);
+			$actionStore_LeadValue = Prs_lead_value::insert($data_lead_value);
+			$result = [
+				'param'=>true,
+				'idlead' => $id
+			];
+			return $result;
+		}
 	}
 	###
 	public function storeLeadFollowUp(Request $request)
@@ -381,6 +456,7 @@ class LeadController extends Controller
 		$principle = Prd_principle::get();
 		$activity_type = Act_activity_type::get();
 		$checkOppor = Opr_opportunity::where('opr_lead_id',$id_lead)->select('opr_id')->first();
+		
 		return view('contents.page_lead.lead_detail',
 			compact(
 				'user','users','id_lead','status','lead','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',

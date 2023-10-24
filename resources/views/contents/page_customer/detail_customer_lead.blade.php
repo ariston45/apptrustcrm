@@ -129,7 +129,7 @@ Customer
 								</select>
 							</div>
 							<div class="mb-2">
-								<label class="form-label mb-1">Team User</label>
+								<label class="form-label mb-1">Colaborator</label>
 								<select type="text" class="form-select val-input-lead p-1" name="assign_team[]" id="select-team-user" placeholder="Select marketing or sales here">
 									<option value="{{ null }}"></option>
 									@foreach ($all_users as $list)

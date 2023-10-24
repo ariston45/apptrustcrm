@@ -60,6 +60,8 @@
 									</select>
 								</div>
 							</div>
+						</div>
+						<div class="col-xl-6">
 							<div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label">Estimate Close</label>
 								<div id="multiInputPhone" class="col">
@@ -68,9 +70,15 @@
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="col-xl-6">
 							<div class="mb-3 row">
+								<label class="col-4 col-form-label custom-label">Set Tax Rate</label>
+								<div id="multiInputPhone" class="col">
+									<div class="input-group">
+										<input name="est_tax_rate" id="est-tax-rate" type="text" class="form-control" value="11">
+									</div>
+								</div>
+							</div>
+							{{-- <div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label required">Set Product Priciples</label>
 								<div class="col">
 									<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple"  value="">
@@ -94,7 +102,7 @@
 								<div class="col">
 									<input name="product_count" id="product-count" type="number" class="form-control mb-2" value="">
 								</div>
-							</div>
+							</div> --}}
 						</div>
 						<div class="col-12">
 							<label class="col mb-2">Notes</label>
@@ -259,6 +267,7 @@
 			}
 		}
 	});
+	/*
 	var select_principles = new TomSelect("#select-principles",{
 		persist: false,
 		createOnBlur: true,
@@ -292,12 +301,12 @@
 			}
 		}
 	});
-	
 	/*************************************************************************/
 	select_customer.on('change',function () {
 		var cst_id = select_customer.getValue();
 		actionGetContacts(cst_id);
 	});
+	/*
 	select_principles.on('change',function () {
 		var prd_id = select_principles.getValue();
 		actionGetProduct(prd_id);
@@ -327,13 +336,10 @@
 		statusbar: false,
 		setup: function(editor) {
 			editor.on('init',function(e) {
-				if (notesOpportunityNotesLOC != null) {
-					/* editor.setContent(notesOpportunityNotesLOC); */
-				}
+				
 			});
 			editor.on('input', function(e) {
-				notes = editor.getContent();
-				localStorage.setItem('notesInputOpportunity', notes);
+				
 			});
 		}
 	});

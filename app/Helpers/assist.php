@@ -10,8 +10,10 @@ use App\Models\Opr_value_product;
 use App\Models\Prs_lead;
 use App\Models\Opr_opportunity;
 use App\Models\Opr_value_other;
+use App\Models\Ord_purchase;
 use App\Models\User;
 use App\Models\User_structure;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Query\Builder;
 
@@ -130,10 +132,20 @@ function asNumber($value) {
   return $number;
 }
 
-
 function genIdOprValOther()
 {
   $data = Opr_value_other::max('ots_id');
+  $new_id = $data + 1;
+  return $new_id;
+}
+
+function quickRandom($length){
+  $random = Str::random($length);
+  return $random;
+}
+
+function genIdPurchase(){
+  $data = Ord_purchase::max('pur_id');
   $new_id = $data + 1;
   return $new_id;
 }

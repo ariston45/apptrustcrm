@@ -75,7 +75,7 @@ function mainDataLeads() {
 			search: "Find Lead"
 		},
 		ajax: {
-			'url': '{!! route("source-data-leads") !!}',
+			'url': '{!! route("source-data-purchased") !!}',
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',

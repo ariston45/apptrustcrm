@@ -410,6 +410,7 @@ class ActivityController extends Controller
 	/* Tags:... */
 	public function storeActivitiesNew(Request $request)
 	{
+		die($request->assignment_user);
 		$user = Auth::user();
 		$today =Carbon::now()->locale('id-ID');
 		$id = genIdActivity();

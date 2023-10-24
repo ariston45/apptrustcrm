@@ -14,7 +14,7 @@ opportunitys
 <div class="card">
 	<div class="card-status-top bg-success"></div>
 	<div class="card-header card-header-custom card-header-light">
-		<h3 class="card-title">Detail Opportunity</h3>
+		<h3 class="card-title">Purchase Order</h3>
 		<div class="card-actions" style="padding-right: 10px;">
 			<a href="{{ url('opportunities') }}">
 				<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
@@ -43,7 +43,7 @@ opportunitys
 				Create Purchase Order
 			</button>
 			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="" style="display: none;">
-				View Purchased Order
+				View Opportunity
 			</button>
 		</div>
 		<div class="col-4" id="btn-g-lock" style="text-align: right">
@@ -55,29 +55,26 @@ opportunitys
 			</input>
 		</div>
 		<div class="col-12" id="btn-g-page-purchase" style="display: none;">
-			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenPO()">
-				View Purchased Order
+			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenOpr()">
+				View Opportunity
 			</button>
 		</div>
 		@else
 		<div class="col-12" id="btn-g-page-purchase">
-			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenPO()">
-				View Purchased Order
+			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenOpr()">
+				View Opportunity
 			</button>
 		</div>
 		@endif
 	</div>
 	@endif
 	{{-- ======================================================================================================== --}}
-	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<div class="row mb-3">
+	<div class="card-body pt-2 pb-2" style="padding-left: 10px;padding-right: 10px;">
+		<div class="row">
 			<div class="col-12">
 				<div class="row">
 					<div class="col">
 						<h3 class=" mb-1"> <b>{{ $opportunity->lds_title }}</b></h3>
-					</div>
-					<div class="col-auto">
-						<span class="text-muted small"><i>Estimated Close: {{ $closing }}</i></span>
 					</div>
 				</div>
 			</div>
@@ -87,62 +84,27 @@ opportunitys
 					<div class="page-pretitle-custom">{{ $list }}</div>
 				@endforeach
 				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
-				<div class="page-pretitle-custom mb-2">{{ html_entity_decode($institution_names) }}</div>
+				<div class="page-pretitle-custom">{{ html_entity_decode($institution_names) }}</div>
 			</div>
 			<div class="col-6" style="text-align: right;">
 				<div class="mb-0">
 					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
+					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeInvoice()"><i class="ri-edit-2-line"></i></button>
 					@endif
-					<em class="text-muted lh-base mb-0"><i>Salesperson</i></em>
-					<div class="page-pretitle-custom">
-						{{ $sales_selected->name }}
+					<em class="text-muted lh-base mb-0"><i>Invoice</i></em>
+					<div id="prt-invoice-number" class="page-pretitle-custom">
+						{{ $purchase_data->pur_invoice }}
 					</div>
 				</div>
 				<div class="mb-0">
 					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeDate()"><i class="ri-edit-2-line"></i></button>
 					@endif
-					<em class="text-muted lh-base mb-0"><i>Colaborator</i></em>
-					<div class="page-pretitle-custom">
-						@if ($member_name == null || $member_name == "")
-						-
-						@else
-						{{ $member_name }}
-						@endif
+					<em class="text-muted lh-base mb-0"><i>Purchase Date</i></em>
+					<div id="prt-purchase-date" class="page-pretitle-custom">
+						{{ $purchase_data->pur_date }}
 					</div>
 				</div>
-				<div class="mb-0">
-					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
-					@endif
-					<em class="text-muted lh-base mb-0"><i>Technical</i></em>
-					<div class="page-pretitle-custom">
-						@if ($tech_name == null || $tech_name == "")
-						-
-						@else
-						{{ $tech_name }}
-						@endif
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="row mb-3">
-			<div class="col-12" style="text-align: center;">
-				<img id="img-status-1" class="img-status" src="{{ asset('static/opportunity_status/opr-status-new.png') }}" alt="" 
-				@if ($opportunity->opr_status == 1) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-2" class="img-status" src="{{ asset('static/opportunity_status/opr-status-presentation.png') }}" alt="" 
-				@if ($opportunity->opr_status == 2) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-3" class="img-status" src="{{ asset('static/opportunity_status/opr-status-poc.png') }}" alt="" 
-				@if ($opportunity->opr_status == 3) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-4" class="img-status" src="{{ asset('static/opportunity_status/opr-status-proposal.png') }}" alt="" 
-				@if ($opportunity->opr_status == 4) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-5" class="img-status" src="{{ asset('static/opportunity_status/opr-status-negotiation.png') }}" alt="" 
-				@if ($opportunity->opr_status == 5) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-6" class="img-status" src="{{ asset('static/opportunity_status/opr-status-win.png') }}" alt="" 
-				@if ($opportunity->opr_status == 6) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-7" class="img-status" src="{{ asset('static/opportunity_status/opr-status-lose.png') }}" alt="" 
-				@if ($opportunity->opr_status == 7) style="display:true;" @else style="display:none;"	@endif>
 			</div>
 		</div>
 		{{-- <hr class="mt-1 mb-3"> --}}
@@ -254,11 +216,12 @@ opportunitys
 			</div>
 			@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 			<div class="col-auto">
-				<button class="badge bg-blue btn-pill" onclick="actionUpdateNote()">Save Notes</button>
+				<button class="badge bg-blue btn-pill" onclick="actionUpdateNote()">Update Notes</button>
 			</div>
 			<div class="col-12 mb-2">
-				<textarea id="textingContent1" class="form-control" name="identification_needs"
-				rows="3" placeholder="Describe something ..." oninput="actionStoreOpporNotes()">{{ $opportunity->opr_notes }}</textarea>
+				<div id="po-notes" class="p-2" contenteditable="false" style="background-color: whitesmoke;">
+					{!! $opportunity->opr_notes !!}
+				</div>
 			</div>
 			@else
 			<div class="col-12 mb-2">
@@ -268,76 +231,6 @@ opportunitys
 		</div>
 	</div>
 	{{-- ======================================================================================================== --}}
-	{{-- <div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<em class="text-muted lh-base mb-1"><i>Technical Report</i></em>
-	</div> --}}
-	{{-- ========================================================================================================= --}}
-	<div class="card-body pt-2 pb-2" style="padding-left: 10px;padding-right: 10px;background-color: whitesmoke;">
-		<div class="row mb-2 mt-2">
-			<em class="col text-muted lh-base mb-1"><i>PIC Contacts</i></em>
-			<div class="col-auto">
-				<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddContactForm()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Contact</button>
-			</div>
-		</div>
-		<div class="col-12">
-			<div id="contact-area" class="row">
-				@foreach ($lead_contacts as $list)
-				<div id="contact-{{ $list->plc_id }}" class="col-md-6 col-xl-3">
-					<div class="card" style="margin-left: 0px;margin-right: 0px;padding-left: 0px;padding-right: 0px;margin-bottom: 8px;">
-						<div class="card-status-start bg-primary"></div>
-						<div class="card-body card-body-contact" style="">
-							<div class="row">
-								<div class="col-auto">
-									<span class="avatar"><i class="ri-user-line"></i></span>
-								</div>
-								<div class="col text-truncate" style="padding-left: 0px;">
-									<strong>{{ $list->cnt_fullname }}</strong>
-									<div class="text-muted text-truncate">{{ $list->cst_name }}</div>
-								</div>
-								<div class="col-auto align-self-center">
-									<div class="dropdown">
-										<button href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>
-										<div class="dropdown-menu dropdown-menu-end">
-											<a class="dropdown-item" href="#contact-area" onclick="actionRemoveContact({{ $list->plc_id }})"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				@endforeach
-			</div>
-		</div>
-	</div>
-	{{-- ========================================================================================================= --}}
-	<div class="card-body pt-3 pb-3" style="padding-left: 10px;padding-right: 10px;">
-		<div id="init-page-activities" class="row mb-2">
-			<em class="col text-muted lh-base mb-1"><i>Activities</i></em>
-			<div class="col-auto">
-				<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddActivities()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Activity</button>
-			</div>
-		</div>
-		<div class="col-12 mb-3">
-			<div class="table">
-				<table class="table table-vcenter custom-datatables">
-					<thead>
-						<tr>
-							<th style="width: 1%;"></th>
-							<th style="width: 19%;">Due Date</th>
-							<th style="width: 10%;">Activity</th>
-							<th style="width: 45%;">Update Info</th>
-							<th style="width: 15%;">Date Created</th>
-							<th style="width: 10%;">Complete</th>
-						</tr>
-					</thead>
-					<tbody id="listDataActivitySection1"></tbody>
-					<tbody id="listDataActivitySection2"></tbody>
-					<tbody id="listDataActivitySection3"></tbody>
-				</table>
-			</div>
-		</div>
-	</div>
 </div>
 {{-- ===================================================================================================== --}}
 <div id="modal-change-subvalue" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
@@ -360,7 +253,7 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-create-purchased" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-create-purchased" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
@@ -414,7 +307,7 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
 <div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
@@ -508,19 +401,15 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-change-sale" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="modal-change-invoice" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Salesperson</h5>
+				<h5 class="modal-title">Change Invoice Number</h5>
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent6" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					<select type="text" class="form-select select-sales" name="select_sales" id="select-user-sales" value="">
-						<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
-						@foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}">{{ $list->name }}</option>
-						@endforeach
-					</select>
+					@csrf
+					<input type="text" id="input-invoice" class="form-control pb-1 pt-1" name="number_invoice" placeholder="Input placeholder">
 				</form>
 			</div>
 			<div class="modal-footer p-3 pt-0">
@@ -531,20 +420,20 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-add-team" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="modal-change-date" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
-				<h5 class="modal-title">Add Teams Sales</h5>
+				<h5 class="modal-title">Change Purchase Date</h5>
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent7" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					<select type="text" class="form-select select-teams" name="select_teams[]" multiple  id="select-user-team" value="">
-						@foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member_id)) selected @endif >
-							{{ $list->name }}
-						</option>
-						@endforeach
-					</select>
+					@csrf
+					<div class="input-group">
+						<span class="input-group-text p-1">
+							<i class="ri-calendar-2-line"></i>
+						</span>
+						<input type="text" id="datepicker_purchase" name="date_purchase" class="form-control p-1" placeholder="Purchase date" autocomplete="off">
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer p-3 pt-0">
@@ -555,7 +444,7 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-add-contacts" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-add-contacts" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -581,9 +470,9 @@ opportunitys
 							<div class="col">
 								<select type="text" class="form-select select-sales" name="customer" id="select-customer" value="">
 									<option value="{{ null }}"></option>
-									{{-- @foreach ($opportunity_customer as $list)
+									@foreach ($opportunity_customer as $list)
 									<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
-									@endforeach --}}
+									@endforeach
 								</select>
 							</div>
 						</div>
@@ -619,9 +508,9 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
-<div id="modal-add-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-add-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
@@ -644,7 +533,7 @@ opportunitys
 										<input type="text" id="datepicker_start" name="start_date" class="form-control p-1" placeholder="Start Date" autocomplete="off">
 									</div>
 								</div> --}}
-								<div class="col" style="padding: 0px;margin-left: 0px;">
+								{{-- <div class="col" style="padding: 0px;margin-left: 0px;">
 									<div class="input-group">
 										<span class="input-group-text p-1">
 											<i class="ri-calendar-2-line"></i>
@@ -691,7 +580,6 @@ opportunitys
 								<label class="col-3 col-form-label">Person in Charge</label>
 								<div class="col" style="padding: 0px;">
 									<select type="text" id="select-pic-user" class="form-select ts-input-custom" multiple name="pic_user[]" placeholder="Select PIC..."  value="">
-										{{-- <option value="{{ null }}">{{ null }}</option> --}}
 										@foreach ($lead_contacts as $list)
 										<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
 										@endforeach
@@ -700,10 +588,6 @@ opportunitys
 							</div>
 						</div>
 						<div class="col-xl-12 col-md-12">
-							{{-- <div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Summary</label>
-								<textarea id="notesActivities" name="activity_summary"></textarea>
-							</div> --}}
 							<div class="mb-2" style="margin-right: 0px;">
 								<label class="col-12 col-form-label">Activity Describe</label>
 								<textarea id="notesActivitiesDescribe" name="activity_describe"></textarea>
@@ -736,35 +620,32 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
 <div id="modal-update-information" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Update Info</h5>
+				<h5 class="modal-title">Purchase Notes</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
 			</div>
 			<div class="modal-body p-3">
-				<form id="formContent10" name="form_content10" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+				<form id="formContent2" name="form_content2" enctype="multipart/form-data" action="javascript:void(0)" method="post">
 					@csrf
-					<input type="hidden" id="opportunity-status-id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
-					<input type="hidden" id="activity-id" name="activity_id" value="" readonly>
 					<div class="mb-2" style="margin-right: 0px;">
-						<label class="col-12 col-form-label">Summary</label>
-						<textarea id="initUpdateInfo" class="notesUpdateInfo" name="activity_summary"></textarea>
+						<textarea id="notesOpr" class="notesUpdateInfo" name="notes"></textarea>
 					</div>
 				</form>
 			</div>
-			<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
+			<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 16px;">
 				<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-				<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent10"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
+				<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent2"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
 			</div>
 		</div>
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-edit-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-edit-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
@@ -788,7 +669,7 @@ opportunitys
 										<input type="text" id="datepicker_start" name="start_date" class="form-control p-1" placeholder="Start Date" autocomplete="off">
 									</div>
 								</div> --}}
-								<div class="col" style="padding: 0px;margin-left: 0px;">
+								{{-- <div class="col" style="padding: 0px;margin-left: 0px;">
 									<div class="input-group">
 										<span class="input-group-text p-1">
 											<i class="ri-calendar-2-line"></i>
@@ -876,9 +757,9 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
-<div id="modal-change-activity-status" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-change-activity-status" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
@@ -903,17 +784,17 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
 <div id="modal-change-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
-				<h5 class="modal-title">Edit Products Opportunity</h5>
+				<h5 class="modal-title">Edit Products</h5>
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent13" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					@csrf
-					<input type="text" id="prd-id" name="prd_id" value="">
+					<input type="hidden" id="prd-id" name="prd_id" value="" readonly>
 					<div class="mb-2 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Set Product Priciple</label>
 						<div class="col" style="padding: 0px;">
@@ -960,7 +841,7 @@ opportunitys
 	</div>
 </div>
 {{-- ===================================================================================================== --}}
-<div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- <div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body p-3">
@@ -974,7 +855,7 @@ opportunitys
 							{{ $list->name }}
 						</option>
 						@endforeach --}}
-						@foreach ($user_tech as $list)
+						{{-- @foreach ($user_tech as $list)
 						<option value="{{ $list->id }}" @if (in_array($list->id, $team_tech_id)) selected @endif>
 							<b>{{ $list->uts_team_name }}</b> - {{ $list->name }}
 						</option>
@@ -988,7 +869,7 @@ opportunitys
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 {{-- ===================================================================================================== --}}
 <div id="modal-add-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
@@ -1158,144 +1039,6 @@ opportunitys
 </script>
 {{-- ============================================================================================ --}}
 <script>
-var select_signed_user = new TomSelect("#select-signed-user",{
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_signed_user_team = new TomSelect("#select-signed-user-team",{
-	persist: false,
-	createOnBlur: true,
-	maxItems: 10,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user-team">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_type_activity = new TomSelect("#select-type-activity",{
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_pic_user = new TomSelect("#select-pic-user",{
-	maxItem: 5,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-pic-user">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_signed_user_i = new TomSelect("#select-signed-user-i",{
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user-i">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_signed_user_team_i = new TomSelect("#select-signed-user-team-i",{
-	persist: false,
-	createOnBlur: true,
-	maxItems: 10,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user-team-i">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_type_activity_i = new TomSelect("#select-type-activity-i",{
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-type-activity-i">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_pic_user_i = new TomSelect("#select-pic-user-i",{
-	persist: false,
-	createOnBlur: true,
-	maxItems: 10,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user-i">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_act_status = new TomSelect("#select-act-status",{
-	persist: false,
-	createOnBlur: true,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-act-status">'+escape(data.title)+'</div>';
-		}
-	}
-});
 var select_principles = new TomSelect("#select-principles",{
 	persist: false,
 	createOnBlur: true,
@@ -1358,24 +1101,7 @@ var select_products_update = new TomSelect("#select-product-update",{
 		}
 	}
 });
-var user_tech = new TomSelect("#select-user-tech",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		maxItems: 10,
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="select-user-tech">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-/*================================================================================================*/
+/***************************************************************************************************/
 select_principles.on('change',function () {
 	var prd_id = select_principles.getValue();
 	actionGetProduct(prd_id);
@@ -1384,6 +1110,16 @@ select_principles_update.on('change',function () {
 	var prd_id = select_principles_update.getValue();
 	actionGetProductUpdate(prd_id);
 });
+/***************************************************************************************************/
+var notes_result = tinymce.init({
+	selector: 'textarea#notesOpr',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+	}
+});
+/***************************************************************************************************/
 const picker_a = new easepick.create({
 	element: "#datepicker_purchase",
 	css: [ "{{ asset('plugins/litepicker/bundle/index.css') }}" ],
@@ -1394,44 +1130,10 @@ const picker_a = new easepick.create({
 		darkMode: false
 	},
 });
-const picker_b = new easepick.create({
-	element: "#datepicker_due",
-	css: [ "{{ asset('plugins/litepicker/bundle/index.css') }}" ],
-	zIndex: 10,
-	format: "YYYY-MM-DD hh:mm a",
-	plugins: [
-		"TimePlugin","AmpPlugin"
-	],
-	TimePlugin: {
-		format12: true
-	},
-	AmpPlugin: {
-		resetButton: true,
-		darkMode: false
-	},
-});
-const picker_c = new easepick.create({
-	element: "#datepicker_due_edit",
-	css: [ "{{ asset('plugins/litepicker/bundle/index.css') }}" ],
-	zIndex: 10,
-	format: "YYYY-MM-DD hh:mm a",
-	plugins: [
-		"TimePlugin","AmpPlugin"
-	],
-	TimePlugin: {
-		format12: true
-	},
-	AmpPlugin: {
-		resetButton: true,
-		darkMode: false
-	},
-});
 </script>
 <script>
-function actionAutoSaveUpdateNote() {  
-};
+
 function actionUpdateNote() {
-	var opr_notes = tinymce.get('textingContent1').getContent();  
 	$.ajaxSetup({
 		headers: {
 			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1439,34 +1141,27 @@ function actionUpdateNote() {
 	});
 	$.ajax({
 		type: 'POST',
-		url: "{{ route('store-opportunity-notes') }}",
 		async: false,
+		url: "{{ route('source-opportunity-note') }}",
 		data: {
-			"id": "{{ $id_oppor }}",
-			"notes": opr_notes
+			'idOpportunity':'{{ $id_oppor }}',
 		},
 		success: function(result) {
-			if (result.param == true) {
-				$.alert({
-					type: 'green',
-					title: 'Success',
-					content: 'Data already store to database.',
-					animateFromElement: false,
-					animation: 'opacity',
-					closeAnimation: 'opacity'
-				});
-			}else{
-				$.alert({
-					type: 'red',
-					title: 'Something error!',
-					content: result.message,
-					animateFromElement: false,
-					animation: 'opacity',
-					closeAnimation: 'opacity'
-				});
-			}
-		}
+			tinymce.remove('#notesOpr');
+			tinymce.init({
+				selector: 'textarea#notesOpr',
+				height : "300",
+				promotion: false,
+				statusbar: false,
+				setup: function(editor) {
+					editor.on('init',function(e) {
+						editor.setContent(result.note);
+					});
+				}
+			});
+		}	
 	});
+	$('#modal-update-information').modal('toggle');
 };
 function actionUpdatingStatus(status) {
 	var idopportunity = {{ $id_oppor }};
@@ -1546,123 +1241,6 @@ function actionChangeImgSts(status) {
 		$('#img-status-7').show();
 	}
 	
-};
-function actionChangeStatus(x,y) {
-	if (y == '1') {
-		$('#btn-opr-status-new').removeClass('btn-ghost-light').removeClass('bg-blue-lt').addClass('btn-ghost-primary');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-win').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-red-lt');
-		$('#btn-go-po').hide();
-		$('#btn-opr-status-lose').show();
-		$('#btn-lock').hide();
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}else if(y == '2'){
-		$('#btn-opr-status-new').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-light').removeClass('bg-blue-lt').addClass('btn-ghost-primary');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-win').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-red-lt');
-		$('#btn-go-po').hide();
-		$('#btn-opr-status-lose').show();
-		$('#btn-lock').hide(2);
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}else if (y == '3'){
-		$('#btn-opr-status-new').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-light').removeClass('bg-blue-lt').addClass('btn-ghost-primary');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-win').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-red-lt');
-		$('#btn-go-po').hide();
-		$('#btn-opr-status-lose').show();
-		$('#btn-lock').hide();
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}else if (y == '4'){
-		$('#btn-opr-status-new').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-light').removeClass('bg-blue-lt').addClass('btn-ghost-primary');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-win').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-red-lt');
-		$('#btn-go-po').hide();
-		$('#btn-opr-status-lose').show();
-		$('#btn-lock').hide();
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}else if (y == '5'){
-		$('#btn-opr-status-new').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-light').removeClass('bg-blue-lt').addClass('btn-ghost-primary');
-		$('#btn-opr-status-win').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-red-lt');
-		$('#btn-go-po').hide();
-		$('#btn-opr-status-lose').show();
-		$('#btn-lock').hide();
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}else if (y == '6'){
-		$('#btn-opr-status-new').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-win').removeClass('btn-ghost-light').removeClass('bg-blue-lt').addClass('btn-ghost-primary');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-danger').addClass('btn-ghost-light').addClass('bg-red-lt');
-		$('#btn-go-po').show();
-		$('#btn-opr-status-lose').hide();
-		$('#btn-lock').show();
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}else{
-		$('#btn-opr-status-new').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-presentation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-poc').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-proposal').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-negotiation').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-win').removeClass('btn-ghost-primary').addClass('btn-ghost-light').addClass('bg-blue-lt');
-		$('#btn-opr-status-lose').removeClass('btn-ghost-light').removeClass('bg-red-lt').addClass('btn-ghost-danger');
-		$('#btn-go-opportunity').hide();
-		$('#btn-death-end').show();
-		$('#btn-lock').hide();
-		actionUpdatingStatus(y);
-		actionChangeImgSts(y);
-	}
-};
-function actionCreatePO() {  
-	$('#modal-create-purchased').modal('toggle');
-};
-function actionStoreOpporNotes() {
-	var opr_notes = $('textarea#textingContent1').val();
-	var opportunity_id = "{{ $id_oppor }}";
-	$.ajaxSetup({
-		headers: {
-			"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
-		}
-	});
-	$.ajax({
-		type: 'POST',
-		url: "{{ route('store-opportunity-notes') }}",
-		data: {
-			"id":opportunity_id,
-			"notes":opr_notes,
-		},
-		success: function(result) {
-			console.log(1);
-			}
-	});
 };
 function actionChangeSubvalue() {
 	$.ajaxSetup({
@@ -1748,12 +1326,6 @@ function actionChangeValRevenue(){
 	});
 	$('#modal-change-revenue-value').modal('toggle');
 }
-function actionChangeSales() {  
-	$('#modal-change-sale').modal('toggle');
-};
-function actionAddTeam() {  
-	$('#modal-add-team').modal('toggle');
-};
 function actionInstantIDR(number){
 	return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -1791,108 +1363,6 @@ function handleChangeParam(parameter) {
 	}
 	actionIdentQualificatin(rules);
 };
-function actionAddContactForm() {
-	$('#modal-add-contacts').modal('toggle');
-};
-function actionAddCardAvatar(params) {
-	$('#contact-area').append(
-		'<div id="contact-'+params.contact_id+'" class="col-md-6 col-xl-3">'
-			+'<div class="card" style="margin-left: 0px;margin-right: 0px;padding-left: 0px;padding-right: 0px;margin-bottom: 8px;">'
-				+'<div class="card-status-start bg-primary"></div>'
-				+'<div class="card-body card-body-contact" style="">'
-					+'<div class="row">'
-						+'<div class="col-auto"><span class="avatar"><i class="ri-user-line"></i></span></div>'
-						+'<div class="col text-truncate" style="padding-left: 0px;"><strong>'+params.name_cnt+'</strong><div class="text-muted text-truncate">'+params.name_cst+'</div>'
-					+'</div>'
-					+'<div class="col-auto align-self-center">'
-						+'<div class="dropdown">'
-							+'<button href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>'
-								+'<div class="dropdown-menu dropdown-menu-end">'
-									+'<a class="dropdown-item" href="#contact-area" onclick="actionRemoveContact('+params.contact_id+')"><i class="ri-user-follow-line" style="margin-right:6px;"></i>Remove</a>'
-								+'</div>'
-							+'</div>'
-						+'</div>'
-					+'</div>'
-				+'</div>'
-			+'</div>'
-		+'</div>'
-	);
-};
-function actionRemoveContact(params) {
-	$.ajaxSetup({
-		headers: {
-			"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
-		}
-	});
-	$.ajax({
-		type: "POST",
-		url: "{{ route('remove-lead-contact') }}",
-		data: {
-			id:params
-		},
-		success: function(result) {
-			$('#'+result.id_card).remove();
-		}
-	});
-};
-function actionLoadDataActivities() {
-	$.ajaxSetup({
-		headers: {
-			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-		}
-	});
-	$.ajax({
-		type: 'POST',
-		url: "{{ route('lead-activities') }}",
-		data: {
-			"lead_id": "{{ $id_lead }}"
-		},
-		success: function(result) {
-			$('#listDataActivitySection1').html(result.data_activity_section_i);
-			$('#listDataActivitySection2').html(result.data_activity_section_ii);
-			$('#listDataActivitySection3').html(result.data_activity_section_iii);
-		}
-	});
-}
-function actionAddActivities() {  
-	$('#modal-add-activities').modal('toggle');
-};
-function actionViewInputTeam() {
-	$('#btn-add-team').hide();
-	$('#btn-remove-team').show(); 
-	$('#select-signed-user-team-area').slideDown();
-};
-function actionViewInputTeamI() {
-	$('#btn-add-team-i').hide();
-	$('#btn-remove-team-i').show(); 
-	$('#select-signed-user-team-area-i').slideDown();
-};
-function actionRemoveInputTeam(x) {
-	x.clear();
-	$('#btn-remove-team').hide();  
-	$('#btn-add-team').show();
-	$('#select-signed-user-team-area').slideUp();
-};
-function actionRemoveInputTeamI(x) {
-	x.clear();
-	$('#btn-remove-team-i').hide();  
-	$('#btn-add-team-i').show();
-	$('#select-signed-user-team-area-i').slideUp();
-};
-function actionTodo(x) { 
-	if (x == 'todo_done') {
-		document.getElementById("todo_running").checked = false;
-	}else{
-		document.getElementById("todo_done").checked = false;
-	}
-};
-function actionTodo_i(x) { 
-	if (x == 'todo_done') {
-		document.getElementById("todo_running_i").checked = false;
-	}else{
-		document.getElementById("todo_done_i").checked = false;
-	}
-};
 function resetFormConten6(x,y,z) {
 	var actionFollow = $('#action_todo').val();
 	// picker_a.clear();
@@ -1911,36 +1381,6 @@ function resetFormConten6(x,y,z) {
 	tinyMCE.activeEditor.setContent('');
 	document.getElementById("todo_running").checked = false;
 	document.getElementById("todo_done").checked = false;
-}
-function actionRunningListMin() {
-	$('.act-section-1').hide(100);
-	$('#btn-area-run-act-min').hide();
-	$('#btn-area-run-act-plus').show();
-}
-function actionRunningListPlus() {
-	$('.act-section-1').show(100);
-	$('#btn-area-run-act-plus').hide();
-	$('#btn-area-run-act-min').show();
-}
-function actionBereadyListMin() {
-	$('.act-section-2').hide(100);
-	$('#btn-area-br-act-min').hide();
-	$('#btn-area-br-act-plus').show();
-}
-function actionBereadyListPlus() {
-	$('.act-section-2').show(100);
-	$('#btn-area-br-act-plus').hide();
-	$('#btn-area-br-act-min').show();
-}
-function actionFinishListMin() {
-	$('.act-section-3').hide(100);
-	$('#btn-area-finish-act-min').hide();
-	$('#btn-area-finish-act-plus').show();
-}
-function actionFinishListPlus() {
-	$('.act-section-3').show(100);
-	$('#btn-area-finish-act-plus').hide();
-	$('#btn-area-finish-act-min').show();
 }
 function actionGetDataInfoAct(id) {
 	var res_update_info ='';  
@@ -2014,136 +1454,8 @@ function actionUpdateInfo(id) {
 			editor.on('init',function(e){
 				editor.setContent(actionGetDataInfoAct(id));
 			});
-			// editor.on('input',function (e) {
-			// 	var content_info = editor.getContent(); 
-			// 	actionStoreUpdateInfo(id,content_info);
-			// });
 		}
 	});
-};
-function actionUpdateActivity(id) { 
-	var res_act = actionGetDataActivity(id);
-	var val_assign_opt = [];
-	var val_assign_team = [];
-	var val_assign_pic = [];
-	$('#modal-edit-activities').modal('toggle');
-	/**/
-	$('#act-id').val(id);
-	$('#datepicker_due_edit').val(res_act.date_due);
-	select_type_activity_i.setValue([res_act.activity[0]]);
-	for (let i = 0; i < res_act.assign.length; i++) {
-		val_assign_opt.push({id:res_act.assign[0],title:res_act.assign[1]});
-	}
-	select_signed_user_i.addOptions(val_assign_opt);
-	select_signed_user_i.setValue(res_act.assign[0]);
-	if (res_act.param_team == true) {
-		$('#select-signed-user-team-area-i').show();
-		$('#btn-remove-team-i').show();
-		$('#btn-add-team-i').hide();
-		select_signed_user_team_i.setValue(res_act.team);
-	}
-	for (let a = 0; a < res_act.user_cst_id.length; a++) {
-		val_assign_pic.push({id:res_act.user_cst_id[a],title:res_act.user_cst_name[a]});
-	}
-	select_pic_user_i.addOptions(val_assign_pic);
-	select_pic_user_i.setValue(res_act.user_cst_id);
-	if (res_act.actstatus == 'finished') {
-		$('#todo_done_i').prop('checked', true); 
-		$('#todo_running_i').prop('checked', false);
-	}else if (res_act.actstatus == 'beready') {
-		$('#todo_done_i').prop('checked', false); 
-		$('#todo_running_i').prop('checked', false);
-	}else{
-		$('#todo_done_i').prop('checked', false); 
-		$('#todo_running_i').prop('checked', true);
-	}
-	if (res_act.todo_describe == null) {
-		var todo_describe = "";
-	}else{
-		var todo_describe = res_act.todo_describe;
-	}
-	if (res_act.todo_result == null) {
-		var todo_result = "";
-	}else{
-		var todo_result = res_act.todo_result;
-	}
-	tinymce.remove('#act-note-describe');
-	tinymce.init({
-		selector: 'textarea#act-note-describe',
-		height : "300",
-		promotion: false,
-		statusbar: false,
-		setup: function(editor) {
-			editor.on('init',function(e) {
-				editor.setContent(todo_describe);
-			});
-		}
-	});
-	tinymce.remove('#act-note-result');
-	tinymce.init({
-		selector: 'textarea#act-note-result',
-		height : "300",
-		promotion: false,
-		statusbar: false,
-		setup: function(editor) {
-			editor.on('init',function(e) {
-				editor.setContent(todo_result);
-			});
-		}
-	});
-};
-function actionRemoveAct(id) {
-	$.confirm({
-    title: 'Warning',
-    content: 'Are you sure will delete this activity ?',
-		type: 'blue',
-    buttons: {
-      yes: function () {
-				$.ajaxSetup({
-					headers: {
-						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-					}
-				});
-				$.ajax({
-					type: 'POST',
-					url: "{{ route('delete-data-lead-activities') }}",
-					data: {
-						"id":id
-					},
-					success: function(result) {
-						actionLoadDataActivities();
-						if (result.param == true) {
-							$.alert({
-								type: 'green',
-								title: 'Success',
-								content: 'Data was deleted from database.',
-								animateFromElement: false,
-								animation: 'opacity',
-								closeAnimation: 'opacity'
-							});
-						}else{
-							$.alert({
-								type: 'red',
-								title: 'Something error!',
-								content: result.message,
-								animateFromElement: false,
-								animation: 'opacity',
-								closeAnimation: 'opacity'
-							});
-						}
-					}
-				});
-      },
-      cancel: function () {
-      },
-    }
-	});
-};
-function actionChangeStatusAct(id) {
-	$('#activity_id_i').val(id);
-	$('#modal-change-activity-status').modal('toggle');
-	var res_act_i = actionGetDataActivity(id);
-	select_act_status.setValue([res_act_i.actstatus]);
 };
 function actionGetProduct(id) {  
 	var dataOption_2 = [];  
@@ -2198,9 +1510,6 @@ function actionGetProductUpdate(id) {
 	// select_products_update.clear();
 	// select_products_update.clearOptions();
 	select_products_update.addOptions(dataOption_3);
-};
-function actionAddTechnical() {  
-	$('#modal-add-technical').modal('toggle');
 };
 function actionAddProduct() {
 	$('#modal-add-product').modal('toggle');
@@ -2303,7 +1612,8 @@ function actionDelRowForm4(button) {
 	var tabForm4 = document.getElementById("table-form-other-cost");
 	tabForm4.deleteRow(rowTabForm4.rowIndex);
 };
-function actionOpenPO() {  
+function actionChangeInvoice() {
+	var id_purchase = "{{ $id_purchase }}"
 	$.ajaxSetup({
 		headers: {
 			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -2311,14 +1621,53 @@ function actionOpenPO() {
 	});
 	$.ajax({
 		type: 'POST',
-		url: "{{ route('action-check-purchase') }}",
+		url: "{{ route('action-get-invoice-number') }}",
 		async: false,
 		data: {
-			"opr_id": "{{ $id_oppor }}", 
+			"id": id_purchase,
+		},
+		success: function(result) {
+			$('#input-invoice').val(result.number);
+		}
+	});
+	$('#modal-change-invoice').modal('toggle');
+};
+function actionChangeDate() {
+	var id_purchase = "{{ $id_purchase }}"
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('action-get-purchase-date') }}",
+		async: false,
+		data: {
+			"id": id_purchase,
+		},
+		success: function(result) {
+			$('#datepicker_purchase').val(result.date);
+		}
+	});  
+	$('#modal-change-date').modal('toggle');
+};
+function actionOpenOpr() {  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('action-check-opportunity') }}",
+		async: false,
+		data: {
+			"id": "{{ $id_purchase }}"
 		},
 		success: function(result) {
 			if (result.param == true) {
-				window.open('{{ url("purchased/detail")}}/'+result.id);
+				window.open('{{ url("opportunities/detail-opportunity")}}/'+result.opr);
 			} else {
 				$.alert({
 					type: 'red',
@@ -2336,8 +1685,8 @@ function actionOpenPO() {
 {{-- ============================================================================================ --}}
 <script>
 $(document).ready(function() {
-	actionLoadDataActivities();
-	/*=================================================================================================================*/
+	/*******************************************************************************************/
+	
 	$("#formContent1").submit(function(e) {
 		e.preventDefault();
 		var formData1 = new FormData(this);
@@ -2361,32 +1710,39 @@ $(document).ready(function() {
 			}
 		});
 	});
-	/*=================================================================================================================*/
+	/*******************************************************************************************/
 	$("#formContent2").submit(function(e) {
-		e.preventDefault();
+		e.preventDefault();  
 		var formData2 = new FormData(this);
 		formData2.append("id", "{{ $id_oppor }}");
 		$.ajaxSetup({
 			headers: {
-				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 			}
 		});
 		$.ajax({
-			type: "POST",
-			url: "{{ route('store-data-purchase-i') }}",
+			type: 'POST',
+			url: "{{ route('store-opportunity-notes') }}",
 			data: formData2,
 			cache: false,
 			contentType: false,
 			processData: false,
 			success: function(result) {
+				$('#po-notes').html(result.note);
 				if (result.param == true) {
-					$('#btn-g-status').hide();
-					$('#btn-g-lock').hide();
-					$('#btn-g-page-purchase').show();
 					$.alert({
 						type: 'green',
 						title: 'Success',
-						content: 'Data already created.',
+						content: 'Data already store to database.',
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
+				}else{
+					$.alert({
+						type: 'red',
+						title: 'Something error!',
+						content: result.message,
 						animateFromElement: false,
 						animation: 'opacity',
 						closeAnimation: 'opacity'
@@ -2395,7 +1751,7 @@ $(document).ready(function() {
 			}
 		});
 	});
-	/*=================================================================================================================*/
+	/*******************************************************************************************/
 	$("#formContent3").submit(function(e) {
 		e.preventDefault();
 		var formData3 = new FormData(this);
@@ -2419,7 +1775,7 @@ $(document).ready(function() {
 			}
 		});
 	});
-	/*=================================================================================================================*/
+	/*******************************************************************************************/
 	$("#formContent4").submit(function(e) {
 		e.preventDefault();
 		var formData4 = new FormData(this);
@@ -2442,7 +1798,7 @@ $(document).ready(function() {
 			}
 		});
 	});
-	/*=================================================================================================================*/
+	/*******************************************************************************************/
 	$("#formContent5").submit(function(e) {
 		e.preventDefault();
 		var formData5 = new FormData(this);
@@ -2464,11 +1820,11 @@ $(document).ready(function() {
 			}
 		});
 	});
-	/*=================================================================================================================*/
-	$('#formContent6').submit(function(e) {
+	/*******************************************************************************************/
+	$("#formContent6").submit(function(e) {
 		e.preventDefault();
 		var formData6 = new FormData(this);
-		formData6.append("id", "{{ $id_lead }}");
+		formData6.append("id", "{{ $id_purchase }}");
 		$.ajaxSetup({
 			headers: {
 				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
@@ -2476,21 +1832,29 @@ $(document).ready(function() {
 		});
 		$.ajax({
 			type: "POST",
-			url: "{{ route('store-change-sales-lead') }}",
+			url: "{{ route('store-invoice-number') }}",
 			data: formData6,
 			cache: false,
 			contentType: false,
 			processData: false,
 			success: function(result) {
-				$('#user-sale').html(result.user);
+				$('#prt-invoice-number').html(result.number);
+				$.alert({
+					type: 'green',
+					title: 'Success',
+					content: 'Data already store to database.',
+					animateFromElement: false,
+					animation: 'opacity',
+					closeAnimation: 'opacity'
+				});
 			}
 		});
 	});
-	/*=================================================================================================================*/
+	/*******************************************************************************************/
 	$("#formContent7").submit(function(e) {
 		e.preventDefault();
 		var formData7 = new FormData(this);
-		formData7.append("id", "{{ $id_lead }}");
+		formData7.append("id", "{{ $id_purchase }}");
 		$.ajaxSetup({
 			headers: {
 				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
@@ -2498,214 +1862,28 @@ $(document).ready(function() {
 		});
 		$.ajax({
 			type: "POST",
-			url: "{{ route('store-select-team') }}",
+			url: "{{ route('store-purchase-date') }}",
 			data: formData7,
 			cache: false,
 			contentType: false,
 			processData: false,
 			success: function(result) {
-				$('#user-team').html(result.user_member);
+				$('#prt-purchase-date').html(result.date);
+				$.alert({
+					type: 'green',
+					title: 'Success',
+					content: 'Data already store to database.',
+					animateFromElement: false,
+					animation: 'opacity',
+					closeAnimation: 'opacity'
+				});
 			}
 		});
 	});
-	/*=================================================================================================================*/
-	$("#formContent8").submit(function(e) {
-		e.preventDefault();
-		var formData8 = new FormData(this);
-		formData8.append("id", "{{ $id_lead }}");
-		$.ajaxSetup({
-			headers: {
-				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
-			}
-		});
-		$.ajax({
-			type: "POST",
-			url: "{{ route('store-add-lead-contact') }}",
-			data: formData8,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				if (result.param == true) {
-					actionAddCardAvatar(result);
-				}else{
-					alert('This contact already added.');
-				}
-			}
-		});
-	});
-	/*=================================================================================================================*/
-	$('#formContent9').submit(function(e) {
-		e.preventDefault();
-		var formData9 = new FormData(this);
-		formData9.append("lead_id", "{{ $id_lead }}");
-		formData9.append("alt_describe", tinymce.get('notesActivitiesDescribe').getContent());
-		formData9.append("alt_result", tinymce.get('notesActivitiesResult').getContent());
-		$.ajaxSetup({
-			headers: {
-				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		});
-		$.ajax({
-			type: 'POST',
-			url: "{{ route('store-data-lead-activities') }}",
-			data: formData9,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				if (result.param == true) {
-					$.alert({
-						type: 'green',
-						title: 'Success',
-						content: 'Data already store to database.',
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-					actionLoadDataActivities();
-					resetFormConten6(select_signed_user_team,select_signed_user,select_type_activity);
-				}else{
-					$.alert({
-						type: 'red',
-						title: 'Something error!',
-						content: result.message,
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-				}
-			}
-		});
-	});
-	/*=================================================================================================================*/
-	$('#formContent10').submit(function(e) {
-		e.preventDefault();
-		var formData10 = new FormData(this);
-		formData10.append("lead_id", "{{ $id_lead }}");
-		$.ajaxSetup({
-			headers: {
-				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		});
-		$.ajax({
-			type: 'POST',
-			url: "{{ route('store-data-update-info') }}",
-			data: formData10,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				if (result.param == true) {
-					actionLoadDataActivities();
-					$.alert({
-						type: 'green',
-						title: 'Success',
-						content: 'Data already store to database.',
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-				}else{
-					$.alert({
-						type: 'red',
-						title: 'Something error!',
-						content: result.message,
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-				}
-			}
-		});		
-	});
-	$('#formContent11').submit(function(e) {
-		e.preventDefault();
-		var formData11 = new FormData(this);
-		formData11.append("lead_id", "{{ $id_lead }}");
-		formData11.append("alt_describe", tinymce.get('act-note-describe').getContent());
-		formData11.append("alt_result", tinymce.get('act-note-result').getContent());
-		$.ajaxSetup({
-			headers: {
-				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		});
-		$.ajax({
-			type: 'POST',
-			url: "{{ route('update-data-lead-activities') }}",
-			data: formData11,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				if (result.param == true) {
-					$.alert({
-						type: 'green',
-						title: 'Success',
-						content: 'Data already store to database.',
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-					actionLoadDataActivities();
-					resetFormConten6(select_signed_user_team,select_signed_user,select_type_activity);
-				}else{
-					$.alert({
-						type: 'red',
-						title: 'Something error!',
-						content: result.message,
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-				}
-			}
-		});
-	});
-	$('#formContent12').submit(function(e) {
-		e.preventDefault();
-		var formData12 = new FormData(this);
-		formData12.append("lead_id", "{{ $id_lead }}");
-		$.ajaxSetup({
-			headers: {
-				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		});
-		$.ajax({
-			type: 'POST',
-			url: "{{ route('update-status-lead-activities') }}",
-			data: formData12,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				if (result.param == true) {
-					$.alert({
-						type: 'green',
-						title: 'Success',
-						content: 'Data already updated.',
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-					actionLoadDataActivities();
-				}else{
-					$.alert({
-						type: 'red',
-						title: 'Something error!',
-						content: result.message,
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-				}
-			}
-		});
-	});
+	/*******************************************************************************************/
 	$('#formContent13').submit(function(e) {
 		e.preventDefault();
 		var formData13 = new FormData(this);
-		formData13.append("lead_id", "{{ $id_lead }}");
 		formData13.append("oppor_id", "{{ $id_oppor }}");
 		formData13.append("alt_principle",$("#select-principles-update option:selected").text());
 		formData13.append("alt_product",$("#select-product-update option:selected").text());
@@ -2745,31 +1923,10 @@ $(document).ready(function() {
 			}
 		});
 	});
-	$("#formContent14").submit(function(e) {
-		e.preventDefault();
-		var formData14 = new FormData(this);
-		formData14.append("id", "{{ $id_lead }}");
-		$.ajaxSetup({
-			headers: {
-				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
-			}
-		});
-		$.ajax({
-			type: "POST",
-			url: "{{ route('store-select-tech') }}",
-			data: formData14,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				$('#user-tech').html(result.user_tech);
-			}
-		});
-	});
+	/*******************************************************************************************/
 	$('#formContent15').submit(function(e) {
 		e.preventDefault();
 		var formData15 = new FormData(this);
-		formData15.append("lead_id", "{{ $id_lead }}");
 		formData15.append("oppor_id", "{{ $id_oppor }}");
 		formData15.append("alt_principle",$("#select-principles option:selected").text());
 		formData15.append("alt_product",$("#select-product option:selected").text());
@@ -2885,76 +2042,7 @@ var notes_describe = tinymce.init({
 	setup: function(editor) {
 	}
 });
-var notes_result = tinymce.init({
-	selector: 'textarea#notesActivitiesResult',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-	}
-});
+
 </script>
 {{-- ============================================================================================ --}}
-<script>
-$(document).ready(function() {
-	var user_sales = new TomSelect("#select-user-sales",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="province-selected">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-	/*=================================================================================================================*/
-	var user_team = new TomSelect("#select-user-team",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		maxItems: 10,
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="province-selected">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-	/*=================================================================================================================*/
-	var user_contact = new TomSelect("#select-contact",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		onOptionAdd:  function () {
-			$('#additional-form-contact').show(200);
-		},
-		onItemRemove: function () {
-			$('#additional-form-contact').hide(200);
-		},
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="contact-selected">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-	/*=================================================================================================================*/
-});
-</script>
 @endpush
