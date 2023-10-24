@@ -62,8 +62,7 @@
                 <img src="" id="inputPreview" class="rounded-2" style="display: none;">
               </div>
               <div id="areaCloseImage">
-                <button id="closeImageProfile" class="badge" style="display: none;"><i
-                    class="ri-close-circle-fill icon"></i></button>
+                <button id="closeImageProfile" class="badge" style="display: none;"><i class="ri-close-circle-fill icon"></i></button>
               </div>
             </div>
             <div class="col-xl-9">
