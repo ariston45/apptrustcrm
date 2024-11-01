@@ -27,6 +27,7 @@ use App\Models\Prs_lead_value;
 use App\Models\Prs_qualification;
 use App\Models\Prs_accessrule;
 use App\Models\User;
+use App\Models\User_structure;
 use Illuminate\Database\Query\JoinClause;
 #Helpers
 use Str;
@@ -46,7 +47,12 @@ class LeadController extends Controller
 	{
 		$user = Auth::user();
 		$customer = Cst_customer::get();
-		$sales = User::where('level','MKT')->orWhere('level','MGR')->orWhere('level','MGR.PAS')->get();
+		// $sales = User::whereIn('level',['STF','MGR','MGR.PAS'])->get();
+		$sales = User::join('user_structures','users.id','=','user_structures.usr_user_id')
+		->leftjoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+		->whereIn('level',['STF','MGR.PAS','MGR'])
+		->select('id','name','uts_team_name')
+		->get();
 		return view('contents.page_lead.form_create_lead',compact('customer','sales','user'));
 	}
 	public function storeLead(Request $request)
@@ -157,11 +163,19 @@ class LeadController extends Controller
 		}else{
 			$err[] = "The data for the person in charge of the project has not been entered, please input the data first";
 		}
+		$id_division = User_structure::where('usr_user_id',$user->id)->select('usr_division_id')->first();
+		$id_user_mgr = User_structure::where('usr_division_id',$id_division->usr_division_id)->where('usr_str_level','manager')->select('usr_user_id')->first();
 		if ($request->assign_sales != null) {
 			# code...
 			$assign_lead = [
 				"slm_user" => $request->assign_sales,
 				"slm_rules" => 'master',
+				"slm_lead" => $id,
+				"created_by" => $user->id
+			];
+			$assign_lead_manager = [
+				"slm_user" => $id_user_mgr->usr_user_id,
+				"slm_rules" => 'manager',
 				"slm_lead" => $id,
 				"created_by" => $user->id
 			];
@@ -201,6 +215,7 @@ class LeadController extends Controller
 		}else {
 			# code...
 			$actionStore_Master = Prs_accessrule::insert($assign_lead);
+			$actionStore_Manager = Prs_accessrule::insert($assign_lead_manager);
 			$actionStore_Person = Cst_personal::insert($person_to_store);
 			$actionStore_PersonLead = Prs_contact::insert($person_lead);
 			$actionStore_Lead = Prs_lead::insert($data_lead);
@@ -272,11 +287,19 @@ class LeadController extends Controller
 		} else {
 			$err[] = "The data for the person in charge of the project has not been entered, please input the data first";
 		}
+		$id_division = User_structure::where('usr_user_id',$user->id)->select('usr_division_id')->first();
+		$id_user_mgr = User_structure::where('usr_division_id',$id_division->usr_division_id)->where('usr_str_level','manager')->select('usr_user_id')->first();
 		if ($request->assign_sales != null) {
 			# code...
 			$assign_lead = [
 				"slm_user" => $request->assign_sales,
 				"slm_rules" => 'head',
+				"slm_lead" => $id,
+				"created_by" => $user->id
+			];
+			$assign_lead_manager = [
+				"slm_user" => $id_user_mgr->usr_user_id,
+				"slm_rules" => 'manager',
 				"slm_lead" => $id,
 				"created_by" => $user->id
 			];
@@ -314,6 +337,7 @@ class LeadController extends Controller
 			return $result;
 		}else{
 			$actionStore_Sales = Prs_accessrule::insert($assign_lead);
+			$actionStore_Manager = Prs_accessrule::insert($assign_lead_manager);
 			$actionStore_Person = Cst_personal::insert($person_to_store);
 			$actionStore_PersonLead = Prs_contact::insert($person_lead);
 			$actionStore_Lead = Prs_lead::insert($data_lead);

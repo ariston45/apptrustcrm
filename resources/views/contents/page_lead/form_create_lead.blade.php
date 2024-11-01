@@ -98,9 +98,9 @@
 										<option value="{{ null }}"></option>
 										@foreach ($sales as $list)
 											@if ($list->id == $user->id)
-											<option value="{{ $list->id }}" selected>{{ $list->name }}</option>	
+											<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>	
 											@else
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
+											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
 											@endif
 										@endforeach
 									</select>
@@ -112,7 +112,7 @@
 									<select type="text" class="form-select" name="assign_team[]" multiple id="select-assign-team" value="{{ $user->id }}" placeholder="Select marketing or sales here">
 										<option value="{{ null }}"></option>
 										@foreach ($sales as $list)
-										<option value="{{ $list->id }}">{{ $list->name }}</option>
+										<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
 										@endforeach
 									</select>
 								</div>

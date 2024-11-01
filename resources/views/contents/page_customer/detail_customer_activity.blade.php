@@ -222,6 +222,32 @@ Customer
 		</div>
 	</div>
 </div>
+<div id="modal-change-activity-status" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
+		<div class="modal-content">
+			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
+				<h5 class="modal-title">Change Activity Status</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
+			</div>
+			<div class="modal-body p-3">
+				<form id="formContent2" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+					@csrf
+					<input type="hidden" id="activity_id_i" name="act_id" value="">
+					<select type="text" class="form-select ts-input-custom" name="status" id="select-act-status" value="">
+						<option value="{{ null }}">{{ null }}</option>
+						<option value="beready">Beready</option>
+						<option value="running">Running</option>
+						<option value="finished">Finish</option>
+					</select>
+				</form>
+			</div>
+			<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
+				<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
+				<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent2"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
+			</div>
+		</div>
+	</div>
+</div>
 @endsection
 @push('style')
 <link rel="stylesheet" href="{{ asset('plugins/jquery-confirm/jquery-confirm.min.css') }}">
@@ -258,10 +284,19 @@ Customer
 		padding-bottom: 6px;
 		text-align: left;
 	}
-
 	.table tr:nth-child(even){background-color: #f2f2f2;}
-
 	.table tr:hover {background-color: #ddd;}
+	.ts-control{
+		padding-bottom: 0.28rem;
+		padding-top: 0.28rem;
+		padding-left: 0.39rem;
+	}
+	.ts-wraper{
+		
+	}
+	.ts-input-custom{
+		min-height: 0.53rem;
+	}
 </style>
 @endpush
 @push('script')
@@ -271,63 +306,26 @@ Customer
 <script src="{{ asset('plugins/tinymce/tinymce.min.js') }}"></script>
 <script src="{{ asset('plugins/fullcalender-scheduler/dist/index.global.js') }}"></script>
 <script src="{{ asset('plugins/litepicker/bundle/index.umd.min.js') }}"></script>
-{{-- fullcalender --}}
+{{-- Variables --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-	var now = '{{ date("Y-m-d") }}';
-	var calendarEl = document.getElementById('calender');
-	var calendar = new FullCalendar.Calendar(calendarEl, {
-		schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-		themeSystem: 'bootstrap5',
-		initialDate: now,
-		height: 390,
-		editable: true,
-		selectable: true,
-		nowIndicator: true,
-		dayMaxEventRows: true,
-		aspectRatio: 1,
-		scrollTime: '00:00',
-		headerToolbar: {
-			left: 'today prev,next',
-			center: 'title',
-			right: 'dayGridMonth,timeGridWeek,resourceTimelineDay'
+var select_act_status = new TomSelect("#select-act-status",{
+	persist: false,
+	createOnBlur: true,
+	create: false,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
 		},
-		initialView: 'dayGridMonth',
-		views: {
-			timeGrid: {
-				dayMaxEventRows: 4 // adjust to 6 only for timeGridWeek/timeGridDay
-			}
-		},
-		dateClick: function(info) {
-		},
-		eventClick: function(info) {
-			actionViewMiniDetail(info.event.id);
-		},
-		resourceGroupField: 'activity',
-		resources: [
-			{ id: 'a', title: 'todo', eventColor: '#00A4B6'},
-			{ id: 'b', title: 'Phone', eventColor: '#1EAD4E' },
-			{ id: 'c', title: 'Email', eventColor: '#0D6DB6'},
-			{ id: 'd', title: 'Visit', eventColor: '#F29833'},
-			{ id: 'e', title: 'POC', eventColor:'#E72E3C'},
-			{ id: 'f', title: 'Video Call', eventColor: '#0C9BD8'},
-			{ id: 'g', title: 'Webinar', eventColor: '#96509A'},
-		],
-		events: function (fetchInfo, successCallback, failureCallback) {
-			var startDate = fetchInfo.start;
-			var endDate = fetchInfo.end;
-			var eventData = sourceDataActivityCalender(startDate,endDate);
-			successCallback(eventData);
-		},
-		eventTimeFormat: {
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: false
+		item: function(data, escape) {
+			return '<div id="select-act-status">'+escape(data.title)+'</div>';
 		}
-	});
-	calendar.render();
+	}
 });
 </script>
+{{-- fullcalender --}}
 {{-- ============================================================ --}}
 <script>
 function actionViewMiniDetail(id) {  
@@ -526,8 +524,133 @@ function actionResetDetailCalender() {
 	$('#act-detail-display').hide();  
 	$('#act-detail-no-display').fadeIn();
 };
+function actionGetDataActivity(id) {
+	var data ='';  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('lead-activities-detail') }}",
+		async: false,
+		data: {
+			"id": id
+		},
+		success: function(result) {
+			data = result;
+		}
+	});
+	return data;
+}
+function actionChangeStatusAct(id,status) {  
+	$('#modal-change-activity-status').modal('toggle');
+	var res_act = actionGetDataActivity(id);
+	$('#activity_id_i').val(res_act.act_id);
+	select_act_status.setValue([res_act.actstatus]);
+};
 </script>
 <script>
 mainDataActivity('act_total','all_status');
+</script>
+<script>
+$(document).ready(function() {
+	$('#formContent2').submit(function(e) {
+		e.preventDefault();
+		var formData2 = new FormData(this);
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: "{{ route('update-status-lead-activities') }}",
+			data: formData2,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function(result) {
+				if (result.param == true) {
+					$.alert({
+						type: 'green',
+						title: 'Success',
+						content: 'Data already updated.',
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
+					actionLoadActivities('act-total');
+				}else{
+					$.alert({
+						type: 'red',
+						title: 'Something error!',
+						content: result.message,
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
+				}
+			}
+		});
+	});
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	var now = '{{ date("Y-m-d") }}';
+	var calendarEl = document.getElementById('calender');
+	var calendar = new FullCalendar.Calendar(calendarEl, {
+		schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+		themeSystem: 'bootstrap5',
+		initialDate: now,
+		height: 390,
+		editable: true,
+		selectable: true,
+		nowIndicator: true,
+		dayMaxEventRows: true,
+		aspectRatio: 1,
+		scrollTime: '00:00',
+		headerToolbar: {
+			left: 'today prev,next',
+			center: 'title',
+			right: 'dayGridMonth,timeGridWeek,resourceTimelineDay'
+		},
+		initialView: 'dayGridMonth',
+		views: {
+			timeGrid: {
+				dayMaxEventRows: 4 // adjust to 6 only for timeGridWeek/timeGridDay
+			}
+		},
+		dateClick: function(info) {
+		},
+		eventClick: function(info) {
+			actionViewMiniDetail(info.event.id);
+		},
+		resourceGroupField: 'activity',
+		resources: [
+			{ id: 'a', title: 'todo', eventColor: '#00A4B6'},
+			{ id: 'b', title: 'Phone', eventColor: '#1EAD4E' },
+			{ id: 'c', title: 'Email', eventColor: '#0D6DB6'},
+			{ id: 'd', title: 'Visit', eventColor: '#F29833'},
+			{ id: 'e', title: 'POC', eventColor:'#E72E3C'},
+			{ id: 'f', title: 'Video Call', eventColor: '#0C9BD8'},
+			{ id: 'g', title: 'Webinar', eventColor: '#96509A'},
+		],
+		events: function (fetchInfo, successCallback, failureCallback) {
+			var startDate = fetchInfo.start;
+			var endDate = fetchInfo.end;
+			var eventData = sourceDataActivityCalender(startDate,endDate);
+			successCallback(eventData);
+		},
+		eventTimeFormat: {
+			hour: '2-digit',
+			minute: '2-digit',
+			hour12: false
+		}
+	});
+	calendar.render();
+});
 </script>
 @endpush

@@ -58,19 +58,20 @@ Customer
 					</div>
 					{{-- <h3 class="mt-2">Business Profile</h3> --}}
 					<hr class="mb-0 mt-0">
-					<div class="row g-2">
-						<div class="col-md-6">
-							<div class="form-label"> <strong>Business Field</strong> </div>
-							<p class="card-subtitle">
+					<div class="row mb-2">
+						<div class="col-xl-6 col-sm-12">
+							<div class="form-label info-title-cst"> <strong>Business Field</strong> </div>
+							<span class="text-muted info-text-cst">
 								@if ($company->cst_business_field == null)
 								-
 								@else
-								{{ $company->cst_business_field }}</p>
+								{{ $company->cst_business_field }}
 								@endif
+							</span>
 						</div>
-						<div class="col-md">
-							<div class="form-label"> <strong>Location</strong> </div>
-							<p class="card-subtitle">
+						<div class="col-xl-6 col-sm-12">
+							<div class="form-label info-title-cst"> <strong>Location</strong> </div>
+							<span class="text-muted info-text-cst">
 								@if (count($location_ar) == 0)
 									-
 								@elseif ($location_ar[0] == "" && $location_ar[1] == "" && $location_ar[2] == "" && $location_ar[3] == "" )
@@ -81,14 +82,14 @@ Customer
 									City: @if($location_ar[2] == null) - @else {{ $location_ar[2] }} @endif <br>
 									Province: @if($location_ar[3] == null) - @else {{ $location_ar[3] }} @endif 
 								@endif
-							</p>
+							</span>
 						</div>
 					</div>
 					<hr class="mb-0 mt-0">
-					<div class="row g-2">
-						<div class="col-md-6">
-							<div class="form-label"><strong>Email</strong> </div>
-							<p class="card-subtitle">
+					<div class="row mb-2">
+						<div class="col-xl-6 col-sm-12">
+							<div class="form-label info-title-cst"><strong>Email</strong> </div>
+							<span class="text-muted info-text-cst">
 								@if (count($email) == null)
 									-
 								@else
@@ -96,11 +97,11 @@ Customer
 										{{ $em->eml_address }} <br>
 									@endforeach
 								@endif
-							</p>
+							</span>
 						</div>
-						<div class="col-md-6">
+						<div class="col-xl-6 col-sm-12">
 							<div class="form-label"> <strong>Telephone</strong> </div>
-							<p class="card-subtitle">
+							<span class="text-muted info-text-cst info-title-cst">
 								@if (count($phone) == null)
 									-
 								@else
@@ -108,18 +109,31 @@ Customer
 										{{ $ph->pho_number }} <br>
 									@endforeach
 								@endif
-							</p>
+							</span>
 						</div>
 					</div>
 					<hr class="mb-0 mt-0">
-					<div class="form-label"> <strong>Notes</strong> </div>
-					<p class="card-subtitle">
-						@if ($company->cst_notes == null)
-						-
-						@else
-						{!! html_entity_decode($company->cst_notes) !!}
-						@endif
-					</p>
+					<div class="row mb-2">
+						<div class="col-xl-6 col-sm-12">
+							<div class="form-label info-title-cst"> <strong>Notes</strong> </div>
+							<span class="text-muted info-text-cst">
+								@if ($company->cst_notes == null)
+								-
+								@else
+								{!! html_entity_decode($company->cst_notes) !!}
+								@endif
+							</span>
+						</div>
+						<div class="col-xl-6 col-sm-12">
+							<div class="form-label info-title-cst"> <strong>Lastest Project</strong> </div>
+							<span class="text-muted info-text-cst">
+								Salesperson : <br>
+								Project : <br>
+								Status : <br>
+								Closing : <br>
+							</span>
+						</div>
+					</div>
 					<hr class="mb-2 mt-0">
 					<div class="row mb-1">
 						<div class="col">
@@ -275,6 +289,11 @@ Customer
 	.table tr:nth-child(even){background-color: #f2f2f2;}
 
 	.table tr:hover {background-color: #ddd;}
+	.info-title-cst{
+		margin: 0px;
+	}
+	.info-text-cst{
+	}
 </style>
 @endpush
 @push('script')

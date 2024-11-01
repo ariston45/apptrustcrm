@@ -11,6 +11,8 @@ use App\Models\Prs_lead;
 use App\Models\Opr_opportunity;
 use App\Models\Opr_value_other;
 use App\Models\Ord_purchase;
+use App\Models\Prd_principle;
+use App\Models\Prd_product;
 use App\Models\User;
 use App\Models\User_structure;
 use Illuminate\Support\Str;
@@ -149,3 +151,19 @@ function genIdPurchase(){
   $new_id = $data + 1;
   return $new_id;
 }
+
+function genIdProduct(){
+  $data = Prd_product::max('psp_id');
+  $new_id = $data + 1;
+  return $new_id;
+}
+function genIdPrinciple(){
+  $data = Prd_principle::max('prd_id');
+  $new_id = $data + 1;
+  return $new_id;
+}
+function getIcon($name){
+  $icon = asset('static/icons/' . $name);
+  return $icon;
+}
+

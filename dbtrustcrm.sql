@@ -11,7 +11,7 @@
  Target Server Version : 100413 (10.4.13-MariaDB)
  File Encoding         : 65001
 
- Date: 08/09/2023 16:42:45
+ Date: 11/12/2023 13:42:01
 */
 
 SET NAMES utf8mb4;
@@ -27,6 +27,7 @@ CREATE TABLE `act_activities`  (
   `act_lead_status` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `act_cst` bigint(20) NULL DEFAULT NULL,
   `act_todo_type_id` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `act_label_category` enum('TICKET','ACTIVITY','TODO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'ACTIVITY',
   `act_run_status` enum('beready','running','finished') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `act_todo_priority` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `act_todo_describe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
@@ -42,41 +43,101 @@ CREATE TABLE `act_activities`  (
   `created_by` bigint(20) NULL DEFAULT NULL,
   `updated_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`act_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of act_activities
 -- ----------------------------
-INSERT INTO `act_activities` VALUES (1, 6, '2', 50, '2', 'beready', NULL, NULL, '1', NULL, '2023-08-16 12:00:00', NULL, 1, '1,3,4', NULL, '2023-06-13 09:57:43', '2023-06-13 09:57:43', 1, NULL);
-INSERT INTO `act_activities` VALUES (2, 6, '2', 50, '2', 'beready', NULL, NULL, '2', NULL, '2023-08-01 07:00:00', NULL, 1, '1,3,4', NULL, '2023-06-13 10:08:06', '2023-06-13 10:08:06', 1, NULL);
-INSERT INTO `act_activities` VALUES (3, 6, '2', 50, '2', 'beready', NULL, NULL, '3', NULL, '2023-08-01 07:00:00', NULL, 1, '1,3,4', NULL, '2023-06-13 10:31:39', '2023-06-13 10:31:39', 1, NULL);
-INSERT INTO `act_activities` VALUES (4, 6, '1', 50, '2', 'beready', NULL, NULL, '4', NULL, '2023-08-15 12:00:00', NULL, 1, '1,3,4', NULL, '2023-06-13 10:54:12', '2023-06-13 10:54:12', 1, NULL);
-INSERT INTO `act_activities` VALUES (5, 6, '2', 50, '2', 'beready', NULL, NULL, '5', NULL, '2023-08-15 16:00:00', NULL, 1, '1,3,4', NULL, '2023-06-13 10:56:37', '2023-06-13 10:56:37', 1, NULL);
-INSERT INTO `act_activities` VALUES (6, 6, '1', 50, '2', 'beready', NULL, NULL, '6', NULL, '2023-08-15 12:00:00', NULL, 1, '1,3,4', NULL, '2023-06-13 11:07:45', '2023-06-13 11:07:45', 1, NULL);
-INSERT INTO `act_activities` VALUES (7, 2, '3', 51, '2', 'finished', NULL, NULL, '7', NULL, '2023-08-01 12:00:00', NULL, 1, '1,3,4', NULL, '2023-06-28 13:36:42', '2023-06-28 13:36:42', 1, NULL);
-INSERT INTO `act_activities` VALUES (9, 2, '3', 51, '2', 'finished', NULL, NULL, '9', NULL, '2023-08-24 12:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-06-28 13:41:58', '2023-06-28 13:41:58', 1, NULL);
-INSERT INTO `act_activities` VALUES (10, 2, '3', 51, '2', 'finished', NULL, NULL, '<p>hore sudah jadi</p>', NULL, '2023-08-30 17:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-06-28 13:50:34', '2023-07-07 09:31:18', 1, NULL);
-INSERT INTO `act_activities` VALUES (11, 2, '2', 51, '2', 'finished', NULL, NULL, '2', NULL, '2023-08-04 17:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-06-28 13:51:44', '2023-06-28 13:51:44', 1, NULL);
-INSERT INTO `act_activities` VALUES (12, 2, '3', 51, '2', 'finished', NULL, NULL, '3', NULL, '2023-08-04 18:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-06-28 14:23:02', '2023-06-28 14:23:02', 1, NULL);
-INSERT INTO `act_activities` VALUES (13, 2, NULL, 51, '2', 'beready', NULL, '<p>te</p>', '<p>tes</p>', NULL, '2023-08-30 12:00:00', '17', 1, '1,3,4', NULL, '2023-06-28 15:13:23', '2023-08-23 09:03:53', 1, NULL);
-INSERT INTO `act_activities` VALUES (14, 2, '2', 51, '2', 'beready', NULL, NULL, '5', NULL, '2023-08-04 12:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-03 09:30:14', '2023-07-03 09:30:14', 1, NULL);
-INSERT INTO `act_activities` VALUES (15, 2, '2', 51, '2', 'finished', NULL, NULL, '6', NULL, '2023-08-06 09:30:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-03 09:34:03', '2023-07-03 09:34:03', 1, NULL);
-INSERT INTO `act_activities` VALUES (16, 2, '2', 51, '2', 'beready', NULL, NULL, '78', NULL, '2023-08-05 16:57:32', '25,26,27', 1, '1,3,4', NULL, '2023-07-04 13:24:18', '2023-07-04 13:24:18', 1, NULL);
-INSERT INTO `act_activities` VALUES (17, 2, '3', 51, '2', 'finished', NULL, NULL, '<p>update data</p>', NULL, '2023-08-06 04:57:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-04 13:24:20', '2023-08-22 09:54:38', 1, NULL);
-INSERT INTO `act_activities` VALUES (19, 2, '2', 51, '2', 'finished', NULL, NULL, '<p>test</p>', NULL, '2023-08-12 12:00:00', '25,26,27', 1, '4', NULL, '2023-07-11 09:11:01', '2023-07-11 09:11:01', 1, NULL);
-INSERT INTO `act_activities` VALUES (20, 2, '2', 51, '2', 'beready', NULL, NULL, '<p>test</p>', NULL, '2023-08-12 12:00:00', '25,26,27', 1, '4', NULL, '2023-07-11 09:12:15', '2023-07-11 09:12:15', 1, NULL);
-INSERT INTO `act_activities` VALUES (21, 2, '3', 51, '2', 'running', NULL, '<p>halo</p>', '<p>iya ini update pertama</p>', NULL, '2023-08-11 12:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-11 09:56:21', '2023-08-22 09:55:04', 1, NULL);
-INSERT INTO `act_activities` VALUES (22, 2, '2', 51, '2', 'finished', NULL, 'test 134', 'test 123', NULL, '2023-08-12 12:00:00', '25,26,27', 1, NULL, NULL, '2023-07-11 10:21:41', '2023-08-22 08:21:12', 1, NULL);
-INSERT INTO `act_activities` VALUES (23, 2, '2', 51, '2', 'beready', NULL, NULL, 'test update', NULL, '2023-08-12 12:00:00', '25,26,27', 1, NULL, NULL, '2023-07-11 10:23:39', '2023-07-13 14:12:07', 1, NULL);
-INSERT INTO `act_activities` VALUES (24, 2, '3', 51, '1', 'finished', NULL, '<p>fffg</p>', '<p>halo saya aris</p>', NULL, '2023-08-11 12:00:00', '25,26,27', 3, '1,3', NULL, '2023-07-11 10:24:55', '2023-08-22 08:21:24', 1, 1);
-INSERT INTO `act_activities` VALUES (25, 2, '3', 51, '2', 'finished', NULL, '<p>meet</p>', '<p>good rt</p>', NULL, '2023-08-24 10:35:00', '16', 1, NULL, NULL, '2023-07-26 15:16:46', '2023-08-24 13:58:56', 1, NULL);
-INSERT INTO `act_activities` VALUES (26, 13, '1', 51, '2', 'finished', NULL, '<p>ger</p>', '<p>apakah</p>', NULL, '2023-08-09 12:00:00', '18', 1, '2,1', NULL, '2023-08-08 08:49:30', '2023-08-28 13:55:31', 3, NULL);
-INSERT INTO `act_activities` VALUES (27, 13, '1', 51, '2', 'finished', NULL, '<p>test</p>', '<p>test</p>', NULL, '2023-08-09 12:00:00', '18', 1, NULL, NULL, '2023-08-08 08:49:42', '2023-08-08 08:49:42', 3, NULL);
-INSERT INTO `act_activities` VALUES (28, 2, '3', 51, '1', 'running', NULL, '<p>sudah stabil ???</p>', '<p>hore sudah bisa&nbsp;</p>', NULL, '2023-08-22 01:00:00', '17', 2, '1,3,4', NULL, '2023-08-21 16:21:52', '2023-08-22 09:51:41', 1, NULL);
-INSERT INTO `act_activities` VALUES (29, 2, NULL, 51, '5', 'beready', NULL, '<p>hai sun</p>', '<p>test update</p>', NULL, '2023-08-23 12:00:00', '17', 2, NULL, NULL, '2023-08-22 15:36:46', '2023-08-23 08:39:15', 1, NULL);
-INSERT INTO `act_activities` VALUES (30, 13, '1', NULL, '3', 'beready', NULL, '<p>23</p>', '<p>activity baru</p>', NULL, '2023-08-29 12:00:00', '16', 1, NULL, NULL, '2023-08-28 10:45:20', '2023-08-28 10:45:20', 1, NULL);
-INSERT INTO `act_activities` VALUES (31, 13, '1', 51, '2', 'running', NULL, '<p>12</p>', '<p>12</p>', NULL, '2023-08-29 12:00:00', '17', 1, NULL, NULL, '2023-08-28 13:55:31', '2023-08-28 13:55:31', 1, NULL);
-INSERT INTO `act_activities` VALUES (32, 13, '1', 51, '5', 'finished', NULL, '<p>Mohammed Abdul Karim adalah seorang Muslim India pengiring Ratu Victoria selama lima belas tahun terakhir masa pemerintahannya. Karim lahir di Lalatpur, dekat kota Jhansi, India Britania, sebagai putra seorang asisten rumah sakit. Pada 1887, tahun Yubileum Emas Ratu Victoria, Karim menjadi salah satu dari dua orang India yang terpilih menjadi pelayan Sri Ratu. Ratu Victoria sangat berkenan dengan pelayanannya dan menganugerahinya gelar \"Munsyi\", sebuah kata dari bahasa Urdu yang kerap diterjemahkan menjadi \"juru tulis\" atau \"guru\". Ratu Victoria mengangkat Karim menjadi sekretaris pribadi, melimpahinya dengan kehormatan, dan mengaruniakan sebidang tanah di India kepadanya.</p>', '<p>Mohammed Abdul Karim adalah seorang Muslim India pengiring Ratu Victoria selama lima belas tahun terakhir masa pemerintahannya. Karim lahir di Lalatpur, dekat kota Jhansi, India Britania, sebagai putra seorang asisten rumah sakit. Pada 1887, tahun Yubileum Emas Ratu Victoria, Karim menjadi salah satu dari dua orang India yang terpilih menjadi pelayan Sri Ratu. Ratu Victoria sangat berkenan dengan pelayanannya dan menganugerahinya gelar \"Munsyi\", sebuah kata dari bahasa Urdu yang kerap diterjemahkan menjadi \"juru tulis\" atau \"guru\". Ratu Victoria mengangkat Karim menjadi sekretaris pribadi, melimpahinya dengan kehormatan, dan mengaruniakan sebidang tanah di India kepadanya.</p>', NULL, '2023-08-29 01:15:00', '18', 5, NULL, NULL, '2023-08-28 14:26:25', '2023-08-28 14:30:22', 1, NULL);
+INSERT INTO `act_activities` VALUES (15, 21, '2', 51, '2', 'ACTIVITY', 'finished', NULL, NULL, '6', NULL, '2023-10-31 12:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-03 09:34:03', '2023-07-03 09:34:03', 1, NULL);
+INSERT INTO `act_activities` VALUES (17, 21, '3', 51, '2', 'ACTIVITY', 'finished', NULL, NULL, '<p>update data</p>', NULL, '2023-10-31 12:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-04 13:24:20', '2023-08-22 09:54:38', 1, NULL);
+INSERT INTO `act_activities` VALUES (19, 21, '2', 51, '2', 'ACTIVITY', 'finished', NULL, NULL, '<p>test</p>', NULL, '2023-10-31 12:00:00', '25,26,27', 1, '4', NULL, '2023-07-11 09:11:01', '2023-07-11 09:11:01', 1, NULL);
+INSERT INTO `act_activities` VALUES (21, 21, '3', 51, '3', 'ACTIVITY', 'beready', NULL, '<p>halo</p>', '<p>iya ini update pertama</p>', NULL, '2023-11-09 12:00:00', '25,26,27', 1, '1,3,4', NULL, '2023-07-11 09:56:21', '2023-11-08 11:18:13', 1, NULL);
+INSERT INTO `act_activities` VALUES (22, 21, '2', 51, '2', 'ACTIVITY', 'finished', NULL, 'test 134', 'test 123', NULL, '2023-11-09 16:00:00', '25,26,27', 1, NULL, NULL, '2023-07-11 10:21:41', '2023-08-22 08:21:12', 1, NULL);
+INSERT INTO `act_activities` VALUES (24, 21, '3', 51, '1', 'ACTIVITY', 'finished', NULL, '<p>fffg</p>', '<p>halo saya aris</p>', NULL, '2023-11-08 12:00:00', '25,26,27', 3, '1,3', NULL, '2023-07-11 10:24:55', '2023-08-22 08:21:24', 1, 1);
+INSERT INTO `act_activities` VALUES (25, 21, '3', 51, '2', 'ACTIVITY', 'finished', NULL, '<p>meet</p>', '<p>good rt</p>', NULL, '2023-11-08 12:00:00', '16', 1, NULL, NULL, '2023-07-26 15:16:46', '2023-08-24 13:58:56', 1, NULL);
+INSERT INTO `act_activities` VALUES (26, 21, '1', 51, '2', 'ACTIVITY', 'finished', NULL, '<p>ger</p>', '<p>apakah</p>', NULL, '2023-11-08 12:00:00', '18', 1, '2,1', NULL, '2023-08-08 08:49:30', '2023-08-28 13:55:31', 3, NULL);
+INSERT INTO `act_activities` VALUES (27, 21, '1', 51, '2', 'ACTIVITY', 'finished', NULL, '<p>test</p>', '<p>test</p>', NULL, '2023-11-08 12:00:00', '18', 1, NULL, NULL, '2023-08-08 08:49:42', '2023-08-08 08:49:42', 3, NULL);
+INSERT INTO `act_activities` VALUES (28, 21, '3', 51, '1', 'ACTIVITY', 'running', NULL, '<p>sudah stabil ???</p>', '<p>hore sudah bisa&nbsp;</p>', NULL, '2023-11-08 12:00:00', '17', 2, '1,3,4', NULL, '2023-08-21 16:21:52', '2023-08-22 09:51:41', 1, NULL);
+INSERT INTO `act_activities` VALUES (31, 21, '1', 51, '2', 'ACTIVITY', 'running', NULL, '<p>12</p>', '<p>12</p>', NULL, '2023-11-04 12:00:00', '17', 1, NULL, NULL, '2023-08-28 13:55:31', '2023-08-28 13:55:31', 1, NULL);
+INSERT INTO `act_activities` VALUES (32, 21, '1', 51, '5', 'ACTIVITY', 'finished', NULL, '<p>Mohammed Abdul Karim adalah seorang Muslim India pengiring Ratu Victoria selama lima belas tahun terakhir masa pemerintahannya. Karim lahir di Lalatpur, dekat kota Jhansi, India Britania, sebagai putra seorang asisten rumah sakit. Pada 1887, tahun Yubileum Emas Ratu Victoria, Karim menjadi salah satu dari dua orang India yang terpilih menjadi pelayan Sri Ratu. Ratu Victoria sangat berkenan dengan pelayanannya dan menganugerahinya gelar \"Munsyi\", sebuah kata dari bahasa Urdu yang kerap diterjemahkan menjadi \"juru tulis\" atau \"guru\". Ratu Victoria mengangkat Karim menjadi sekretaris pribadi, melimpahinya dengan kehormatan, dan mengaruniakan sebidang tanah di India kepadanya.</p>', '<p>Mohammed Abdul Karim adalah seorang Muslim India pengiring Ratu Victoria selama lima belas tahun terakhir masa pemerintahannya. Karim lahir di Lalatpur, dekat kota Jhansi, India Britania, sebagai putra seorang asisten rumah sakit. Pada 1887, tahun Yubileum Emas Ratu Victoria, Karim menjadi salah satu dari dua orang India yang terpilih menjadi pelayan Sri Ratu. Ratu Victoria sangat berkenan dengan pelayanannya dan menganugerahinya gelar \"Munsyi\", sebuah kata dari bahasa Urdu yang kerap diterjemahkan menjadi \"juru tulis\" atau \"guru\". Ratu Victoria mengangkat Karim menjadi sekretaris pribadi, melimpahinya dengan kehormatan, dan mengaruniakan sebidang tanah di India kepadanya.</p>', NULL, '2023-11-04 12:00:00', '18', 5, NULL, NULL, '2023-08-28 14:26:25', '2023-08-28 14:30:22', 1, NULL);
+INSERT INTO `act_activities` VALUES (45, 21, '3', 51, '4', 'ACTIVITY', 'finished', NULL, '<p>1</p>', '<p>2</p>', NULL, '2023-11-04 12:00:00', '17', 2, NULL, NULL, '2023-10-30 09:44:14', '2023-11-08 10:54:39', 2, NULL);
+INSERT INTO `act_activities` VALUES (46, 21, '3', 51, '2', 'TICKET', 'beready', NULL, '<p>123</p>', '<p>123</p>', NULL, '2023-11-04 12:00:00', '17', 9, '2', NULL, '2023-11-01 14:37:03', '2023-11-01 14:37:03', 2, NULL);
+INSERT INTO `act_activities` VALUES (47, 21, '3', 51, '2', 'TICKET', 'beready', NULL, '<p>123</p>', '<p>123</p>', NULL, '2023-11-04 12:00:00', '17', 9, '2', NULL, '2023-11-01 14:37:34', '2023-11-01 14:37:34', 2, NULL);
+INSERT INTO `act_activities` VALUES (48, 20, '50', 50, '2', 'ACTIVITY', 'running', NULL, '<p>Aku telfon</p>', '<p>Aku telfon</p>', NULL, '2023-11-09 04:00:00', '37', 2, NULL, NULL, '2023-11-09 15:43:40', '2023-11-09 15:43:40', 2, NULL);
+INSERT INTO `act_activities` VALUES (49, 22, '3', 50, '3', 'ACTIVITY', 'finished', NULL, '<p>123</p>', '<p>122</p>', NULL, '2023-11-10 12:00:00', '21', 2, NULL, NULL, '2023-11-10 10:26:50', '2023-11-10 10:29:24', 2, NULL);
+INSERT INTO `act_activities` VALUES (50, 22, '3', 50, '5', 'ACTIVITY', 'finished', NULL, '<p>123</p>', '<p>skay</p>', NULL, '2023-11-10 12:00:00', '21', 2, NULL, NULL, '2023-11-10 10:52:23', '2023-11-10 11:05:23', 2, NULL);
+INSERT INTO `act_activities` VALUES (51, 22, '3', 50, '4', 'ACTIVITY', 'finished', NULL, '<p>test</p>', '<p>test</p>', NULL, '2023-11-10 13:00:00', '21', 2, NULL, NULL, '2023-11-10 10:57:41', '2023-11-10 11:05:29', 2, NULL);
+INSERT INTO `act_activities` VALUES (52, 23, '3', 50, '2', 'ACTIVITY', 'running', NULL, '<p>1yuidf</p>', '<p>trhtrh</p>', NULL, '2023-11-10 01:15:00', '15', 3, NULL, NULL, '2023-11-10 13:12:34', '2023-11-10 13:12:34', 2, NULL);
+
+-- ----------------------------
+-- Table structure for act_activity_access
+-- ----------------------------
+DROP TABLE IF EXISTS `act_activity_access`;
+CREATE TABLE `act_activity_access`  (
+  `acs_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `acs_act_id` int(11) NULL DEFAULT NULL,
+  `acs_user_id` int(11) NULL DEFAULT NULL,
+  `acs_rules` enum('creator','assignee','member') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`acs_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 55 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of act_activity_access
+-- ----------------------------
+INSERT INTO `act_activity_access` VALUES (1, 33, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (2, 32, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (3, 21, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (4, 22, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (5, 23, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (6, 24, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (7, 25, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (8, 26, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (9, 34, 2, 'member', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (10, 34, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (11, 34, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (12, 35, 4, 'member', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (13, 35, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (14, 35, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (15, 36, 9, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (16, 36, 9, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (17, 37, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (18, 37, 9, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (19, 38, 2, 'member', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (20, 38, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (21, 38, 8, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (22, 39, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (23, 39, 8, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (24, 40, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (25, 40, 4, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (26, 41, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (27, 41, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (28, 42, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (29, 42, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (30, 43, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (31, 43, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (32, 44, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (33, 44, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (34, 45, NULL, 'member', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (35, 45, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (36, 45, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (37, 46, 2, 'member', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (38, 46, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (39, 46, 9, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (40, 47, 2, 'member', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (41, 47, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (42, 47, 9, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (43, 48, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (44, 48, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (45, 49, 2, 'creator', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (46, 49, 2, 'assignee', '2023-11-10 10:46:18', NULL);
+INSERT INTO `act_activity_access` VALUES (49, 50, 2, 'creator', '2023-11-10 10:52:23', NULL);
+INSERT INTO `act_activity_access` VALUES (50, 50, 2, 'assignee', '2023-11-10 10:52:23', NULL);
+INSERT INTO `act_activity_access` VALUES (51, 51, 2, 'creator', '2023-11-10 10:57:41', NULL);
+INSERT INTO `act_activity_access` VALUES (52, 51, 2, 'assignee', '2023-11-10 10:57:41', NULL);
+INSERT INTO `act_activity_access` VALUES (53, 52, 2, 'creator', '2023-11-10 13:12:34', NULL);
+INSERT INTO `act_activity_access` VALUES (54, 52, 3, 'assignee', '2023-11-10 13:12:34', NULL);
 
 -- ----------------------------
 -- Table structure for act_activity_types
@@ -7842,32 +7903,9 @@ CREATE TABLE `cst_customers`  (
 -- ----------------------------
 -- Records of cst_customers
 -- ----------------------------
-INSERT INTO `cst_customers` VALUES (1, 1, 'gudang_garam', 'Gudang Garam', NULL, NULL, NULL, 'PUBLIC', '2023-09-01 14:50:17', NULL, '2023-02-28 16:03:30', NULL);
-INSERT INTO `cst_customers` VALUES (2, 2, 'telkom_indonesiatelkom_indonesia', 'Telkom IndonesiaTelkom Indonesia', NULL, NULL, NULL, 'PUBLIC', '2023-09-01 14:50:19', NULL, '2023-02-28 16:04:11', NULL);
-INSERT INTO `cst_customers` VALUES (3, 3, 'japfa_comfeed_indonesia', 'Japfa Comfeed Indonesia', NULL, NULL, NULL, 'PUBLIC', '2023-09-01 14:50:21', NULL, '2023-02-28 16:05:02', NULL);
-INSERT INTO `cst_customers` VALUES (4, 4, 'barito_pacific', 'Barito Pacific', NULL, NULL, NULL, 'PUBLIC', '2023-09-01 14:50:23', NULL, '2023-02-28 16:05:14', NULL);
-INSERT INTO `cst_customers` VALUES (31, 5, 'indah_kiat_pulp&_paper', 'Indah Kiat Pulp & Paper', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:29', NULL, '2023-02-28 16:05:27', NULL);
-INSERT INTO `cst_customers` VALUES (32, 6, 'indofood_sukses_makmur', 'Indofood Sukses Makmur', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:30', NULL, '2023-02-28 16:05:34', NULL);
-INSERT INTO `cst_customers` VALUES (33, 7, 'charoen_pokphand_indonesia', 'Charoen Pokphand Indonesia', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:32', NULL, '2023-02-28 16:06:11', NULL);
-INSERT INTO `cst_customers` VALUES (34, 8, 'adaro_energy', 'Adaro Energy', '', 'Entrepreneurship', '<p>test</p>', 'PUBLIC', '2023-08-31 14:00:39', NULL, '2023-02-28 16:06:22', NULL);
-INSERT INTO `cst_customers` VALUES (35, 9, 'astra_international', 'Astra International', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:35', NULL, '2023-02-28 16:06:27', NULL);
-INSERT INTO `cst_customers` VALUES (36, 10, 'sinar_mas_agro_resources&_technology', 'Sinar Mas Agro Resources & Technology', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:40', NULL, '2023-02-28 16:06:35', NULL);
-INSERT INTO `cst_customers` VALUES (37, 11, 'bank_central_asia(bca)', 'Bank Central Asia (BCA)', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:41', NULL, '2023-02-28 16:06:50', NULL);
-INSERT INTO `cst_customers` VALUES (38, 12, 'bank_mandiri', 'Bank Mandiri', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:43', NULL, '2023-02-28 16:06:57', NULL);
-INSERT INTO `cst_customers` VALUES (39, 13, 'bank_negara_indonesia(bni)', 'Bank Negara Indonesia (BNI)', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:44', NULL, '2023-02-28 16:07:09', NULL);
-INSERT INTO `cst_customers` VALUES (40, 14, 'bank_rakyat_indonesia(bri)', 'Bank Rakyat Indonesia (BRI)', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:46', NULL, '2023-02-28 16:07:20', NULL);
-INSERT INTO `cst_customers` VALUES (41, 15, 'barito_pacific', 'Barito Pacific', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:47', NULL, '2023-02-28 16:07:29', NULL);
-INSERT INTO `cst_customers` VALUES (42, 16, 'pupuk_indonesia', 'Pupuk Indonesia', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:49', NULL, '2023-02-28 16:07:53', NULL);
-INSERT INTO `cst_customers` VALUES (43, 17, 'sumber_alfaria_trijaya', 'Sumber Alfaria Trijaya', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:50', NULL, '2023-02-28 16:08:06', NULL);
-INSERT INTO `cst_customers` VALUES (44, 18, 'mind_id', 'Mind ID', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:52', NULL, '2023-02-28 16:08:48', NULL);
-INSERT INTO `cst_customers` VALUES (45, 19, 'm1_added_brand_at_start', 'M1 added brand at start', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:55', NULL, '2023-02-28 16:08:53', NULL);
-INSERT INTO `cst_customers` VALUES (46, 20, 'my_first_added_brand', 'My first added brand', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:57', NULL, '2023-02-28 16:09:00', NULL);
-INSERT INTO `cst_customers` VALUES (47, 21, 'hanjaya_mandala_sampoerna', 'Hanjaya Mandala Sampoerna', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:58', NULL, '2023-02-28 16:09:12', NULL);
-INSERT INTO `cst_customers` VALUES (48, 22, 'perusahaan_listrik_negara(pln)', 'Perusahaan Listrik Negara (PLN)', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:20:59', NULL, '2023-02-28 16:09:39', NULL);
-INSERT INTO `cst_customers` VALUES (49, 23, 'pt_warna_warni', 'Pt Warna Warni', NULL, NULL, NULL, 'PUBLIC', '2023-05-30 16:21:01', NULL, '2023-03-09 09:44:01', 1);
-INSERT INTO `cst_customers` VALUES (50, 25, 'fakultas_kedokteran', 'Fakultas Kedokteran', NULL, NULL, NULL, 'PUBLIC', '2023-06-15 09:09:13', NULL, '2023-03-16 16:59:41', 1);
-INSERT INTO `cst_customers` VALUES (51, 25, 'fakultas_hukum', 'Fakultas Hukum', '', 'Accounting and Finance', '<p>Bapak ini baik</p>', 'MODERATE', '2023-06-15 09:08:49', NULL, '2023-04-06 13:18:25', 1);
-INSERT INTO `cst_customers` VALUES (52, 25, 'fakultas_pendidikan', 'Fakultas Pendidikan', NULL, NULL, NULL, 'PUBLIC', NULL, NULL, '2023-09-06 15:01:41', 1);
+INSERT INTO `cst_customers` VALUES (50, 1, 'fakultas_kedokteran', 'Fakultas Kedokteran', NULL, NULL, NULL, 'PUBLIC', '2023-10-24 08:50:14', NULL, '2023-03-16 16:59:41', 1);
+INSERT INTO `cst_customers` VALUES (51, 1, 'fakultas_hukum', 'Fakultas Hukum', '', 'Accounting and Finance', '<p>Bapak ini baik</p>', 'MODERATE', '2023-10-24 08:50:15', NULL, '2023-04-06 13:18:25', 1);
+INSERT INTO `cst_customers` VALUES (52, 1, 'fakultas_pendidikan', 'Fakultas Pendidikan', NULL, NULL, NULL, 'PUBLIC', '2023-10-24 08:50:16', NULL, '2023-09-06 15:01:41', 1);
 
 -- ----------------------------
 -- Table structure for cst_institutions
@@ -7888,31 +7926,7 @@ CREATE TABLE `cst_institutions`  (
 -- ----------------------------
 -- Records of cst_institutions
 -- ----------------------------
-INSERT INTO `cst_institutions` VALUES (1, 'Gudang Garam', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:05');
-INSERT INTO `cst_institutions` VALUES (2, 'Telkom IndonesiaTelkom Indonesia', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:32');
-INSERT INTO `cst_institutions` VALUES (3, 'Japfa Comfeed Indonesia', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:32');
-INSERT INTO `cst_institutions` VALUES (4, 'Barito Pacific', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:32');
-INSERT INTO `cst_institutions` VALUES (5, 'Indah Kiat Pulp & Paper', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (6, 'Indofood Sukses Makmur', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (7, 'Charoen Pokphand Indonesia', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (8, 'Adaro Energy', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (9, 'Astra International', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (10, 'Sinar Mas Agro Resources & Technology', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (11, 'Bank Central Asia (BCA)', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (12, 'Bank Mandiri', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (13, 'Bank Negara Indonesia (BNI)', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (14, 'Bank Rakyat Indonesia (BRI)', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (15, 'Barito Pacific', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (16, 'Pupuk Indonesia', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (17, 'Sumber Alfaria Trijaya', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (18, 'Mind ID', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (19, 'M1 added brand at start', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (20, 'My first added brand', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (21, 'Hanjaya Mandala Sampoerna', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (22, 'Perusahaan Listrik Negara (PLN)', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (23, 'Pt Warna Warni', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:33');
-INSERT INTO `cst_institutions` VALUES (24, 'er', '-', NULL, NULL, NULL, NULL, '2023-05-30 16:23:34');
-INSERT INTO `cst_institutions` VALUES (25, 'Universitas Brawijaya', '-', NULL, NULL, NULL, NULL, '2023-06-15 09:07:41');
+INSERT INTO `cst_institutions` VALUES (1, 'Universitas Brawijaya', '-', NULL, NULL, NULL, NULL, '2023-10-24 08:51:15');
 
 -- ----------------------------
 -- Table structure for cst_locations
@@ -7951,7 +7965,6 @@ INSERT INTO `cst_locations` VALUES (48, 1, 'INDIVIDUAL', '121313', 'WATULIMO', '
 INSERT INTO `cst_locations` VALUES (49, 25, 'INSTITUTION', '213', 'KEPANJEN', 'MALANG', 'JAWA TIMUR', NULL, NULL, '2023-09-06 14:50:09', 1);
 INSERT INTO `cst_locations` VALUES (50, 25, 'INSTITUTION', NULL, 'SUKUN', 'MALANG', 'JAWA TIMUR', NULL, NULL, '2023-09-06 14:52:39', 1);
 INSERT INTO `cst_locations` VALUES (51, 52, 'INSTITUTION', NULL, NULL, 'MALANG', NULL, '2023-09-06 16:20:18', NULL, '2023-09-06 14:59:22', 1);
-INSERT INTO `cst_locations` VALUES (52, 52, 'INSTITUTION', NULL, NULL, 'MALANG', NULL, '2023-09-06 16:20:03', NULL, '2023-09-06 15:01:41', 1);
 
 -- ----------------------------
 -- Table structure for cst_personals
@@ -7975,13 +7988,6 @@ CREATE TABLE `cst_personals`  (
 -- ----------------------------
 -- Records of cst_personals
 -- ----------------------------
-INSERT INTO `cst_personals` VALUES (1, 42, 'Aldi', NULL, 'Marketing', '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:14', NULL, '2023-02-28 16:14:27', NULL);
-INSERT INTO `cst_personals` VALUES (2, 26, 'Alex', NULL, NULL, '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:14', NULL, '2023-03-06 15:02:54', NULL);
-INSERT INTO `cst_personals` VALUES (3, 48, 'Agus PLN', NULL, NULL, '<p>Bapak ini baik</p>', 'PUBLIC', '2023-07-18 10:00:24', NULL, '2023-03-08 11:18:49', NULL);
-INSERT INTO `cst_personals` VALUES (9, 42, 'gio', NULL, NULL, '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:15', NULL, '2023-03-08 15:12:43', 1);
-INSERT INTO `cst_personals` VALUES (10, 49, 'Gio', NULL, NULL, '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:15', NULL, '2023-03-09 09:44:01', 1);
-INSERT INTO `cst_personals` VALUES (12, 49, 'wulan', NULL, 'marketing', '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:15', NULL, '2023-03-09 13:48:36', 1);
-INSERT INTO `cst_personals` VALUES (14, 27, 'tono', NULL, NULL, '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:15', NULL, '2023-03-16 09:31:53', 1);
 INSERT INTO `cst_personals` VALUES (15, 50, 'Aris', NULL, NULL, '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-23 16:16:53', NULL, '2023-03-16 16:59:40', 1);
 INSERT INTO `cst_personals` VALUES (16, 51, 'Andi', NULL, 'Marketing', '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:15', 1, '2023-04-10 13:02:02', 2);
 INSERT INTO `cst_personals` VALUES (17, 51, 'Rudi', NULL, 'Auditing', '<p>Bapak ini baik</p>', 'PUBLIC', '2023-06-14 16:47:15', NULL, '2023-04-10 13:11:19', 1);
@@ -8006,12 +8012,7 @@ INSERT INTO `cst_personals` VALUES (35, 50, 'kuduga', NULL, '23', NULL, 'PUBLIC'
 INSERT INTO `cst_personals` VALUES (36, 50, 'gadi', NULL, 'uy', NULL, 'PUBLIC', NULL, NULL, '2023-06-23 16:00:28', 1);
 INSERT INTO `cst_personals` VALUES (37, 50, 'jack', NULL, 'waka', NULL, 'PUBLIC', NULL, NULL, '2023-06-26 08:15:14', 1);
 INSERT INTO `cst_personals` VALUES (38, 51, 'Rani', NULL, NULL, NULL, 'PUBLIC', NULL, NULL, '2023-07-20 15:51:19', 1);
-INSERT INTO `cst_personals` VALUES (39, NULL, NULL, NULL, NULL, NULL, 'PUBLIC', NULL, NULL, '2023-07-26 11:11:21', 1);
-INSERT INTO `cst_personals` VALUES (40, NULL, NULL, NULL, NULL, NULL, 'PUBLIC', NULL, NULL, '2023-07-26 11:28:12', 1);
 INSERT INTO `cst_personals` VALUES (41, 51, 'Joni', NULL, NULL, NULL, 'PUBLIC', NULL, NULL, '2023-08-31 11:31:33', 1);
-INSERT INTO `cst_personals` VALUES (42, 34, 'Ali', NULL, 'Humas', '', 'PUBLIC', NULL, NULL, '2023-08-31 14:02:08', 1);
-INSERT INTO `cst_personals` VALUES (43, 1, 'Fanu', NULL, 'Sales', NULL, '', '2023-09-06 13:55:07', NULL, '2023-09-06 13:52:00', 1);
-INSERT INTO `cst_personals` VALUES (44, 1, 'Durhaka', NULL, 'Staff IT', NULL, 'PUBLIC', NULL, NULL, '2023-09-06 14:27:22', 1);
 INSERT INTO `cst_personals` VALUES (45, 50, 'lex', NULL, NULL, NULL, 'PUBLIC', NULL, NULL, '2023-09-06 16:44:23', 1);
 
 -- ----------------------------
@@ -8060,7 +8061,7 @@ CREATE TABLE `instansis`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `menus`;
 CREATE TABLE `menus`  (
-  `id_menu` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_menu` int(10) NOT NULL AUTO_INCREMENT,
   `mn_level_user` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `mn_parent_id` int(11) NULL DEFAULT NULL,
   `mn_icon_code` varchar(90) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
@@ -8069,19 +8070,87 @@ CREATE TABLE `menus`  (
   `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `created_at` datetime NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id_menu`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 104 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 79 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of menus
 -- ----------------------------
-INSERT INTO `menus` VALUES (1, 'ADM', 0, 'ar_dashboard.svg', 'Home', 'home', '2022-12-21 15:19:34', '2016-07-28 07:08:51');
-INSERT INTO `menus` VALUES (2, 'ADM', 0, 'ar_customer.svg', 'Customer', 'customer', '2023-07-27 14:51:34', '2023-01-18 13:57:12');
-INSERT INTO `menus` VALUES (3, 'ADM', 0, 'ar_items.svg', 'Activities', 'activity', '2023-07-27 15:50:34', '2023-07-27 14:51:44');
-INSERT INTO `menus` VALUES (4, 'ADM', 0, 'ar_leads.svg', 'Leads', 'leads', '2023-07-27 14:51:27', '2023-01-18 14:01:55');
-INSERT INTO `menus` VALUES (5, 'ADM', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', '2023-07-27 14:51:25', '2023-01-18 14:04:03');
-INSERT INTO `menus` VALUES (100, 'ADM', 0, 'ar_settings2.svg', 'Pengaturan', 'setting', '2023-01-18 13:58:32', '2014-08-14 01:22:17');
-INSERT INTO `menus` VALUES (101, 'ADM', 100, 'ar_items.svg', 'User', 'setting/user', '2023-01-18 13:58:52', '2016-12-08 10:54:08');
-INSERT INTO `menus` VALUES (102, 'ADM', 100, 'ar_items.svg', 'Instansi', 'setting/instansi', '2023-01-18 13:58:58', '2019-12-21 00:38:40');
+INSERT INTO `menus` VALUES (1, 'ADM', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (2, 'ADM', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (3, 'ADM', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (4, 'ADM', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:29:56', NULL);
+INSERT INTO `menus` VALUES (5, 'ADM', 0, 'ar_todo.svg', 'Activities', 'activity', NULL, NULL);
+INSERT INTO `menus` VALUES (6, 'ADM', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
+INSERT INTO `menus` VALUES (7, 'ADM', 0, 'ar_customer.svg', 'Customer', 'customer', NULL, NULL);
+INSERT INTO `menus` VALUES (8, 'ADM', 0, 'ar_management.svg', 'Management', 'management', NULL, NULL);
+INSERT INTO `menus` VALUES (9, 'ADM', 0, 'ar_product.svg', 'Products', 'product', NULL, NULL);
+INSERT INTO `menus` VALUES (10, 'ADM', 9, 'ar_items.svg', 'All Products', 'product/all', NULL, NULL);
+INSERT INTO `menus` VALUES (11, 'ADM', 9, 'ar_items.svg', 'Principles', 'product/principle', NULL, NULL);
+INSERT INTO `menus` VALUES (12, 'ADM', 0, 'ar_settings2.svg', 'Setting', 'setting', NULL, NULL);
+INSERT INTO `menus` VALUES (13, 'ADM', 12, 'ar_items.svg', 'User', 'setting/user', NULL, NULL);
+INSERT INTO `menus` VALUES (14, 'ADM', 12, 'ar_items.svg', 'Division', 'setting/division', NULL, NULL);
+INSERT INTO `menus` VALUES (15, 'ADM', 12, 'ar_items.svg', 'Teams', 'setting/team', NULL, NULL);
+INSERT INTO `menus` VALUES (16, 'AGM', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (17, 'AGM', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (18, 'AGM', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (19, 'AGM', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:29:59', NULL);
+INSERT INTO `menus` VALUES (20, 'AGM', 0, 'ar_todo.svg', 'Activities', 'activity', NULL, NULL);
+INSERT INTO `menus` VALUES (21, 'AGM', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
+INSERT INTO `menus` VALUES (22, 'AGM', 0, 'ar_customer.svg', 'Customer', 'customer', NULL, NULL);
+INSERT INTO `menus` VALUES (23, 'AGM', 0, 'ar_management.svg', 'Management', 'management', NULL, NULL);
+INSERT INTO `menus` VALUES (24, 'AGM', 0, 'ar_product.svg', 'Products', 'product', NULL, NULL);
+INSERT INTO `menus` VALUES (25, 'AGM', 24, 'ar_items.svg', 'All Products', 'product/all', NULL, NULL);
+INSERT INTO `menus` VALUES (26, 'AGM', 24, 'ar_items.svg', 'Principles', 'product/principle', NULL, NULL);
+INSERT INTO `menus` VALUES (27, 'AGM', 0, 'ar_settings2.svg', 'Setting', 'setting', NULL, NULL);
+INSERT INTO `menus` VALUES (28, 'AGM', 27, 'ar_items.svg', 'User', 'setting/user', NULL, NULL);
+INSERT INTO `menus` VALUES (29, 'AGM', 27, 'ar_items.svg', 'Division', 'setting/division', NULL, NULL);
+INSERT INTO `menus` VALUES (30, 'AGM', 27, 'ar_items.svg', 'Teams', 'setting/team', NULL, NULL);
+INSERT INTO `menus` VALUES (31, 'MGR', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (32, 'MGR', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (33, 'MGR', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (34, 'MGR', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:30:06', NULL);
+INSERT INTO `menus` VALUES (35, 'MGR', 0, 'ar_todo.svg', 'Activities', 'activity', NULL, NULL);
+INSERT INTO `menus` VALUES (36, 'MGR', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
+INSERT INTO `menus` VALUES (37, 'MGR', 0, 'ar_customer.svg', 'Customer', 'customer', NULL, NULL);
+INSERT INTO `menus` VALUES (38, 'MGR', 0, 'ar_management.svg', 'Management', 'management', NULL, NULL);
+INSERT INTO `menus` VALUES (39, 'MGR', 0, 'ar_product.svg', 'Products', 'product', NULL, NULL);
+INSERT INTO `menus` VALUES (40, 'MGR', 39, 'ar_items.svg', 'All Products', 'product/all', NULL, NULL);
+INSERT INTO `menus` VALUES (41, 'MGR', 39, 'ar_items.svg', 'Principles', 'product/principle', NULL, NULL);
+INSERT INTO `menus` VALUES (42, 'MGR', 0, 'ar_settings2.svg', 'Setting', 'setting', NULL, NULL);
+INSERT INTO `menus` VALUES (43, 'MGR', 42, 'ar_items.svg', 'User', 'setting/user', NULL, NULL);
+INSERT INTO `menus` VALUES (44, 'MGR.PAS', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (45, 'MGR.PAS', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (46, 'MGR.PAS', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (47, 'MGR.PAS', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:30:15', NULL);
+INSERT INTO `menus` VALUES (48, 'MGR.PAS', 0, 'ar_todo.svg', 'Activities', 'activity', NULL, NULL);
+INSERT INTO `menus` VALUES (49, 'MGR.PAS', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
+INSERT INTO `menus` VALUES (50, 'MGR.PAS', 0, 'ar_customer.svg', 'Customer', 'customer', NULL, NULL);
+INSERT INTO `menus` VALUES (51, 'MGR.PAS', 0, 'ar_management.svg', 'Management', 'management', NULL, NULL);
+INSERT INTO `menus` VALUES (52, 'MGR.PAS', 0, 'ar_product.svg', 'Products', 'product', NULL, NULL);
+INSERT INTO `menus` VALUES (53, 'MGR.PAS', 52, 'ar_items.svg', 'All Products', 'product/all', NULL, NULL);
+INSERT INTO `menus` VALUES (54, 'MGR.PAS', 52, 'ar_items.svg', 'Principles', 'product/principle', NULL, NULL);
+INSERT INTO `menus` VALUES (55, 'MGR.PAS', 0, 'ar_settings2.svg', 'Setting', 'setting', NULL, NULL);
+INSERT INTO `menus` VALUES (56, 'MGR.PAS', 55, 'ar_items.svg', 'User', 'setting/user', NULL, NULL);
+INSERT INTO `menus` VALUES (57, 'MGR.PAS', 55, 'ar_items.svg', 'Division', 'setting/division', NULL, NULL);
+INSERT INTO `menus` VALUES (58, 'MGR.PAS', 55, 'ar_items.svg', 'Teams', 'setting/team', NULL, NULL);
+INSERT INTO `menus` VALUES (59, 'MGR.TCH', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (60, 'MGR.TCH', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (61, 'MGR.TCH', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (62, 'MGR.TCH', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:30:21', NULL);
+INSERT INTO `menus` VALUES (63, 'MGR.TCH', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
+INSERT INTO `menus` VALUES (64, 'MGR.TCH', 0, 'ar_management.svg', 'Management', 'management', NULL, NULL);
+INSERT INTO `menus` VALUES (65, 'MGR.TCH', 0, 'ar_settings2.svg', 'Setting', 'setting', NULL, NULL);
+INSERT INTO `menus` VALUES (66, 'MGR.TCH', 65, 'ar_items.svg', 'User', 'setting/user', NULL, NULL);
+INSERT INTO `menus` VALUES (67, 'STF', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (68, 'STF', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (69, 'STF', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (70, 'STF', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:30:27', NULL);
+INSERT INTO `menus` VALUES (71, 'STF', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
+INSERT INTO `menus` VALUES (72, 'STF.TCH', 0, 'ar_dashboard.svg', 'Home', 'home', NULL, NULL);
+INSERT INTO `menus` VALUES (73, 'STF.TCH', 0, 'ar_leads.svg', 'Leads', 'leads', NULL, NULL);
+INSERT INTO `menus` VALUES (74, 'STF.TCH', 0, 'ar_opportunities.svg', 'Opportunity', 'opportunities', NULL, NULL);
+INSERT INTO `menus` VALUES (75, 'STF.TCH', 0, 'ar_po.svg', 'Purchased', 'purchased', '2023-11-01 09:30:31', NULL);
+INSERT INTO `menus` VALUES (76, 'STF.TCH', 0, 'ar_ticket.svg', 'Ticket', 'ticket', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for migrations
@@ -8113,6 +8182,7 @@ CREATE TABLE `opr_opportunities`  (
   `opr_status` varchar(90) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `opr_close_status` enum('WIN','LOSE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `opr_estimate_closing` date NULL DEFAULT NULL,
+  `opr_close_date` date NULL DEFAULT NULL,
   `opr_notes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT current_timestamp(),
   `created_by` bigint(20) NULL DEFAULT NULL,
@@ -8124,7 +8194,9 @@ CREATE TABLE `opr_opportunities`  (
 -- ----------------------------
 -- Records of opr_opportunities
 -- ----------------------------
-INSERT INTO `opr_opportunities` VALUES (1, 19, 'Akan Beli Microsoft', '6', NULL, '2023-07-20', 'apa kabar', '2023-07-24 10:29:31', NULL, '2023-07-27 14:48:10', NULL);
+INSERT INTO `opr_opportunities` VALUES (1, 21, 'Test membuat lead', '6', 'WIN', '2023-07-20', NULL, '<p>test apak</p>', '2023-07-24 10:29:31', NULL, '2023-11-10 16:25:48', NULL);
+INSERT INTO `opr_opportunities` VALUES (2, 20, 'New Project 1', '6', NULL, '2023-09-30', NULL, '<p>halo</p>', '2023-09-25 11:32:01', NULL, '2023-11-15 15:10:45', NULL);
+INSERT INTO `opr_opportunities` VALUES (3, 22, 'Projek 1', '2', NULL, '2023-11-30', NULL, '<p>catatan test</p>', '2023-10-26 12:11:21', NULL, '2023-11-10 13:10:51', NULL);
 
 -- ----------------------------
 -- Table structure for opr_opportunity_notes
@@ -8147,33 +8219,6 @@ CREATE TABLE `opr_opportunity_notes`  (
 -- ----------------------------
 -- Records of opr_opportunity_notes
 -- ----------------------------
-
--- ----------------------------
--- Table structure for opr_product_opportunities
--- ----------------------------
-DROP TABLE IF EXISTS `opr_product_opportunities`;
-CREATE TABLE `opr_product_opportunities`  (
-  `por_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `por_opportunity_id` bigint(20) NULL DEFAULT NULL,
-  `por_principle` int(11) NULL DEFAULT NULL,
-  `por_product_id` int(11) NULL DEFAULT NULL,
-  `por_quantity` int(11) NULL DEFAULT NULL,
-  `por_unit_value` int(11) NULL DEFAULT NULL,
-  `por_total_value` int(11) NULL DEFAULT NULL,
-  `created_at` datetime NULL DEFAULT current_timestamp(),
-  `created_by` bigint(20) NULL DEFAULT NULL,
-  `updated_at` datetime NULL DEFAULT current_timestamp(),
-  `updated_by` bigint(20) NULL DEFAULT NULL,
-  PRIMARY KEY (`por_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of opr_product_opportunities
--- ----------------------------
-INSERT INTO `opr_product_opportunities` VALUES (12, 1, 1, 1, NULL, NULL, NULL, '2023-07-27 14:30:12', NULL, '2023-07-27 14:30:12', NULL);
-INSERT INTO `opr_product_opportunities` VALUES (13, 1, 1, 2, NULL, NULL, NULL, '2023-07-27 14:30:12', NULL, '2023-07-27 14:30:12', NULL);
-INSERT INTO `opr_product_opportunities` VALUES (21, 2, 1, 1, NULL, NULL, NULL, '2023-09-05 16:34:03', NULL, '2023-09-05 16:34:03', NULL);
-INSERT INTO `opr_product_opportunities` VALUES (22, 2, 1, 1, NULL, NULL, NULL, '2023-09-06 08:41:44', NULL, '2023-09-06 08:41:44', NULL);
 
 -- ----------------------------
 -- Table structure for opr_stage_statuses
@@ -8203,28 +8248,111 @@ INSERT INTO `opr_stage_statuses` VALUES (6, 'opr-status-win', 'Win', 'static/opp
 INSERT INTO `opr_stage_statuses` VALUES (7, 'opr-status-lose', 'Lose', 'static/opportunity_status/opr-status-lose.png', '2023-07-25 08:30:24', NULL, '2023-07-25 10:18:35', NULL);
 
 -- ----------------------------
--- Table structure for opr_value_assumtions
+-- Table structure for opr_value_others
 -- ----------------------------
-DROP TABLE IF EXISTS `opr_value_assumtions`;
-CREATE TABLE `opr_value_assumtions`  (
+DROP TABLE IF EXISTS `opr_value_others`;
+CREATE TABLE `opr_value_others`  (
+  `ots_id` bigint(20) NOT NULL,
+  `ots_opr_id` bigint(20) NOT NULL,
+  `ots_name` varchar(455) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ots_value` double NULL DEFAULT NULL,
+  `created_at` datetime NULL DEFAULT current_timestamp(),
+  `created_by` bigint(20) NULL DEFAULT NULL,
+  `updated_at` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` bigint(20) NULL DEFAULT NULL,
+  PRIMARY KEY (`ots_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of opr_value_others
+-- ----------------------------
+INSERT INTO `opr_value_others` VALUES (33, 1, 'biaya pengiriman', 500.557, '2023-10-19 14:42:29', NULL, '2023-10-19 14:42:29', NULL);
+INSERT INTO `opr_value_others` VALUES (34, 1, 'tes 3', 7888.78, '2023-10-19 14:42:29', NULL, '2023-10-19 14:42:29', NULL);
+
+-- ----------------------------
+-- Table structure for opr_value_products
+-- ----------------------------
+DROP TABLE IF EXISTS `opr_value_products`;
+CREATE TABLE `opr_value_products`  (
+  `por_id` bigint(20) NOT NULL,
+  `por_opr_id` bigint(20) NULL DEFAULT NULL,
+  `por_principle_name` varchar(355) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `por_product_name` varchar(355) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `por_note` varchar(455) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `por_quantity` int(11) NULL DEFAULT NULL,
+  `por_unit_value` double NULL DEFAULT NULL,
+  `por_total_value` double NULL DEFAULT NULL,
+  `created_at` datetime NULL DEFAULT current_timestamp(),
+  `created_by` bigint(20) NULL DEFAULT NULL,
+  `updated_at` datetime NULL DEFAULT current_timestamp(),
+  `updated_by` bigint(20) NULL DEFAULT NULL,
+  PRIMARY KEY (`por_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of opr_value_products
+-- ----------------------------
+INSERT INTO `opr_value_products` VALUES (12, 1, 'Microsoft', 'Microsoft Office 365 Subcription', '123', 1, 555, 555, '2023-07-27 14:30:12', NULL, '2023-10-19 14:39:34', NULL);
+INSERT INTO `opr_value_products` VALUES (13, 1, 'Microsoft', 'Microsoft Certificate', NULL, 3, 200, 600, '2023-07-27 14:30:12', NULL, '2023-07-27 14:30:12', NULL);
+INSERT INTO `opr_value_products` VALUES (42, 1, 'Microsoft', 'Microsoft Office 365 Subcription', '12', 13, 13, 169, '2023-10-04 16:10:13', NULL, '2023-10-04 16:10:13', NULL);
+INSERT INTO `opr_value_products` VALUES (43, 1, 'Microsoft', 'Microsoft Office 365 Subcription', '124', 123, 13313, 1637499, '2023-10-04 16:11:59', NULL, '2023-10-04 16:11:59', NULL);
+INSERT INTO `opr_value_products` VALUES (44, 1, 'Microsoft', 'Microsoft Office 365 Subcription', '1', 3, 2, 6, '2023-10-04 16:31:03', NULL, '2023-10-04 16:31:03', NULL);
+INSERT INTO `opr_value_products` VALUES (45, 1, 'Microsoft', 'Microsoft Office 365 Subcription', '12', 1, 12, 12, '2023-10-04 16:32:52', NULL, '2023-10-04 16:32:52', NULL);
+INSERT INTO `opr_value_products` VALUES (46, 1, 'Microsoft', 'Microsoft Office 365 Subcription', '12', 1, 12, 12, '2023-10-09 12:52:37', NULL, '2023-10-09 12:52:37', NULL);
+INSERT INTO `opr_value_products` VALUES (47, 1, 'Sangfor', 'Test', 'test', 1, 100, 100, '2023-10-09 13:02:14', NULL, '2023-10-09 13:02:14', NULL);
+INSERT INTO `opr_value_products` VALUES (48, 1, 'Sangfor', 'Test', 'test', 1, 100, 100, '2023-10-09 13:03:33', NULL, '2023-10-09 13:03:33', NULL);
+INSERT INTO `opr_value_products` VALUES (49, 3, 'Microsoft', 'Microsoft Certificate', NULL, 100, 1000, 100000, '2023-10-17 13:11:36', NULL, '2023-10-17 13:11:36', NULL);
+INSERT INTO `opr_value_products` VALUES (50, 1, 'Microsoft', 'Microsoft Office 365 Subcription', 'test arr', 45, 9000, 405000, '2023-10-19 14:54:15', NULL, '2023-10-19 14:54:15', NULL);
+INSERT INTO `opr_value_products` VALUES (51, 2, 'Microsoft', 'Microsoft Office 365 Subcription', '12', 5, 1000000, 5000000, '2023-10-25 16:58:18', NULL, '2023-10-25 16:58:18', NULL);
+
+-- ----------------------------
+-- Table structure for opr_values
+-- ----------------------------
+DROP TABLE IF EXISTS `opr_values`;
+CREATE TABLE `opr_values`  (
   `ovs_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ovs_opportunity_id` bigint(20) NULL DEFAULT NULL,
-  `opr_value_dpp` double NULL DEFAULT NULL,
-  `opr_value_hpp` double NULL DEFAULT NULL,
-  `opr_tax` double NULL DEFAULT NULL,
-  `opr_other` double NULL DEFAULT NULL,
-  `opr_revenue` double NULL DEFAULT NULL,
+  `ovs_opr_id` bigint(20) NULL DEFAULT NULL,
+  `ovs_value_subtotal` double NULL DEFAULT NULL,
+  `ovs_rate_tax` double NULL DEFAULT NULL,
+  `ovs_value_tax` double NULL DEFAULT NULL,
+  `ovs_value_other_cost` double NULL DEFAULT NULL,
+  `ovs_value_total` double NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT current_timestamp(),
   `created_by` bigint(20) NULL DEFAULT NULL,
   `updated_at` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`ovs_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of opr_value_assumtions
+-- Records of opr_values
 -- ----------------------------
-INSERT INTO `opr_value_assumtions` VALUES (1, 1, 1000, 500, 246566.01, 12, 567000000, '2023-07-25 15:30:05', NULL, '2023-07-26 10:19:56', NULL);
+INSERT INTO `opr_values` VALUES (1, 1, 2044053, 11, 224845.83, 8389.337, 2277288.167, '2023-07-25 15:30:05', NULL, '2023-10-19 14:54:15', NULL);
+INSERT INTO `opr_values` VALUES (2, 2, 5000000, 11, 550000, NULL, 5550000, '2023-10-17 08:48:50', NULL, '2023-10-25 16:58:18', NULL);
+INSERT INTO `opr_values` VALUES (11, 3, 100000, 11, 11000, NULL, 111000, '2023-10-17 11:38:23', NULL, '2023-10-17 13:11:36', NULL);
+INSERT INTO `opr_values` VALUES (12, 3, NULL, 11, NULL, NULL, NULL, '2023-10-26 12:11:21', NULL, '2023-10-26 12:11:21', NULL);
+
+-- ----------------------------
+-- Table structure for ord_purchases
+-- ----------------------------
+DROP TABLE IF EXISTS `ord_purchases`;
+CREATE TABLE `ord_purchases`  (
+  `pur_id` int(11) NOT NULL,
+  `pur_oppr_id` int(11) NULL DEFAULT NULL,
+  `pur_invoice` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `pur_date` date NULL DEFAULT NULL,
+  `pur_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime NULL DEFAULT current_timestamp(),
+  `created_by` int(11) NULL DEFAULT NULL,
+  `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`pur_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of ord_purchases
+-- ----------------------------
+INSERT INTO `ord_purchases` VALUES (1, 1, '123', '2023-10-25', '<p>123</p>', '2023-10-24 15:29:53', 2, '2023-10-24 15:32:19', NULL);
 
 -- ----------------------------
 -- Table structure for password_resets
@@ -8278,36 +8406,69 @@ CREATE TABLE `prd_principles`  (
   `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `created_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`prd_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prd_principles
 -- ----------------------------
-INSERT INTO `prd_principles` VALUES (1, 'Microsoft', 'Microsoft', 'notes..', '2023-05-30 14:50:39', NULL, '2023-05-30 14:51:00', NULL);
+INSERT INTO `prd_principles` VALUES (1, 'Microsoft', 'Microsoft', '<p>notes .. .. ..&nbsp;</p>', '2023-05-30 14:50:39', NULL, '2023-11-23 10:21:05', NULL);
 INSERT INTO `prd_principles` VALUES (2, 'Sangfor', 'Sangfor', 'notes..', '2023-07-21 14:58:59', NULL, '2023-07-21 14:59:17', NULL);
+INSERT INTO `prd_principles` VALUES (3, 'WatchGurad', NULL, NULL, '2023-10-26 11:54:22', NULL, NULL, NULL);
+INSERT INTO `prd_principles` VALUES (4, 'test', NULL, '<p>test</p>', '2023-11-22 13:59:43', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for prd_products
 -- ----------------------------
 DROP TABLE IF EXISTS `prd_products`;
 CREATE TABLE `prd_products`  (
-  `psp_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `psp_id` int(10) NOT NULL,
   `psp_product_id` int(11) NULL DEFAULT NULL,
   `psp_subproduct_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `psp_estimate_value` double NULL DEFAULT NULL,
   `psp_describe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `psp_category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT current_timestamp(),
   `created_by` bigint(20) NULL DEFAULT NULL,
   `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`psp_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prd_products
 -- ----------------------------
-INSERT INTO `prd_products` VALUES (1, 1, 'Microsoft Office 365 Subcription', 1500000, 'products...', '2023-03-15 09:18:04', NULL, '2023-05-30 14:52:53', NULL);
-INSERT INTO `prd_products` VALUES (2, 1, 'Microsoft Certificate ', 500000, 'products...', '2023-05-30 14:51:23', NULL, '2023-05-30 14:53:00', NULL);
+INSERT INTO `prd_products` VALUES (1, 1, 'Microsoft Office 365 Subcription', 1500000, 'p1', 'thing', '2023-03-15 09:18:04', NULL, '2023-11-21 08:54:55', NULL);
+INSERT INTO `prd_products` VALUES (2, 1, 'Microsoft Certificate ', 500000, 'p2', 'thing', '2023-05-30 14:51:23', NULL, '2023-11-21 08:54:57', NULL);
+INSERT INTO `prd_products` VALUES (3, 1, 'Windows 10 lisensi', NULL, NULL, 'service', '2023-10-26 11:53:21', NULL, '2023-11-21 08:57:43', NULL);
+
+-- ----------------------------
+-- Table structure for prs_accessrules
+-- ----------------------------
+DROP TABLE IF EXISTS `prs_accessrules`;
+CREATE TABLE `prs_accessrules`  (
+  `slm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `slm_user` bigint(20) NULL DEFAULT NULL,
+  `slm_lead` bigint(20) NULL DEFAULT NULL,
+  `slm_rules` enum('master','colaborator','manager','technical') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'master',
+  `created_at` datetime NULL DEFAULT current_timestamp(),
+  `created_by` bigint(20) NULL DEFAULT NULL,
+  `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` bigint(20) NULL DEFAULT NULL,
+  PRIMARY KEY (`slm_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 73 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of prs_accessrules
+-- ----------------------------
+INSERT INTO `prs_accessrules` VALUES (1, 3, 20, 'manager', '2023-07-20 16:45:55', 1, '2023-11-14 15:30:27', NULL);
+INSERT INTO `prs_accessrules` VALUES (2, 4, 20, 'master', '2023-07-20 16:49:07', 1, '2023-11-14 15:30:23', NULL);
+INSERT INTO `prs_accessrules` VALUES (3, 3, 21, 'master', '2023-07-26 13:03:54', NULL, '2023-11-14 15:24:57', NULL);
+INSERT INTO `prs_accessrules` VALUES (4, 3, 21, 'manager', '2023-08-31 11:31:33', 1, '2023-11-14 15:24:58', NULL);
+INSERT INTO `prs_accessrules` VALUES (5, 5, 22, 'master', '2023-10-16 15:13:43', 2, '2023-11-14 15:24:59', NULL);
+INSERT INTO `prs_accessrules` VALUES (6, 5, 22, 'manager', '2023-10-16 15:16:03', 2, '2023-11-14 15:25:01', NULL);
+INSERT INTO `prs_accessrules` VALUES (7, 4, 23, 'master', '2023-10-26 15:49:42', 2, '2023-11-14 15:26:47', NULL);
+INSERT INTO `prs_accessrules` VALUES (8, 3, 23, 'manager', '2023-11-14 15:30:51', NULL, '2023-11-14 15:31:20', NULL);
+INSERT INTO `prs_accessrules` VALUES (9, 9, 21, 'technical', '2023-09-22 09:35:12', NULL, '2023-11-14 15:42:05', NULL);
 
 -- ----------------------------
 -- Table structure for prs_contacts
@@ -8324,7 +8485,7 @@ CREATE TABLE `prs_contacts`  (
   `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`plc_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 66 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prs_contacts
@@ -8354,6 +8515,11 @@ INSERT INTO `prs_contacts` VALUES (57, NULL, 39, NULL, NULL, '2023-07-26 11:11:2
 INSERT INTO `prs_contacts` VALUES (58, NULL, 40, NULL, NULL, '2023-07-26 11:28:12', 1, NULL, NULL);
 INSERT INTO `prs_contacts` VALUES (59, 19, 14, NULL, 27, '2023-07-26 13:10:06', 1, NULL, NULL);
 INSERT INTO `prs_contacts` VALUES (60, 21, 41, NULL, 51, '2023-08-31 11:31:33', 1, NULL, NULL);
+INSERT INTO `prs_contacts` VALUES (61, 22, 46, NULL, 2, '2023-10-16 15:13:43', 2, NULL, NULL);
+INSERT INTO `prs_contacts` VALUES (62, 23, 46, NULL, 2, '2023-10-16 15:16:03', 2, NULL, NULL);
+INSERT INTO `prs_contacts` VALUES (63, 22, 21, NULL, 50, '2023-10-26 12:09:52', 2, NULL, NULL);
+INSERT INTO `prs_contacts` VALUES (64, 23, 15, NULL, 50, '2023-10-26 15:49:43', 2, NULL, NULL);
+INSERT INTO `prs_contacts` VALUES (65, 20, 37, 'waka', 50, '2023-11-09 15:39:19', 2, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for prs_lead_statuses
@@ -8395,7 +8561,7 @@ CREATE TABLE `prs_lead_values`  (
   `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`lvs_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 32 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prs_lead_values
@@ -8424,6 +8590,12 @@ INSERT INTO `prs_lead_values` VALUES (22, 18, 144, 1222, '2023-07-20 16:49:42', 
 INSERT INTO `prs_lead_values` VALUES (23, 19, 1000, 5000, '2023-07-21 08:25:23', NULL, NULL, NULL);
 INSERT INTO `prs_lead_values` VALUES (24, 20, 123, 5677, '2023-07-21 08:31:36', NULL, NULL, NULL);
 INSERT INTO `prs_lead_values` VALUES (25, 21, 20000000.99, 3354654765.98, '2023-08-31 11:31:33', NULL, NULL, NULL);
+INSERT INTO `prs_lead_values` VALUES (26, 22, 5000000, 1000000, '2023-10-16 15:13:43', NULL, NULL, NULL);
+INSERT INTO `prs_lead_values` VALUES (27, 23, 5000000, 10000000, '2023-10-16 15:16:03', NULL, NULL, NULL);
+INSERT INTO `prs_lead_values` VALUES (28, 24, 5000, 100000, '2023-10-16 15:19:56', NULL, NULL, NULL);
+INSERT INTO `prs_lead_values` VALUES (29, 25, 5000, 100000, '2023-10-16 15:20:56', NULL, NULL, NULL);
+INSERT INTO `prs_lead_values` VALUES (30, 22, 10000, 10000, '2023-10-26 12:09:52', NULL, NULL, NULL);
+INSERT INTO `prs_lead_values` VALUES (31, 23, 10000, 10000, '2023-10-26 15:49:43', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for prs_leads
@@ -8435,6 +8607,8 @@ CREATE TABLE `prs_leads`  (
   `lds_describe` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `lds_status` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `lds_customer` varchar(90) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `lds_stage_opr` enum('true','false') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'false',
+  `lds_close_date` date NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT current_timestamp(),
   `created_by` bigint(20) NULL DEFAULT NULL,
   `updated_at` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
@@ -8445,27 +8619,10 @@ CREATE TABLE `prs_leads`  (
 -- ----------------------------
 -- Records of prs_leads
 -- ----------------------------
-INSERT INTO `prs_leads` VALUES (1, 'Beli Sangfor', 'test', '3', '50', '2023-03-16 12:48:47', 1, '2023-07-18 08:52:23', NULL);
-INSERT INTO `prs_leads` VALUES (2, 'Beli Sangfor', 'test', '3', '51', '2023-03-16 12:48:52', 1, '2023-08-22 13:36:59', NULL);
-INSERT INTO `prs_leads` VALUES (3, 'Beli Sangfor', 'test', '3', '50', '2023-03-16 12:50:08', 1, '2023-09-01 14:53:06', NULL);
-INSERT INTO `prs_leads` VALUES (4, 'Beli Sangfor', 'test', '3', '50', '2023-03-16 12:50:31', 1, '2023-09-01 14:53:12', NULL);
-INSERT INTO `prs_leads` VALUES (5, 'Beli Sangfor', 'test', '1', '50', '2023-03-16 12:51:57', 1, '2023-07-31 14:59:16', NULL);
-INSERT INTO `prs_leads` VALUES (6, 'Test lead', '2', '1', '50', '2023-05-31 12:57:22', 1, '2023-07-31 14:59:21', NULL);
-INSERT INTO `prs_leads` VALUES (7, 'ef', '313', '3', '50', '2023-05-31 15:20:16', 1, '2023-09-01 14:53:12', NULL);
-INSERT INTO `prs_leads` VALUES (8, 'Data Lead', 'Data lead test', '3', '50', '2023-06-05 09:49:58', 1, '2023-09-01 14:53:12', NULL);
-INSERT INTO `prs_leads` VALUES (9, 'test', NULL, '2', '50', '2023-06-05 09:55:04', 1, '2023-09-01 14:53:12', NULL);
-INSERT INTO `prs_leads` VALUES (10, 'ini adalah lead pembangunan web laravel berbasis web ini adalah lead pembangunan web laravel berbasis web', '3', '1', '50', '2023-06-05 10:10:39', 1, '2023-09-01 14:53:12', NULL);
-INSERT INTO `prs_leads` VALUES (11, 'ef', '5', '2', '50', '2023-06-05 10:11:42', 1, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (12, 'ef', '12', '2', '50', '2023-06-05 10:51:18', 1, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (13, 'Project one', NULL, '1', '50', '2023-07-20 15:51:19', NULL, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (14, 'Jeka', NULL, '1', '50', '2023-07-20 16:10:44', NULL, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (15, 'KOA', NULL, '3', '50', '2023-07-20 16:14:12', NULL, '2023-09-05 11:24:24', NULL);
-INSERT INTO `prs_leads` VALUES (16, 'Jeans', NULL, '3', '50', '2023-07-20 16:45:55', NULL, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (17, 'Jeans', NULL, '1', '50', '2023-07-20 16:49:08', NULL, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (18, 'lead satu', NULL, '1', '50', '2023-07-20 16:49:42', NULL, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (19, 'Akan Beli Microsoft', NULL, '3', '51', '2023-07-21 08:25:23', NULL, '2023-09-05 10:29:39', NULL);
-INSERT INTO `prs_leads` VALUES (20, 'New Project', NULL, '1', '50', '2023-07-21 08:31:36', NULL, '2023-09-01 14:53:13', NULL);
-INSERT INTO `prs_leads` VALUES (21, 'Test membuat lead', NULL, '1', '50', '2023-08-31 11:31:33', NULL, '2023-09-01 14:53:13', NULL);
+INSERT INTO `prs_leads` VALUES (20, 'New Project 1', NULL, '3', '50', 'true', '2023-11-12', '2023-07-21 08:31:36', NULL, '2023-11-14 11:15:55', NULL);
+INSERT INTO `prs_leads` VALUES (21, 'Test membuat lead', NULL, '3', '51', 'true', '2023-11-13', '2023-08-31 11:31:33', NULL, '2023-11-14 11:16:00', NULL);
+INSERT INTO `prs_leads` VALUES (22, 'Projek 1', NULL, '3', '50', 'true', '2023-11-14', '2023-10-26 12:09:52', NULL, '2023-11-14 11:16:04', NULL);
+INSERT INTO `prs_leads` VALUES (23, 'Projek 678', NULL, '3', '50', 'false', '2023-11-04', '2023-10-26 15:49:43', NULL, '2023-11-15 14:57:16', NULL);
 
 -- ----------------------------
 -- Table structure for prs_product_offers
@@ -8518,7 +8675,7 @@ CREATE TABLE `prs_qualifications`  (
   `updated_at` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`lqs_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prs_qualifications
@@ -8528,61 +8685,29 @@ INSERT INTO `prs_qualifications` VALUES (7, 8, 'identification_budgets', 'true',
 INSERT INTO `prs_qualifications` VALUES (8, 16, 'identification_needs', 'false', 'tes', '2023-07-24 13:22:40', 1, '2023-07-24 13:22:40', NULL);
 INSERT INTO `prs_qualifications` VALUES (9, 1, 'identification_needs', 'false', '<p>12</p>', '2023-07-25 13:20:56', 1, '2023-07-25 13:20:56', NULL);
 INSERT INTO `prs_qualifications` VALUES (10, 2, 'identification_needs', 'false', NULL, '2023-08-22 10:06:58', 1, '2023-08-22 10:07:18', NULL);
+INSERT INTO `prs_qualifications` VALUES (11, 21, 'identification_budgets', 'false', NULL, '2023-09-14 16:46:16', 2, '2023-09-14 16:46:17', NULL);
 
 -- ----------------------------
--- Table structure for prs_salespersons
+-- Table structure for user_divisions
 -- ----------------------------
-DROP TABLE IF EXISTS `prs_salespersons`;
-CREATE TABLE `prs_salespersons`  (
-  `slm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `slm_user` bigint(20) NULL DEFAULT NULL,
-  `slm_lead` bigint(20) NULL DEFAULT NULL,
-  `slm_rules` enum('head','member') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'head',
-  `created_at` datetime NULL DEFAULT current_timestamp(),
-  `created_by` bigint(20) NULL DEFAULT NULL,
-  `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` bigint(20) NULL DEFAULT NULL,
-  PRIMARY KEY (`slm_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of prs_salespersons
--- ----------------------------
-INSERT INTO `prs_salespersons` VALUES (20, 3, 1, 'member', '2023-07-10 09:27:36', NULL, '2023-07-12 09:22:21', NULL);
-INSERT INTO `prs_salespersons` VALUES (21, 4, 1, 'member', '2023-07-10 09:27:36', NULL, '2023-07-12 09:19:42', NULL);
-INSERT INTO `prs_salespersons` VALUES (23, 3, 2, 'head', '2023-07-12 11:45:03', NULL, '2023-09-05 10:32:14', NULL);
-INSERT INTO `prs_salespersons` VALUES (24, 4, 13, 'member', '2023-07-20 15:51:18', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (25, 2, 21, 'member', '2023-07-20 15:51:18', 1, '2023-09-01 14:39:32', NULL);
-INSERT INTO `prs_salespersons` VALUES (26, 3, 14, 'member', '2023-07-20 16:10:43', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (28, 5, 15, 'member', '2023-07-20 16:14:12', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (30, 3, 16, 'member', '2023-07-20 16:45:55', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (32, 3, 17, 'member', '2023-07-20 16:49:07', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (34, 4, 18, 'member', '2023-07-20 16:49:42', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (38, 3, 20, 'member', '2023-07-21 08:31:36', 1, NULL, NULL);
-INSERT INTO `prs_salespersons` VALUES (46, 2, 21, 'member', '2023-07-26 13:03:54', NULL, '2023-09-01 11:11:20', NULL);
-INSERT INTO `prs_salespersons` VALUES (47, 3, 21, 'member', '2023-07-26 13:03:54', NULL, '2023-09-01 11:11:20', NULL);
-INSERT INTO `prs_salespersons` VALUES (49, 1, 21, 'head', '2023-08-31 11:31:33', 1, '2023-09-01 14:52:18', NULL);
-
--- ----------------------------
--- Table structure for user_devisions
--- ----------------------------
-DROP TABLE IF EXISTS `user_devisions`;
-CREATE TABLE `user_devisions`  (
+DROP TABLE IF EXISTS `user_divisions`;
+CREATE TABLE `user_divisions`  (
   `div_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `div_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `created_at` datetime NULL DEFAULT NULL,
+  `div_kode` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime NULL DEFAULT current_timestamp(),
   `created_by` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `updated_at` datetime NULL DEFAULT NULL,
+  `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`div_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of user_devisions
+-- Records of user_divisions
 -- ----------------------------
-INSERT INTO `user_devisions` VALUES (1, 'Management', '2023-09-07 10:25:08', '1', NULL, NULL);
-INSERT INTO `user_devisions` VALUES (2, 'Marketing', '2023-09-07 09:02:49', '1', NULL, NULL);
-INSERT INTO `user_devisions` VALUES (3, 'Technical', '2023-09-07 09:02:52', '1', NULL, NULL);
+INSERT INTO `user_divisions` VALUES (1, 'Management', 'A', '2023-09-07 10:25:08', '1', '2023-11-02 13:15:32', NULL);
+INSERT INTO `user_divisions` VALUES (2, 'Marketing', 'B', '2023-09-07 09:02:49', '1', '2023-11-02 13:15:34', NULL);
+INSERT INTO `user_divisions` VALUES (3, 'Technical', 'C', '2023-09-07 09:02:52', '1', '2023-11-02 13:15:36', NULL);
 
 -- ----------------------------
 -- Table structure for user_structures
@@ -8591,7 +8716,7 @@ DROP TABLE IF EXISTS `user_structures`;
 CREATE TABLE `user_structures`  (
   `usr_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `usr_user_id` int(11) NULL DEFAULT NULL,
-  `usr_devision_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `usr_division_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `usr_team_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `usr_str_level` enum('staff','manager','master','administrator') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'staff',
   `created_at` datetime NULL DEFAULT NULL,
@@ -8599,18 +8724,20 @@ CREATE TABLE `user_structures`  (
   `updated_at` datetime NULL DEFAULT NULL,
   `updated_by` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`usr_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user_structures
 -- ----------------------------
 INSERT INTO `user_structures` VALUES (1, 1, '1', '1', 'master', NULL, NULL, NULL, NULL);
-INSERT INTO `user_structures` VALUES (2, 2, '3', '4', 'staff', NULL, NULL, NULL, NULL);
-INSERT INTO `user_structures` VALUES (3, 3, '2', '2', 'manager', NULL, NULL, NULL, NULL);
-INSERT INTO `user_structures` VALUES (4, 4, '2', '3', 'manager', NULL, NULL, NULL, NULL);
-INSERT INTO `user_structures` VALUES (5, 5, '2', '2', 'staff', NULL, NULL, NULL, NULL);
-INSERT INTO `user_structures` VALUES (6, 6, '2', '3', 'staff', NULL, NULL, NULL, NULL);
-INSERT INTO `user_structures` VALUES (8, 7, '2', '2', 'master', NULL, NULL, NULL, NULL);
+INSERT INTO `user_structures` VALUES (2, 2, '1', '1', 'administrator', NULL, NULL, NULL, NULL);
+INSERT INTO `user_structures` VALUES (3, 3, '2', '2', 'manager', NULL, NULL, '2023-09-14 09:32:33', NULL);
+INSERT INTO `user_structures` VALUES (4, 4, '2', '2', 'staff', NULL, '2', '2023-09-14 14:07:34', NULL);
+INSERT INTO `user_structures` VALUES (5, 5, '2', '3', 'manager', NULL, NULL, NULL, NULL);
+INSERT INTO `user_structures` VALUES (6, 6, '2', '3', 'staff', NULL, '2', '2023-09-14 14:05:50', NULL);
+INSERT INTO `user_structures` VALUES (8, 7, '2', '3', 'staff', NULL, '2', '2023-09-12 11:04:33', NULL);
+INSERT INTO `user_structures` VALUES (9, 8, '3', '4', 'manager', NULL, NULL, NULL, NULL);
+INSERT INTO `user_structures` VALUES (10, 9, '3', '4', 'staff', NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for user_teams
@@ -8625,15 +8752,16 @@ CREATE TABLE `user_teams`  (
   `updated_at` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`uts_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user_teams
 -- ----------------------------
 INSERT INTO `user_teams` VALUES (1, 'Management', '1', NULL, NULL, '2023-09-08 15:00:38', NULL);
-INSERT INTO `user_teams` VALUES (2, 'Marketing A', '2', NULL, NULL, '2023-09-08 15:00:40', NULL);
+INSERT INTO `user_teams` VALUES (2, 'Marketing C', '2', NULL, NULL, '2023-09-14 10:47:47', '2');
 INSERT INTO `user_teams` VALUES (3, 'Marketing B', '2', NULL, NULL, '2023-09-08 15:00:41', NULL);
 INSERT INTO `user_teams` VALUES (4, 'Technical', '3', NULL, NULL, '2023-09-08 15:00:44', NULL);
+INSERT INTO `user_teams` VALUES (6, 'Team B', '2', '2023-09-11 16:27:38', '2', '2023-09-13 16:59:51', '2');
 
 -- ----------------------------
 -- Table structure for users
@@ -8655,20 +8783,20 @@ CREATE TABLE `users`  (
   `created_by` bigint(20) NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` bigint(20) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `users_username_unique`(`username`) USING BTREE,
-  UNIQUE INDEX `users_email_unique`(`email`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (1, 'Master', 'master', 'AGM', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'master@webmaster.com', NULL, NULL, NULL, NULL, '2023-09-07 09:23:25', NULL, '2023-09-07 09:24:15', NULL);
-INSERT INTO `users` VALUES (2, 'Aris', 'aris', 'ADM', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'aris@webmaster.com', '2022-12-01 15:03:18', NULL, NULL, NULL, '2022-12-01 15:04:29', NULL, '2023-09-07 09:23:20', NULL);
-INSERT INTO `users` VALUES (3, 'Rata', 'rata', 'MGR.PAS', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'rata@gmail.com', NULL, NULL, NULL, NULL, '2023-06-20 13:02:08', NULL, '2023-09-07 09:23:18', NULL);
-INSERT INTO `users` VALUES (4, 'Vio', 'vio', 'MGR', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'vio@gmail.com', NULL, NULL, NULL, NULL, '2023-06-20 13:02:53', NULL, '2023-09-07 09:23:17', NULL);
-INSERT INTO `users` VALUES (5, 'Essy', 'essy', 'STF', NULL, '$2y$10$oYaYTHFI3EIoOH5m4InQ2uZbRZEs1gCRvXCQI1a30U7zK4bRay6Me', 'essy@gmail.com', NULL, NULL, NULL, NULL, '2022-12-23 15:33:58', NULL, '2023-09-07 09:23:14', NULL);
-INSERT INTO `users` VALUES (6, 'Yua', 'yua', 'STF', NULL, '$2y$10$oYaYTHFI3EIoOH5m4InQ2uZbRZEs1gCRvXCQI1a30U7zK4bRay6Me', 'yua@gmail.com', NULL, NULL, NULL, NULL, '2023-06-20 15:14:51', NULL, '2023-09-07 09:23:12', NULL);
-INSERT INTO `users` VALUES (7, 'Aldi', 'aldi', 'SFT', NULL, '$2y$10$0.HYZEOCuoMzcAFV9DBF3uTnJxIBp258u.1Pp4mTRirKgDO99wBdu', '-', NULL, '-', NULL, '-', '2023-09-07 15:41:48', NULL, NULL, NULL);
+INSERT INTO `users` VALUES (1, 'Mst. Admin', 'admin_master', 'AGM', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'master@webmaster.com', NULL, NULL, NULL, NULL, '2023-09-07 09:23:25', NULL, '2023-11-14 13:38:53', NULL);
+INSERT INTO `users` VALUES (2, 'Sys. Admin', 'admin_system', 'ADM', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'aris@webmaster.com', '2022-12-01 15:03:18', NULL, NULL, NULL, '2022-12-01 15:04:29', NULL, '2023-11-14 13:39:02', NULL);
+INSERT INTO `users` VALUES (3, 'Avi', 'avi', 'MGR', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'rata@gmail.com', NULL, NULL, NULL, NULL, '2023-06-20 13:02:08', NULL, '2023-11-14 13:39:34', NULL);
+INSERT INTO `users` VALUES (4, 'Vio', 'vio', 'STF', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'vio@gmail.com', NULL, NULL, NULL, NULL, '2023-06-20 13:02:53', 2, '2023-09-14 16:10:11', NULL);
+INSERT INTO `users` VALUES (5, 'Etsy', 'etsy', 'MGR.PAS', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'essy@gmail.com', NULL, NULL, NULL, NULL, '2022-12-23 15:33:58', NULL, '2023-11-14 15:24:15', NULL);
+INSERT INTO `users` VALUES (6, 'Assa', 'assa', 'STF', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', 'yua@gmail.com', NULL, NULL, NULL, NULL, '2023-06-20 15:14:51', 2, '2023-11-14 13:48:42', NULL);
+INSERT INTO `users` VALUES (7, 'Aldi', 'aldi', 'STF', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', '-', NULL, '123', NULL, '-', '2023-09-07 15:41:48', 2, '2023-11-14 13:48:42', NULL);
+INSERT INTO `users` VALUES (8, 'Avino', 'avino', 'MGR.TCH', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', '', NULL, NULL, NULL, NULL, '2023-09-14 16:27:34', NULL, '2023-11-14 13:41:29', NULL);
+INSERT INTO `users` VALUES (9, 'Azka', 'azka', 'STF.TCH', NULL, '$2y$10$oQgqoiq/sf3ugAqvV1hFJugis285NXL1.8j6MKAwH8XSrtDh1Kzkm', '', NULL, NULL, NULL, NULL, '2023-09-15 08:49:51', NULL, '2023-11-14 13:41:07', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

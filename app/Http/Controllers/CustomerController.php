@@ -29,6 +29,8 @@ use App\Models\Prd_subproduct;
 use App\Models\Prs_lead_status;
 use App\Models\Act_activity_type;
 use App\Models\Cst_institution;
+use App\Models\Opr_opportunity;
+use App\Models\Ord_purchase;
 use App\Models\Prs_lead;
 use PhpParser\Node\Stmt\Echo_;
 
@@ -71,7 +73,41 @@ class CustomerController extends Controller
     ->where('pho_param', 'INSTITUTION')
     ->select('pho_number')
     ->get();
-    $colect_person = null;
+    $last_lead = Prs_lead::where('lds_customer', $id)->select('lds_id')->orderBy('lds_close_date','desc')->first();
+    if ($last_lead == null) {
+      $lastproject_data = null;
+    }else{
+      $last_oppor = Opr_opportunity::where('opr_lead_id',$last_lead->lds_id)->first();
+      if ($last_oppor == null) {
+        $pro_data = Prs_accessrule::join('users','prs_accessrules.slm_user','=','users.id')
+        ->join('prs_leads','prs_accessrules.slm_lead','=','prs_leads.lds_id')
+        ->join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
+        ->where('slm_rules','master')
+        ->orderBy('lds_close_date','desc')
+        ->select('name','lds_title as title','lds_close_date as close_date','pls_status_name as status')
+        ->first();
+        $lastproject_data = $pro_data;
+      }else{
+        $last_purchase = Ord_purchase::where('pur_oppr_id',$last_oppor->opr_id)->select('opr_id')->first();
+        if ($last_purchase == null) {
+          $pro_data = Prs_accessrule::join('users','prs_accessrules.slm_user','=','users.id')
+          ->join('opr_opportunities','prs_accessrules.slm_lead','opr_opportunities.opr_lead_id')
+          ->join('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
+          ->where('slm_rules','master')
+          ->select('name','opr_title as title','opr_close_date as close_date','oss_status_name as status')
+          ->first();
+          $lastproject_data = $pro_data;
+        }else{
+          $pro_data = Prs_accessrule::join('users','prs_accessrules.slm_user','=','users.id')
+          ->join('opr_opportunities','prs_accessrules.slm_lead','opr_opportunities.opr_lead_id')
+          ->join('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
+          ->where('slm_rules','master')
+          ->select('name','opr_title as title','opr_close_date as close_date','oss_status_name as status')
+          ->first();
+          $lastproject_data = $pro_data;
+        }
+      }
+    }
     $person_ar = array();
     $colect_person = Cst_personal::where('cnt_cst_id', $id)->get();
     $dataContact = array();

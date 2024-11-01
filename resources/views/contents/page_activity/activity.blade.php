@@ -14,7 +14,7 @@ opportunitys
 <div class="card">
 	<div class="card-status-top bg-success"></div>
 	<div class="card-header card-header-custom card-header-light">
-		<h3 class="card-title">Detail Opportunity</h3>
+		<h3 class="card-title">Detail Activity</h3>
 		<div class="card-actions" style="padding-right: 10px;">
 			<button class="btn btn-sm btn-primary btn-pill btn-light" onclick="actionAddActivities()" style="width: 130px;">
 				<div style="font-weight: 700;">
@@ -130,11 +130,12 @@ opportunitys
 			<div id="init-page-activities" class="row mb-2">
 				<em class="col text-muted lh-base mb-1"><i>Activities</i></em>
 				<div class="col-auto">
+					<button class="btn btn-sm" onclick="actionResetFilter()"> <div class="text-muted">Reset Filter</div></button>
 					<input type="hidden" id="param-code-status" name="code_status" value="act_total" readonly>
 				</div>
 			</div>
 			<div id="contact-area" class="row">
-				<div class="col-6 col-sm-4 col-md-2 col-xl py-3 pt-1 pb-2">
+				<div class="col-xl-auto col-md-2 py-3 pt-1 pb-2 ">
 					<a href="#init-page-activities" id="id-btn-act_total" class="btn btn-square bg-dark-lt" style="display: inherit;" onclick="actionLoadActivities('act_total')">
 						<div id="id-total-activities">{{ $cnt_total }}</div>
 						<div><i class="ri-database-line" style="vertical-align: bottom;"></i> Total</div>
@@ -173,7 +174,7 @@ opportunitys
 						$count_activity = $cnt_video_call;
 					@endphp	
 				@endif
-				<div class="col-6 col-sm-4 col-md-2 col-xl py-3 pt-1 pb-2">
+				<div class="col-xl-auto col-md-2 py-3 pt-1 pb-2">
 					<a href="#init-page-activities" id="id-btn-{{ $list->aat_type_code }}" class="{{ $list->aat_custom_class_2 }}" style="display: inherit;" onclick="actionLoadActivities('{{ $list->aat_type_code }}')">
 						<div id="id-{{ $list->aat_type_code }}">{{ $count_activity }}</div>
 						<div> <i class="{{ $list->aat_icon }}" style="vertical-align: bottom;"></i> {{ $list->aat_type_name }}</div>
@@ -188,13 +189,13 @@ opportunitys
 							<tr>
 								{{-- <th></th> --}}
 								<th style="width: 5%;"></th>
-								<th style="text-align: center; width: 15%;">Due date</th>
-								<th style="text-align: center; width: 8%;">Activity</th>
-								<th style="text-align: center; width: 15%;">Customer</th>
-								<th style="text-align: center; width: 31%;">Info</th>
-								<th style="text-align: center; width: 15%;">Project</th>
-								{{-- <th style="text-align: center; width: 15%;">Assign</th> --}}
-								<th style="text-align: center; width: 9%;">Completion</th>
+								<th style="text-align: center; width: 12%;">Due date</th>
+								<th style="text-align: left; width: 8%;">Activity</th>
+								<th style="text-align: left; width: 15%;">Customer</th>
+								<th style="text-align: left; width: 15%;">Project</th>
+								<th style="text-align: left; width: 10%;">Assign</th>
+								<th style="text-align: left; width: 30%;">Info</th>
+								<th style="text-align: center; width: 5%;">Completion</th>
 							</tr>
 						</thead>
 						<tbody class="table-tbody"></tbody>
@@ -243,7 +244,7 @@ opportunitys
 							<div class="mb-2 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Customer</label>
 								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-customer" class="form-select ts-input-custom" name="customer" placeholder="Select your type activity"  value="">
+									<select type="text" id="select-customer" class="form-select ts-input-custom" name="customer" placeholder="Select customer"  value="">
 										<option value="{{ null }}"></option>
 										@foreach ($customer_all as $list)
 											<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
@@ -425,10 +426,12 @@ opportunitys
 		min-height: 0.53rem;
 	}
 	.custom-datatables tbody tr td{
-		padding-top: 4px;
-		padding-bottom: 4px;
-		padding-left: 0.8rem;
-		padding-right: 0.8rem;
+		font-size: 13px;
+		font-weight: 500;
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+		padding-left: 0.5rem;
+		padding-right: 0.5rem;
 	}
 	.img-status {
 		max-height: 200px;
@@ -481,6 +484,8 @@ opportunitys
 {{-- Script 1 --}}
 
 <script>
+var array = @json($users_mod);
+console.log(array);
 var select_type_activity = new TomSelect("#select-type-activity",{
 	create: false,			
 	valueField: 'id',
@@ -607,7 +612,7 @@ var select_act_status = new TomSelect("#select-act-status",{
 {{-- ============================================================================================ --}}
 {{-- Class Function --}}
 <script>
-function mainDataActivity(type_act,status_act) {
+function mainDataActivity(val_type,val_status,val_user) {
 	var id = "";
 	$('#myTable_filter input').addClass('form-control custom-datatables-filter');
 	$('#myTable_length select').addClass('form-control form-select custom-datatables-leght');
@@ -628,30 +633,45 @@ function mainDataActivity(type_act,status_act) {
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',
-				'act_status' : status_act,
-				'act_param': type_act
+				'act_param': val_type,
+				'act_status' : val_status,
+				'act_user' : val_user,
 			}
 		},
 		columnDefs: [
 			{
+				"targets": 0, 
+				"className": "",
+				"orderable": false
+			},
+			{
+				"targets": 1, 
+				"className": "text-left",
+				"orderable": false
+			},
+			{
 				"targets": 2, 
-				"className": "text-center",
+				"className": "text-left",
+				"orderable": false,
+				"searchable":true,
 			},
 			{
 				"targets": 3, 
-				"className": "text-center",
+				"className": "text-left",
+				"orderable": true,
+				"searchable":true,
 			}
 		],
 		order:[[0,'asc']],
 		columns: [
-			{data: 'menu', name: 'menu', orderable: false, searchable: false },
-			{data: 'due_date', name: 'due_date', orderable: true, searchable: true },
-			{data: 'title', name: 'title', orderable: true, searchable: true },
-			{data: 'customer', name: 'customer', orderable: true, searchable: true },
-			{data: 'info', name: 'info', orderable: true, searchable: true },
+			{data: 'menu', name: 'menu' },
+			{data: 'due_date', name: 'due_date'},
+			{data: 'title', name: 'title'},
+			{data: 'customer', name: 'customer'},
 			{data: 'project', name: 'project', orderable: true, searchable: true },
-			/*
 			{data: 'assign', name: 'assign', orderable: true, searchable: true },
+			{data: 'info', name: 'info', orderable: true, searchable: true },
+			/*
 			*/
 			{data: 'complete', name: 'complete', orderable: true, searchable: true },
 		],
@@ -666,9 +686,21 @@ function mainDataActivity(type_act,status_act) {
 						$('#filter_completion').append('<option value="' + prop + '">' + obj[prop] + '</option>');
 					}
 				}
-			}
+			};
+			$("#activity-table_filter.dataTables_filter")
+			.append('<label id="userFilter"><select id="filter_user" class="form-control btn-square" onchange="actioFilterCompletion(this)" style="padding: 5px; border-color: #6f797a;"></select> </label>');
+			am_aplicacion_ids_a = @json($users_mod);
+			for (var key in am_aplicacion_ids_a) {
+				var obj = am_aplicacion_ids_a[key];
+				for (var prop in obj) {
+					if (obj.hasOwnProperty(prop)) {
+						$('#filter_user').append('<option value="' + prop + '">' + obj[prop] + '</option>');
+					}
+				}
+			};
 		}
 	});
+	tableAct.column('0:visible').order( 'asc' ).draw();
 	return tableAct;
 };
 function sourceDataActivityCalender(start,end) {
@@ -761,13 +793,14 @@ function actionLoadActivities(type_act) {
 	$('#param-code-status').val(type_act);
 	/*************************************************/
 	$('#activity-table').DataTable().clear().destroy();
-	var cr = mainDataActivity(type_act,'all_status');
+	var cr = mainDataActivity(type_act,'all_status','all_user');
 };
 function actioFilterCompletion(param) {
 	var type = $('#param-code-status').val();
-	var status = param.value;
+	var val_status = document.getElementById("filter_completion");
+	var val_user = document.getElementById("filter_user");
 	$('#activity-table').DataTable().clear().destroy();
-	mainDataActivity(type,status);
+	mainDataActivity(type,val_status.value,val_user.value);
 };
 function actionViewMiniDetail(id) {  
 	$('#act-detail-no-display').hide();
@@ -904,11 +937,22 @@ function actionViewInputTeam() {
 	$('#btn-remove-team').show(); 
 	$('#select-signed-user-team-area').slideDown();
 };
+function actionResetFilter(){
+	$('#id-btn-act_todo').removeClass('bg-cyan').removeClass('text-cyan-fg').addClass('bg-cyan-lt');
+	$('#id-btn-act_phone').removeClass('bg-green').removeClass('text-green-fg').addClass('bg-green-lt');
+	$('#id-btn-act_email').removeClass('bg-blue').removeClass('text-blue-fg').addClass('bg-blue-lt');
+	$('#id-btn-act_visit').removeClass('bg-yellow').removeClass('text-yellow-fg').addClass('bg-yellow-lt');
+	$('#id-btn-act_poc').removeClass('bg-red').removeClass('text-red-fg').addClass('bg-red-lt');
+	$('#id-btn-act_webinar').removeClass('bg-purple').removeClass('text-purple-fg').addClass('bg-purple-lt');
+	$('#id-btn-act_video_call').removeClass('bg-azure').removeClass('text-azure-fg').addClass('bg-azure-lt');
+	$('#activity-table').DataTable().clear().destroy();
+	mainDataActivity('act_total','all_status','all_user');
+};
 </script>
 {{-- ============================================================================================ --}}
 {{-- Script 2 --}}
 <script>
-mainDataActivity('act_total','all_status');
+mainDataActivity('act_total','all_status','all_user');
 </script>
 {{-- ============================================================================================ --}}
 {{-- Script 3 --}}
@@ -975,7 +1019,6 @@ $(document).ready(function() {
 	$("#formContent1").submit(function(e) {
 		e.preventDefault();
 		var formData1 = new FormData(this);
-		
 		$.ajaxSetup({
 			headers: {
 				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
