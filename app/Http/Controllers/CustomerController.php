@@ -25,13 +25,15 @@ use App\Models\Cst_contact_email;
 use App\Models\Cst_contact_mobile;
 use App\Models\Cst_contact_phone;
 use App\Models\Cst_location;
-use App\Models\Prd_subproduct;
+use App\Models\Prd_product;
 use App\Models\Prs_lead_status;
 use App\Models\Act_activity_type;
 use App\Models\Cst_institution;
 use App\Models\Opr_opportunity;
 use App\Models\Ord_purchase;
+use App\Models\Prs_contact;
 use App\Models\Prs_lead;
+use App\Models\User_structure;
 use PhpParser\Node\Stmt\Echo_;
 
 class CustomerController extends Controller
@@ -78,6 +80,7 @@ class CustomerController extends Controller
       $lastproject_data = null;
     }else{
       $last_oppor = Opr_opportunity::where('opr_lead_id',$last_lead->lds_id)->first();
+      // dd($last_oppor);
       if ($last_oppor == null) {
         $pro_data = Prs_accessrule::join('users','prs_accessrules.slm_user','=','users.id')
         ->join('prs_leads','prs_accessrules.slm_lead','=','prs_leads.lds_id')
@@ -88,7 +91,7 @@ class CustomerController extends Controller
         ->first();
         $lastproject_data = $pro_data;
       }else{
-        $last_purchase = Ord_purchase::where('pur_oppr_id',$last_oppor->opr_id)->select('opr_id')->first();
+        $last_purchase = Ord_purchase::where('pur_oppr_id',$last_oppor->opr_id)->select('pur_id')->first();
         if ($last_purchase == null) {
           $pro_data = Prs_accessrule::join('users','prs_accessrules.slm_user','=','users.id')
           ->join('opr_opportunities','prs_accessrules.slm_lead','opr_opportunities.opr_lead_id')
@@ -162,6 +165,30 @@ class CustomerController extends Controller
       }
     }
     return view('contents.page_customer.detail_customer', compact('cstId', 'id', 'company', 'location_ar', 'email', 'phone', 'dataContact'));
+  }
+
+  /* Tags:... */
+  public function viewContactCustomer(Request $request)
+  {
+    $id = $request->idcs;
+    return view('contents.page_customer.contacts',compact('id'));
+  }
+  /* Tags:... */
+  public function viewContactDetail(Request $request)
+  {
+    $auth = Auth::user();
+    $id = $request->id;
+    $data_personal = Cst_personal::join('')
+    ->where('cnt_id',$request->id)
+    ->first();
+    dd($data_contact);
+    die();
+    return view('contents.page_customer.contact_info', compact('data_personal', 'user'));
+  }
+  /* Tags:... */
+  public function deleteContact(Request $request)
+  {
+    #code...
   }
   public function activityCustomer(Request $request)
   {
@@ -480,6 +507,27 @@ class CustomerController extends Controller
 			'id','project','user_all','user','personal','company'
     ));
   }
+  public function actionPageCustomerPurchase(Request $request)
+  {
+    $id = $request->id;
+    $company = Cst_customer::join('cst_institutions', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
+    ->leftjoin('users', 'cst_customers.created_by', '=', 'users.id')
+    ->where('cst_id', $id)
+      ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes', 'ins_name')
+      ->first();
+    $user = Auth::user();
+    $user_all = User::whereIn('level', ['MKT', 'MGR.PAS', 'MGR', 'AGM', 'TCK'])->get();
+    $personal = Cst_personal::where('cnt_cst_id', $id)->get();
+    $project = Prs_lead::where('lds_customer', $id)->where('lds_status', '3')->get();
+    return view('contents.page_customer.detail_customer_purchase', compact(
+      'id',
+      'project',
+      'user_all',
+      'user',
+      'personal',
+      'company'
+    ));
+  }
   ###
   public function actionPageCustomerOpportunities(Request $request)
   {
@@ -511,9 +559,9 @@ class CustomerController extends Controller
     $company = Cst_customer::where('cst_id',$request->id)->first();
     $lead_status = Prs_lead_status::get();
     $business_fields = Cst_bussiness_field::get();
-    $products = Prd_subproduct::get();
-    // die();
-    return view('contents.page_customer.form_create_customer_fixed', compact('business_fields', 'lead_status', 'products', 'company'));
+    $products = Prd_product::get();
+    $id = $request->id;
+    return view('contents.page_customer.form_create_customer_fixed', compact('business_fields', 'lead_status', 'products', 'company','id'));
   }
   ###
   public function updateCompanyData(Request $request)

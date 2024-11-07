@@ -135,6 +135,7 @@ class SettingController extends Controller
 		->get();
 		$divisions = User_division::get();
 		$team = User_team::get();
+		// dd($data_user);
 		$access = array('STF' => 'Staff','MGR'=>'Manager','MGR.PAS'=>'Manager All Access', 'AGM' => 'Management','ADM' => 'Administrator');
 		return view('contents.page_setting.form_update_user',compact('data_user','user','user_str','division','team','access','url_close'));
 	}

@@ -8,8 +8,11 @@ use App\Models\Addr_city;
 use App\Models\Addr_district;
 use App\Models\Addr_province;
 use App\Models\Addr_subdistrict;
+use App\Models\Cst_contact_email;
+use App\Models\Cst_contact_mobile;
 use App\Models\Cst_customer;
 use App\Models\Cst_institution;
+use App\Models\Cst_personal;
 use App\Models\Prs_lead;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -265,7 +268,7 @@ class DataController extends Controller
 			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
 			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
 			<a class="dropdown-item" href="'.url('customer/detail-customer/'.$colect_data->cst_id.'?extpg=information').'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Customer</a>
-			<a class="dropdown-item" href="'.url('customer/create-customer/'.$colect_data->cst_id).'"><i class="ri-user-add-line" style="margin-right:6px;"></i>Add Contact</a>
+			<a class="dropdown-item" href="'.url('customer/contacts/'.$colect_data->cst_id).'"><i class="ri-user-add-line" style="margin-right:6px;"></i>Contacts</a>
 			<a class="dropdown-item" href="'.url('customer/detail-customer-activities/'.$colect_data->cst_id.'?extpg=activities').'"><i class="ri-run-line" style="margin-right:6px;"></i>Activities</a>
       <a class="dropdown-item" href="#"><i class="ri-filter-2-line" style="margin-right:6px;"></i>Leads</a>
 			<a class="dropdown-item" href="#"><i class="ri-briefcase-2-line" style="margin-right:6px;"></i>Opportunities</a>
@@ -308,6 +311,64 @@ class DataController extends Controller
 		})
 		->rawColumns(['number_index','menu', 'name','ins_name', 'category', 'city', 'datein','lastactive'])
 		->make('true');
+	}
+	public function sourceDataContact(Request $request)
+	{
+		$colect_data = Cst_personal::where('cnt_cst_id',$request->id)
+		->get();
+		// $colect_data = Cst_institution::join('cst_customers', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
+		// ->leftJoin(
+		// 	DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
+		// 	function ($join) {
+		// 		$join->on('cst_customers.cst_id', '=', 'locations.loc_cst_id');
+		// 	}
+		// 	)
+		// 	->select('ins_id', 'cst_id', 'ins_name', 'cst_name', 'ins_business_field', 'cst_business_field', 'loc_city', 'cst_customers.created_at')
+		// 	->get();
+		$num = 1;
+		return DataTables::of($colect_data)
+			->addIndexColumn()
+			->addColumn('empty_str', function ($k) {
+				return '';
+			})
+			->addColumn('menu', function ($colect_data) {
+				return '
+			<div style="text-align:center;">
+			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
+			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
+			<a class="dropdown-item" href="' . url('customer/contacts/detail/' . $colect_data->cnt_id ) . '"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Contact</a>
+			<a class="dropdown-item" href="' . url('customer/contacts/delete/' . $colect_data->cnt_id) . '"><i class="ri-user-add-line" style="margin-right:6px;"></i>Delete</a>
+      </div>
+			</div>
+			';
+			})
+			->addColumn('number_index', function () {
+				return 1;
+			})
+			->addColumn('name', function ($colect_data) {
+				return $colect_data->cnt_fullname;
+			})
+			->addColumn('phone', function ($colect_data) {
+				$data_phone = Cst_contact_mobile::where('mob_cnt_id', $colect_data->cnt_id)->get();
+				$res = "";
+				foreach ($data_phone as $key => $value) {
+					$res.="- ".$value->mob_number."<br>";
+				}
+				return $res;
+			})
+			->addColumn('email', function ($colect_data) {
+				$data_email = Cst_contact_email::where('eml_cnt_id', $colect_data->cnt_id)->get();
+				$res = "";
+				foreach ($data_email as $key => $value) {
+					$res .= "- " . $value->eml_address . "<br>";
+				}
+				return $res;
+			})
+			->addColumn('job', function ($colect_data) {
+				return $colect_data->cnt_company_position;
+			})
+			->rawColumns(['number_index', 'menu', 'name', 'phone', 'email', 'job'])
+			->make('true');
 	}
 	# <===========================================================================================================================================================>
 	/* Tags:source data leads */

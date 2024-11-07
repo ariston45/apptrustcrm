@@ -20093,8 +20093,6 @@ namespace  {
             class View extends \Illuminate\Support\Facades\View {}
             class Datatables extends \Yajra\Datatables\Facades\Datatables {}
             class Flare extends \Facade\Ignition\Facades\Flare {}
-            class DataTables extends \Yajra\DataTables\Facades\DataTables {}
-     
 }
 
 

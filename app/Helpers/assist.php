@@ -2,7 +2,7 @@
 
 use App\Models\Act_activity;
 use App\Models\Cst_personal;
-use App\Models\Cst_company;
+use App\Models\Menu;
 use App\Models\Cst_customer;
 use App\Models\Cst_institution;
 use App\Models\Cst_location;
@@ -167,3 +167,28 @@ function getIcon($name){
   return $icon;
 }
 
+/* Tags:... */
+function initUser()
+{
+  $id = Auth::user()->id;
+  $user = User::where('id', $id)->first();
+  return $user;
+}
+/* Tags:... */
+function initMenu()
+{
+  $level = Auth::user()->level;
+  $menus = Menu::where('mn_level_user', $level)->where('mn_parent_id', '=', 0)->get();
+  return $menus;
+}
+
+/* Tags:... */
+function rulesFeature($data)
+{
+  $level = Auth::user()->level;
+  if (in_array($level,$data)) {
+    return true;
+  }else{
+    return false;
+  }
+}

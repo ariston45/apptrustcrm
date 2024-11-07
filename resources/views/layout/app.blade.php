@@ -1,7 +1,6 @@
 @php
-	use App\Http\Controllers\ProfileController;
-	$user = ProfileController::IdenUser();
-	$menus = ProfileController::IdenMenu();
+	$user = initUser();
+	$menus = initMenu();
   @endphp
 <!DOCTYPE HTML>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">

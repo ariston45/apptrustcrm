@@ -7,8 +7,7 @@ Home
 <h4 class="page-title">Home</h4>
 @endsection
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="#">Step one</a></li>
-<li class="breadcrumb-item active"><a href="#">Step two</a></li>
+<li class="breadcrumb-item active"><a href="#">Home</a></li>
 @endsection
 @section('content')
 <div class="row">

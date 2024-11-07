@@ -77,9 +77,9 @@
 						</div>
 						<div class="col-xl-6">
 							@if ($user->level == 'MGR')
-							<input type="text" name="division" value="{{ $data_user->usr_devision_id }}">
-							<input type="text" name="team" value="{{ $data_user->usr_team_id }}">
-							<input type="text" name="access" value="STF">
+							<input type="hidden" name="division" value="{{ $data_user->usr_division_id }}">
+							<input type="hidden" name="team" value="{{ $data_user->usr_team_id }}">
+							<input type="hidden" name="access" value="STF">
 							@else
 							<div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label required">Set Devision</label>
