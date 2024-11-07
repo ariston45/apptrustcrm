@@ -62,11 +62,11 @@ Customer
 								<thead>
 									<tr>
 										{{-- <th></th> --}}
-										<th style="text-align: left;width: 45%;">Project Name</th>
-										<th style="text-align: left;width: 15%;">Status</th>
-										<th style="text-align: left;width: 30%;">Salesperson</th>
-										<th style="text-align: left;width: 10%;">Date Created</th>
-										{{-- <th style="text-align: center;">Menus</th> --}}
+										<th style="text-align: left;width: 35%;">Project Name</th>
+										<th style="text-align: left;width: 10%;">Status</th>
+										<th style="text-align: left;width: 15%;">Salesperson</th>
+										<th style="text-align: left;width: 20%;">Follow Up</th>
+										<th style="text-align: left;width: 20%;">Date</th>
 									</tr>
 								</thead>
 								<tbody class="table-tbody"></tbody>
@@ -368,7 +368,8 @@ $(document).ready(function() {
 			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
-			{data: 'created', name: 'created', orderable: true, searchable: true },
+			{data: 'activity', name: 'activity', orderable: true, searchable: true },
+			{data: 'last_activity', name: 'last_activity', orderable: true, searchable: true },
 		],
 	});
 });

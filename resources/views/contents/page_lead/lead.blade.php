@@ -30,12 +30,13 @@
 				<table class="table custom-datatables" id="customer-table" style="width: 100%;">
 					<thead>
 						<tr>
-							{{-- <th></th> --}}
-							<th style="width: 40%;">Project Title</th>
-							<th style="text-align: center; width: 25%;">Customer</th>
-							<th style="text-align: center; width: 10%;">Status</th>
-							<th style="text-align: center; width: 15%;">Salesperson</th>
-							<th style="text-align: center; width: 10%">Menus</th>
+							<th style="width: 25%;">Customer</th>
+							<th style="width: 25%;">Project Title</th>
+							<th style="width: 13%;">Status</th>
+							<th style="width: 10%;">Salesperson</th>
+							<th style="width: 10%;">Follow Up</th>
+							<th style="width: 12%;">Last Activity</th>
+							<th style="width: 5%">Menus</th>
 						</tr>
 					</thead>
 					<tbody class="table-tbody"></tbody>
@@ -62,10 +63,10 @@
 <script src="{{ asset('plugins/datatables/datatables.min.js') }}"></script>
 {{-- Datatables --}}
 <script>
-$('#myTable_filter input').addClass('form-control custom-datatables-filter');
-$('#myTable_length select').addClass('form-control form-select custom-datatables-leght');
 function mainDataLeads() {
 	var id = "";
+	$('#myTable_filter input').addClass('form-control custom-datatables-filter');
+	$('#myTable_length select').addClass('form-control form-select custom-datatables-leght');
 	$('#customer-table').DataTable({
 		processing: true,serverSide: true,responsive: true,
 		pageLength: 15,
@@ -82,24 +83,15 @@ function mainDataLeads() {
 				'id' : id
 			}
 		},
-		columnDefs: [
-			{
-				"targets": 2, 
-        "className": "text-center",
-			},
-			{
-				"targets": 3, 
-        "className": "text-center",
-			}
-		],
 		order:[[0,'asc']],
 		columns: [
 			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
-			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'customer', name: 'customer', orderable: true, searchable: true },
+			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
-			// {data: 'datein', name: 'datein', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
+			{data: 'activity', name: 'activity', orderable: true, searchable: true },
+			{data: 'last_activity', name: 'last_activity', orderable: true, searchable: true },
 			{data: 'menu', name: 'menu', orderable: false, searchable: false },
 		]
 	});	

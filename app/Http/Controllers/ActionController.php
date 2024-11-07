@@ -160,5 +160,11 @@ class ActionController extends Controller
 			return $res;
 		}
 	}
+
+	/* Tags:... */
+	public function viewTicketActivity()
+	{
+		#code...
+	}
 }
 

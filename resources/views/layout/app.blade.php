@@ -52,7 +52,7 @@
         padding: 10px 10px 10px 10px;
       }
       .card-body-custom{
-        padding: 16px 24px 16px 24px;
+        padding: 10px 10px 10px 10px;
       }
       .nav-link-title{
         color: #39656b;

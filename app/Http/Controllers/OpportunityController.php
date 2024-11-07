@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use stdClass;
+use DB;
 
 class OpportunityController extends Controller
 {
@@ -165,6 +166,16 @@ class OpportunityController extends Controller
 		));
 	}
 	/* Tags:... */
+	public function help_viewOpportunityDetail(Request $request)
+	{
+		$opr = Opr_opportunity::where('opr_lead_id',$request->id)->first();
+		if($opr == true){
+			return redirect('opportunities/detail-opportunity/'.$opr->opr_id);
+		}else{
+			return redirect('leads/detail-lead/'.$request->id);
+		}
+	}
+	/* Tags:... */
 	public function formNewOpportunity(Request $request)
 	{
 		$id_cst = $request->id;
@@ -211,6 +222,7 @@ class OpportunityController extends Controller
 	public function storeNewOpportunity(Request $request)
 	{
 		$opr_id = genIdOpportunity();
+		$date_now = date('Y-m-d');
 		$est_closing = date('Y-m-d h:i:s', strtotime($request->est_closing_date));
 		$lead = Prs_lead::where('lds_id',$request->lead_id)->select('lds_title')->first();
 		$data_opr = [
@@ -231,6 +243,7 @@ class OpportunityController extends Controller
 			'ovs_value_total' =>null,
 		];
 		$actionStoreOpportunity = Opr_value::insert($data_value);
+		$actionUpdateLead = Prs_lead::where('lds_id',$request->lead_id)->update(['lds_stage_opr'=>'true','lds_close_date'=>$date_now]);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -242,6 +255,7 @@ class OpportunityController extends Controller
 	{
 		$opr_id = genIdOpportunity();
 		$est_closing = date('Y-m-d h:i:s', strtotime($request->est_closing_date));
+		$date_now = date('Y-m-d');
 		$data_opr = [
 			'opr_id' => $opr_id,
 			'opr_lead_id' => $request->lead_id,
@@ -256,6 +270,7 @@ class OpportunityController extends Controller
 		];
 		$actionStoreOpportunity = Opr_opportunity::insert($data_opr);
 		$actionStoreProduct = Opr_value::insert($data_opr_value);
+		$actionUpdateLead = Prs_lead::where('lds_id',$request->lead_id)->update(['lds_stage_opr'=>'true','lds_close_date'=>$date_now]);
 		$result = [
 			'param'=>true,
 			'id_opr' => $opr_id
@@ -419,6 +434,7 @@ class OpportunityController extends Controller
 	public function storeUpdateStatusOpr(Request $request)
 	{
 		$updating_lead = Opr_opportunity::where('opr_id',$request->id)->update(['opr_status'=>$request->status]);
+		Opr_opportunity::where('opr_id',$request->id)->update(['opr_close_status'=> null]);
 		$result = [
 			'param'=>true,
 			'new_status' => $request->status
@@ -690,6 +706,57 @@ class OpportunityController extends Controller
 		$result = [
 			'param'=>true,
 			'note' => $notes->opr_notes,
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function checkWinOpportunity(Request $request)
+	{
+		$user = auth()->user();
+		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
+			$lead_data = Prs_lead::join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
+			->join('ord_purchases','opr_opportunities.opr_id','=','ord_purchases')
+			->where('opr_close_status',null)
+			->select('opr_id','lds_title')
+			->get();
+		}elseif(checkRule(array('MGR'))){
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
+			->where('opr_close_status',null)
+			->whereIn('lds_id',$lead_ids)
+			->select('opr_id','lds_title')
+			->get();
+		}elseif(checkRule(array('STF'))){
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
+			->where('opr_close_status',null)
+			->whereIn('lds_id',$lead_ids)
+			->select('opr_id','lds_title')
+			->get();
+		}
+		if (isset($lead_data)) {
+			foreach ($lead_data as $key => $value) {
+				$data[$key] = [
+					'id' => $value->opr_id,
+					'title' => $value->lds_title
+				];
+			}
+		}else{
+			$data = array();
+		}
+		$result = [
+			'param'=>true,
+			'data' => $data,
 		];
 		return $result;
 	}

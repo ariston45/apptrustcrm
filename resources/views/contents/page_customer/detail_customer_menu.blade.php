@@ -33,9 +33,5 @@
         </button>
       </a>
     </div>
-    {{-- <h4 class="subheader mt-4">Experience</h4>
-    <div class="list-group list-group-transparent">
-      <a href="#" class="list-group-item list-group-item-action">Give Feedback</a>
-    </div> --}}
   </div>
 </div>

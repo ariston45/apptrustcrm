@@ -70,7 +70,7 @@ opportunitys
 	@endif
 	{{-- ======================================================================================================== --}}
 	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<div class="row mb-3">
+		<div class="row mb-1">
 			<div class="col-12">
 				<div class="row">
 					<div class="col">
@@ -81,68 +81,62 @@ opportunitys
 					</div>
 				</div>
 			</div>
-			<div class="col-6">
+			<div class="col-auto">
 				<em class="text-muted lh-base mb-1"><i>Customer</i></em>
 				@foreach ($opportunity_customer as $list)
 					<div class="page-pretitle-custom">{{ $list }}</div>
 				@endforeach
 				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
-				<div class="page-pretitle-custom mb-2">{{ html_entity_decode($institution_names) }}</div>
-			</div>
-			<div class="col-6" style="text-align: right;">
-				<div class="mb-0">
-					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
-					@endif
-					<em class="text-muted lh-base mb-0"><i>Salesperson</i></em>
-					<div class="page-pretitle-custom">
-						{{ $sales_selected->name }}
-					</div>
+				<div class="page-pretitle-custom mb-1">{{ html_entity_decode($institution_names) }}</div>
+				<em class="text-muted lh-base mb-0"><i>Salesperson</i></em>
+				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+				<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
+				@endif
+				<div class="page-pretitle-custom">
+					{{ $sales_selected->name }}
 				</div>
-				<div class="mb-0">
-					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+				<em class="text-muted lh-base mb-0"><i>Colaborator</i></em>
+				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+				@endif
+				<div class="page-pretitle-custom">
+					@if ($member_name == null || $member_name == "")
+					-
+					@else
+					{{ $member_name }}
 					@endif
-					<em class="text-muted lh-base mb-0"><i>Colaborator</i></em>
-					<div class="page-pretitle-custom">
-						@if ($member_name == null || $member_name == "")
-						-
-						@else
-						{{ $member_name }}
-						@endif
-					</div>
 				</div>
-				<div class="mb-0">
-					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
+				<em class="text-muted lh-base mb-0"><i>Technical</i></em>
+				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
+				@endif
+				<div class="page-pretitle-custom">
+					@if ($tech_name == null || $tech_name == "")
+					-
+					@else
+					{{ $tech_name }}
 					@endif
-					<em class="text-muted lh-base mb-0"><i>Technical</i></em>
-					<div class="page-pretitle-custom">
-						@if ($tech_name == null || $tech_name == "")
-						-
-						@else
-						{{ $tech_name }}
-						@endif
-					</div>
 				</div>
 			</div>
-		</div>
-		<div class="row mb-3">
-			<div class="col-12" style="text-align: center;">
-				<img id="img-status-1" class="img-status" src="{{ asset('static/opportunity_status/opr-status-new.png') }}" alt="" 
-				@if ($opportunity->opr_status == 1) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-2" class="img-status" src="{{ asset('static/opportunity_status/opr-status-presentation.png') }}" alt="" 
-				@if ($opportunity->opr_status == 2) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-3" class="img-status" src="{{ asset('static/opportunity_status/opr-status-poc.png') }}" alt="" 
-				@if ($opportunity->opr_status == 3) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-4" class="img-status" src="{{ asset('static/opportunity_status/opr-status-proposal.png') }}" alt="" 
-				@if ($opportunity->opr_status == 4) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-5" class="img-status" src="{{ asset('static/opportunity_status/opr-status-negotiation.png') }}" alt="" 
-				@if ($opportunity->opr_status == 5) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-6" class="img-status" src="{{ asset('static/opportunity_status/opr-status-win.png') }}" alt="" 
-				@if ($opportunity->opr_status == 6) style="display:true;" @else style="display:none;"	@endif>
-				<img id="img-status-7" class="img-status" src="{{ asset('static/opportunity_status/opr-status-lose.png') }}" alt="" 
-				@if ($opportunity->opr_status == 7) style="display:true;" @else style="display:none;"	@endif>
+			<div class="col" style="text-align: right;">
+				<div class="row">
+					<div class="col-12" style="text-align: center;">
+						<img id="img-status-1" class="img-status" src="{{ asset('static/opportunity_status/opr-status-new.png') }}" alt="" 
+						@if ($opportunity->opr_status == 1) style="display:true;" @else style="display:none;"	@endif>
+						<img id="img-status-2" class="img-status" src="{{ asset('static/opportunity_status/opr-status-presentation.png') }}" alt="" 
+						@if ($opportunity->opr_status == 2) style="display:true;" @else style="display:none;"	@endif>
+						<img id="img-status-3" class="img-status" src="{{ asset('static/opportunity_status/opr-status-poc.png') }}" alt="" 
+						@if ($opportunity->opr_status == 3) style="display:true;" @else style="display:none;"	@endif>
+						<img id="img-status-4" class="img-status" src="{{ asset('static/opportunity_status/opr-status-proposal.png') }}" alt="" 
+						@if ($opportunity->opr_status == 4) style="display:true;" @else style="display:none;"	@endif>
+						<img id="img-status-5" class="img-status" src="{{ asset('static/opportunity_status/opr-status-negotiation.png') }}" alt="" 
+						@if ($opportunity->opr_status == 5) style="display:true;" @else style="display:none;"	@endif>
+						<img id="img-status-6" class="img-status" src="{{ asset('static/opportunity_status/opr-status-win.png') }}" alt="" 
+						@if ($opportunity->opr_status == 6) style="display:true;" @else style="display:none;"	@endif>
+						<img id="img-status-7" class="img-status" src="{{ asset('static/opportunity_status/opr-status-lose.png') }}" alt="" 
+						@if ($opportunity->opr_status == 7) style="display:true;" @else style="display:none;"	@endif>
+					</div>
+				</div>
 			</div>
 		</div>
 		{{-- <hr class="mt-1 mb-3"> --}}
@@ -398,7 +392,7 @@ opportunitys
 						<div class="col-xl-12 col-md-12">
 							<div class="mb-2" style="margin-right: 0px;">
 								<label class="col-12 col-form-label">Notes Purchase</label>
-								<textarea id="notesActivitiesDescribe" name="note_purchase"></textarea>
+								<textarea id="notesPurchase" name="note_purchase"></textarea>
 							</div>
 						</div>
 					</div>
@@ -632,18 +626,12 @@ opportunitys
 				<form id="formContent9" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
 					@csrf
 					<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
+					<input type="hidden" name="customer" value="{{ $opportunity->lds_customer }}" readonly>
+					<input type="hidden" name="lead_status_id" value="{{ $opportunity->lds_status }}" readonly>
 					<div class="row">
 						<div class="col-xl-6 col-md-12">
 							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Date</label>
-								{{-- <div class="col" style="padding: 0px; margin-right: 10px;">
-									<div class="input-group" id="datetimepicker1">
-										<span class="input-group-text p-1">
-											<i class="ri-calendar-2-line"></i>
-										</span>
-										<input type="text" id="datepicker_start" name="start_date" class="form-control p-1" placeholder="Start Date" autocomplete="off">
-									</div>
-								</div> --}}
 								<div class="col" style="padding: 0px;margin-left: 0px;">
 									<div class="input-group">
 										<span class="input-group-text p-1">
@@ -700,10 +688,6 @@ opportunitys
 							</div>
 						</div>
 						<div class="col-xl-12 col-md-12">
-							{{-- <div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Summary</label>
-								<textarea id="notesActivities" name="activity_summary"></textarea>
-							</div> --}}
 							<div class="mb-2" style="margin-right: 0px;">
 								<label class="col-12 col-form-label">Activity Describe</label>
 								<textarea id="notesActivitiesDescribe" name="activity_describe"></textarea>
@@ -1103,9 +1087,6 @@ opportunitys
 		padding-top: 0.28rem;
 		padding-left: 0.39rem;
 	}
-	.ts-wraper{
-		
-	}
 	.ts-input-custom{
 		min-height: 0.53rem;
 	}
@@ -1152,12 +1133,67 @@ opportunitys
 <script src="{{ asset('plugins/tom-select/dist/js/tom-select.base.js') }}"></script>
 <script src="{{ asset('plugins/tinymce/tinymce.min.js') }}"></script>
 <script src="{{ asset('plugins/litepicker/bundle/index.umd.min.js') }}"></script>
-{{-- ============================================================================================ --}}
+{{-- ============================================================================================ --}}s
 <script>
 
 </script>
 {{-- ============================================================================================ --}}
 <script>
+var user_sales = new TomSelect("#select-user-sales",{
+		create: true,
+		valueField: 'id',
+		labelField: 'title',
+		searchField: 'title',
+		render: {
+			option: function(data, escape) {
+				return '<div>' +
+				'<span class="title">' + escape(data.title) + '</span>' +
+				'</div>';
+			},
+			item: function(data, escape) {
+				return '<div id="province-selected">' + escape(data.title) + '</div>';
+			}
+		}
+});
+var user_team = new TomSelect("#select-user-team",{
+	create: true,
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	maxItems: 10,
+	render: {
+		option: function(data, escape) {
+			return '<div>' +
+			'<span class="title">' + escape(data.title) + '</span>' +
+			'</div>';
+		},
+		item: function(data, escape) {
+			return '<div id="province-selected">' + escape(data.title) + '</div>';
+		}
+	}
+});
+var user_contact = new TomSelect("#select-contact",{
+	create: true,
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	onOptionAdd:  function () {
+		$('#additional-form-contact').show(200);
+	},
+	onItemRemove: function () {
+		$('#additional-form-contact').hide(200);
+	},
+	render: {
+		option: function(data, escape) {
+			return '<div>' +
+			'<span class="title">' + escape(data.title) + '</span>' +
+			'</div>';
+		},
+		item: function(data, escape) {
+			return '<div id="contact-selected">' + escape(data.title) + '</div>';
+		}
+	}
+});
 var select_signed_user = new TomSelect("#select-signed-user",{
 	create: false,			
 	valueField: 'id',
@@ -1359,22 +1395,22 @@ var select_products_update = new TomSelect("#select-product-update",{
 	}
 });
 var user_tech = new TomSelect("#select-user-tech",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		maxItems: 10,
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="select-user-tech">' + escape(data.title) + '</div>';
-			}
+	create: true,
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	maxItems: 10,
+	render: {
+		option: function(data, escape) {
+			return '<div>' +
+			'<span class="title">' + escape(data.title) + '</span>' +
+			'</div>';
+		},
+		item: function(data, escape) {
+			return '<div id="select-user-tech">' + escape(data.title) + '</div>';
 		}
-	});
+	}
+});
 /*================================================================================================*/
 select_principles.on('change',function () {
 	var prd_id = select_principles.getValue();
@@ -1426,6 +1462,82 @@ const picker_c = new easepick.create({
 		darkMode: false
 	},
 });
+/*************************************************************************************************/
+var notesStoredLOC = localStorage.getItem('notesInputActivities');
+var notesEitor = ""; 
+var notes_a = tinymce.init({
+	selector: 'textarea#notesActivities',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+		editor.on('init',function(e) {
+			if (notesStoredLOC != null) {
+				editor.setContent(notesStoredLOC);
+			}
+		});
+		editor.on('input', function(e) {
+			notes = editor.getContent();
+			localStorage.setItem('notesInputActivities', notes);
+		});
+	}
+});
+var notesOpportunityNotesLOC = localStorage.getItem('notesInputOpportunity');
+var notesEitorOppor = ""; 
+var notes_b = tinymce.init({
+	selector: 'textarea#notesOpportunity',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+		editor.on('init',function(e) {
+			if (notesOpportunityNotesLOC != null) {
+				editor.setContent(notesOpportunityNotesLOC);
+			}
+		});
+		editor.on('input', function(e) {
+			notes = editor.getContent();
+			localStorage.setItem('notesInputOpportunity', notes);
+		});
+	}
+});
+var notes_c = tinymce.init({
+	selector: 'textarea#textingContent1',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+		editor.on('init',function(e) {
+		});
+		editor.on('input', function(e) {
+		});
+	}
+});
+var notes_describe = tinymce.init({
+	selector: 'textarea#notesActivitiesDescribe',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+	}
+});
+var notes_purchase = tinymce.init({
+	selector: 'textarea#notesPurchase',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+	}
+});
+var notes_result = tinymce.init({
+	selector: 'textarea#notesActivitiesResult',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+	}
+});
+/*************************************************************************************************/
 </script>
 <script>
 function actionAutoSaveUpdateNote() {  
@@ -2818,143 +2930,6 @@ $('#btn-remove-team').click(function () {
 });
 $('#btn-remove-team-i').click(function () {
 	actionRemoveInputTeamI(select_signed_user_team_i);
-});
-</script>
-{{-- ============================================================================================ --}}
-<script type="text/javascript">
-var notesStoredLOC = localStorage.getItem('notesInputActivities');
-var notesEitor = ""; 
-var notes_a = tinymce.init({
-	selector: 'textarea#notesActivities',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-		editor.on('init',function(e) {
-			if (notesStoredLOC != null) {
-				editor.setContent(notesStoredLOC);
-			}
-		});
-		editor.on('input', function(e) {
-			notes = editor.getContent();
-			localStorage.setItem('notesInputActivities', notes);
-		});
-	}
-});
-</script>
-{{-- ============================================================================================ --}}
-<script type="text/javascript">
-var notesOpportunityNotesLOC = localStorage.getItem('notesInputOpportunity');
-var notesEitorOppor = ""; 
-var notes_b = tinymce.init({
-	selector: 'textarea#notesOpportunity',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-		editor.on('init',function(e) {
-			if (notesOpportunityNotesLOC != null) {
-				editor.setContent(notesOpportunityNotesLOC);
-			}
-		});
-		editor.on('input', function(e) {
-			notes = editor.getContent();
-			localStorage.setItem('notesInputOpportunity', notes);
-		});
-	}
-});
-</script>
-<script>
-var notes_c = tinymce.init({
-	selector: 'textarea#textingContent1',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-		editor.on('init',function(e) {
-		});
-		editor.on('input', function(e) {
-		});
-	}
-});
-var notes_describe = tinymce.init({
-	selector: 'textarea#notesActivitiesDescribe',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-	}
-});
-var notes_result = tinymce.init({
-	selector: 'textarea#notesActivitiesResult',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-	}
-});
-</script>
-{{-- ============================================================================================ --}}
-<script>
-$(document).ready(function() {
-	var user_sales = new TomSelect("#select-user-sales",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="province-selected">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-	/*=================================================================================================================*/
-	var user_team = new TomSelect("#select-user-team",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		maxItems: 10,
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="province-selected">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-	/*=================================================================================================================*/
-	var user_contact = new TomSelect("#select-contact",{
-		create: true,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		onOptionAdd:  function () {
-			$('#additional-form-contact').show(200);
-		},
-		onItemRemove: function () {
-			$('#additional-form-contact').hide(200);
-		},
-		render: {
-			option: function(data, escape) {
-				return '<div>' +
-				'<span class="title">' + escape(data.title) + '</span>' +
-				'</div>';
-			},
-			item: function(data, escape) {
-				return '<div id="contact-selected">' + escape(data.title) + '</div>';
-			}
-		}
-	});
-	/*=================================================================================================================*/
 });
 </script>
 @endpush

@@ -8,6 +8,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PurchaseController;
@@ -37,7 +38,12 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('subdistrict', [DataController::class, 'sourceDataSubdistrict'])->name('source-data-subdistrict');
 	});
 	// Route::get('/', [HomeController::class, 'index']);
-	Route::get('home', [HomeController::class,'homeFunction']);
+	Route::prefix('home')->group(function(){
+		Route::get('/', [HomeController::class,'homeFunction']);
+		Route::match(['get','post'],'source-chart-lead', [HomeController::class,'sourceChartLead'])->name('source-chart-lead');
+		Route::match(['get','post'],'source-chart-opportunity', [HomeController::class,'sourceChartOpportunity'])->name('source-chart-opportunity');
+		Route::match(['get','post'],'source-chart-purchase', [HomeController::class, 'sourceChartPurchase'])->name('source-chart-purchase');
+	});
 	Route::post('dropzone/store', [CustomerController::class, 'dropzoneStore'])->name('dropzone.store');
 	# Customer
 	Route::prefix('customer')->group(function(){
@@ -116,10 +122,13 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('activity-detail/{id}', [ActivityController::class, 'viewActivityDetail']);
 		#load data activity
 		Route::match(['get', 'post'],'source-data-activity', [DataController::class, 'sourceActivities'])->name('source-data-activity');
+		Route::match(['get', 'post'],'source-data-activity-instant', [DataController::class, 'sourceActivitiesInstant'])->name('source-data-activity-instant');
 		Route::match(['get', 'post'],'source-data-activity-cst', [DataController::class, 'sourceActivitiesCst'])->name('source-data-activity-cst');
 		Route::post('source-data-activity-calender', [ActivityController::class, 'sourceDataActivityCalender'])->name('source-data-activity-calender');
+		Route::post('source-data-activity-calender-tck', [ActivityController::class, 'sourceDataTiketCalender'])->name('source-data-activity-calender-tck');
 		Route::post('source-data-activity-calender-cst', [ActivityController::class, 'sourceDataActivityCalenderCst'])->name('source-data-activity-calender-cst');
 		Route::match(['get', 'post'],'source-data-activity-detail-calender', [ActivityController::class, 'sourceDataActivityDetailCalender'])->name('source-data-activity-detail-calender');
+		Route::match(['get', 'post'],'all-lead-activities', [ActivityController::class, 'sourceAllLeadActivities'])->name('all-lead-activities');
 		#storing activity date
 		Route::post('store-new-activty', [ActivityController::class, 'storeActivitiesNew'])->name('store-new-activty');
 		Route::post('store-data-lead-activities', [ActivityController::class, 'storeActivitiesLead'])->name('store-data-lead-activities');
@@ -141,6 +150,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('/', [OpportunityController::class, 'viewOpportunities']);
 		Route::get('detail-opportunity/{id}', [OpportunityController::class, 'viewOpportunityDetail']);
 		Route::get('create-new-opportunity', [OpportunityController::class, 'formNewOpportunity'])->name('form-new-opportunity');
+		Route::match(['post','get'],'check-opportunity/{id}', [OpportunityController::class, 'help_viewOpportunityDetail']);
 		//
 		Route::post('store-new-opportunity', [OpportunityController::class, 'storeNewOpportunity'])->name('store-new-opportunity'); 
 		Route::post('store-new-opportunity-cst', [OpportunityController::class, 'storeNewOpportunityCst'])->name('store-new-opportunity-cst');
@@ -166,13 +176,14 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-other-value-data',[OpportunityController::class,'sourceOtherValueData'])->name('source-other-value-data');
 		Route::match(['get', 'post'],'source-total-value',[OpportunityController::class,'sourceTotalValue'])->name('source-total-value');
 		Route::match(['get', 'post'],'source-opportunity-note',[OpportunityController::class,'sourceOpporNotes'])->name('source-opportunity-note');
-		
+		Route::match(['get', 'post'],'action-check-win-opportunity',[OpportunityController::class,'checkWinOpportunity'])->name('action-check-win-opportunity');
 	});
 	# Purchasing
 	Route::prefix('purchased')->group(function(){
 		Route::get('/', [PurchaseController::class,'PurchaseDataView']);
 		Route::match(['get', 'post'],'source-data-purchase', [PurchaseController::class, 'sourceDataPurchase'])->name('source-data-purchase');
 		Route::match(['get', 'post'],'store-data-purchase-i', [PurchaseController::class, 'storeDataPurchase_a'])->name('store-data-purchase-i');
+		Route::match(['get', 'post'],'store-data-purchase-ii', [PurchaseController::class, 'storeDataPurchase_b'])->name('store-data-purchase-ii');
 		Route::match(['get', 'post'],'action-check-purchase', [PurchaseController::class,'actionCheckPurchase'])->name('action-check-purchase');
 		Route::match(['get'],'detail/{id}', [PurchaseController::class,'detailPurchase']);
 		Route::match(['get', 'post'],'action-get-invoice-number', [PurchaseController::class,'actionCheckInvoice'])->name('action-get-invoice-number');
@@ -182,6 +193,21 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-data-purchased', [PurchaseController::class, 'sourceDataPurchased'])->name('source-data-purchased');
 		Route::match(['get', 'post'],'action-check-opportunity', [PurchaseController::class, 'actionCheckOpr'])->name('action-check-opportunity');
 		
+	});
+	# Product
+	Route::prefix('product')->group(function(){
+		Route::get('/', [ProductController::class,'viewProducts']);
+		Route::get('all', [ProductController::class,'viewProducts']);
+		Route::get('principle', [ProductController::class,'viewPrinciple']);
+		Route::match(['get','post'],'source-product', [ProductController::class,'sourceProduct'])->name('source-product');
+		Route::match(['get','post'],'source-principle', [ProductController::class,'sourcePrinciple'])->name('source-principle');
+		Route::match(['get','post'],'action-check-product-item', [ProductController::class,'checkDataProductItem'])->name('action-check-product-item');
+		Route::match(['get','post'],'action-check-principle', [ProductController::class,'checkDataPrinciple'])->name('action-check-principle');
+		Route::match(['get','post'],'action-check-principle-item', [ProductController::class,'checkDataPrincipleItem'])->name('action-check-principle-item');
+		Route::match(['get','post'],'store-data-product', [ProductController::class,'storeProduct'])->name('store-data-product');
+		Route::match(['get','post'],'store-data-principle', [ProductController::class,'storePrinciple'])->name('store-data-principle');
+		Route::match(['get','post'],'store-data-product-update', [ProductController::class,'storeProductUpdate'])->name('store-data-product-update');
+		Route::match(['get','post'],'store-data-principle-update', [ProductController::class,'storePrincipleUpdate'])->name('store-data-principle-update');		
 	});
 	# Setting
 	Route::prefix('setting')->group(function(){
@@ -213,6 +239,34 @@ Route::group(['middleware' => ['auth']], function () {
 	Route::prefix('product')->group(function () {
 		Route::post('ajaxlink-product-value', [ProductController::class, 'ajaxProductValue'])->name('ajaxlink-product-value');
 	});
+	# Ticket
+	Route::prefix('ticket')->group(function () {
+		Route::get('/', [ActivityController::class, 'viewTicketActivity']);
+		Route::get('ticket-detail/{id}', [ActivityController::class, 'viewTicketDetail']);
+		Route::post('store-new-ticket', [ActivityController::class, 'storeTicketsNew'])->name('store-new-ticket');
+		Route::match(['get', 'post'],'source-data-ticket', [DataController::class, 'sourceTickets'])->name('source-data-ticket');
+	});
+	# Managemet
+	Route::prefix('management')->group(function () {
+		Route::get('/', [ManagementController::class, 'viewManagingUsers']);
+		Route::get('user-information/{id}', [ManagementController::class, 'viewManagingUsersDetail']);
+		Route::get('user-activities/{id}', [ManagementController::class, 'viewActivitiesUser']);
+		Route::get('user-leads/{id}', [ManagementController::class, 'viewLeadsUser']);
+		Route::get('user-opportunities/{id}', [ManagementController::class, 'viewOpportunitiesUser']);
+		Route::get('user-purchases/{id}', [ManagementController::class, 'viewPurchasesUser']);
+		Route::match(['get', 'post'],'source-data-mgn-user', [ManagementController::class, 'sourceDataManagementUser'])->name('source-data-mgn-user');
+		Route::match(['get', 'post'],'source-statistic-activity-user', [ManagementController::class, 'sourceStatisticActivityUser'])->name('source-statistic-activity-user');
+		Route::match(['get', 'post'],'source-statistic-lead-user', [ManagementController::class, 'sourceStatisticLeadUser'])->name('source-statistic-lead-user');
+		Route::match(['get', 'post'],'source-statistic-opportunity-user', [ManagementController::class, 'sourceStatisticOpportunityUser'])->name('source-statistic-opportunity-user');
+		Route::match(['get', 'post'],'source-statistic-purchase-user', [ManagementController::class, 'sourceStatisticPurchaseUser'])->name('source-statistic-purchase-user');
+		#
+		Route::match(['get', 'post'],'source-data-activity-user', [DataController::class, 'sourceActivitiesUser'])->name('source-data-activity-user');
+		Route::match(['get', 'post'],'source-data-activity-calender-usr', [ActivityController::class, 'sourceDataActivityCalenderUsr'])->name('source-data-activity-calender-usr');
+		Route::match(['get', 'post'],'source-data-leads-user', [DataController::class, 'sourceDataLeadsUser'])->name('source-data-leads-user');
+		Route::match(['get', 'post'],'source-data-opportunities-user', [DataController::class, 'sourceDataOpportunitiesUser'])->name('source-data-opportunities-user');
+		Route::match(['get', 'post'],'source-data-purchases-user', [DataController::class, 'sourceDataPurchasesUser'])->name('source-data-purchases-user');
+	});
+
 	# CRUD
 	Route::prefix('crud')->group(function(){
 		Route::post('store-user', [ActionController::class,'storeUser'])->name('store-user');

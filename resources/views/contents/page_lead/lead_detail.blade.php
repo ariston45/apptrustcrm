@@ -381,7 +381,7 @@ Leads
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 				<form id="formContent5" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
 					<div class="row mb-2">
-						<label class="col-3 col-form-label required" for="">
+						<label class="col-3 col-form-label required" >
 							Name
 						</label>
 						<div class="col">
@@ -395,7 +395,7 @@ Leads
 					</div>
 					<span id="additional-form-contact" style="display: none;">
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Customer</label>
+							<label class="col-3 col-form-label" >Customer</label>
 							<div class="col">
 								<select type="text" class="form-select select-sales" name="customer" id="select-customer" value="">
 									<option value="{{ null }}"></option>
@@ -406,7 +406,7 @@ Leads
 							</div>
 						</div>
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Contact</label>
+							<label class="col-3 col-form-label" >Contact</label>
 							<div class="col">
 								<select type="text" class="form-select select-sales" name="type" id="select-type" value="">
 									<option value="{{ null }}"></option>
@@ -417,13 +417,13 @@ Leads
 							</div>
 						</div>
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Number/Email</label>
+							<label class="col-3 col-form-label" >Number/Email</label>
 							<div class="col">
 								<input type="text" class="form-control" name="textcontact" value="{{ null }}">
 							</div>
 						</div>
 						<div class="row mb-2">
-							<label class="col-3 col-form-label" for="">Position</label>
+							<label class="col-3 col-form-label" >Position</label>
 							<div class="col">
 								<input type="text" class="form-control" name="position" value="{{ null }}">
 							</div>
@@ -589,14 +589,6 @@ Leads
 						<div class="col-xl-6 col-md-12">
 							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Date</label>
-								{{-- <div class="col" style="padding: 0px; margin-right: 10px;">
-									<div class="input-group" id="datetimepicker1">
-										<span class="input-group-text p-1">
-											<i class="ri-calendar-2-line"></i>
-										</span>
-										<input type="text" id="datepicker_start" name="start_date" class="form-control p-1" placeholder="Start Date" autocomplete="off">
-									</div>
-								</div> --}}
 								<div class="col" style="padding: 0px;margin-left: 0px;">
 									<div class="input-group">
 										<span class="input-group-text p-1">
@@ -734,32 +726,6 @@ Leads
 			<div class="modal-body p-3">
 				<form id="formContent10" name="form_content10" enctype="multipart/form-data" action="javascript:void(0)" method="post">
 					@csrf
-					{{-- <input type="hidden" id="activity_id_i" name="act_id" value=""> --}}
-					{{-- <div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Set Product Priciple</label>
-						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple"  value="">
-								<option value="{{ null }}">Select principle</option>
-								@foreach ($principle as $list)
-									<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
-								@endforeach
-							</select>
-						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Set Product</label>
-						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-product" multiple class="form-select ts-input-custom" name="product[]" placeholder="Select your type activity" value="">
-								<option value="{{ null }}"></option>
-							</select>
-						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Count</label>
-						<div class="col" style="padding:0px;">
-							<input type="text" id="product-count" name="product_count" class="form-control p-1" placeholder="Count" autocomplete="off">
-						</div>
-					</div> --}}
 					<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 						<label class="col-3 col-form-label">Estimate Close</label>
 						<div class="col" style="padding: 0px;margin-left: 0px;">
@@ -843,9 +809,6 @@ Leads
 		padding-bottom: 0.28rem;
 		padding-top: 0.28rem;
 		padding-left: 0.39rem;
-	}
-	.ts-wraper{
-		
 	}
 	.ts-input-custom{
 		min-height: 0.53rem;
@@ -1115,6 +1078,39 @@ const picker_d = new easepick.create({
 		resetButton: true,
 		darkMode: false
 	},
+});
+var notes_b = tinymce.init({
+	selector: 'textarea#notesOpportunity',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+		editor.on('init',function(e) {
+			if (notesOpportunityNotesLOC != null) {
+				/* editor.setContent(notesOpportunityNotesLOC); */
+			}
+		});
+		editor.on('input', function(e) {
+			notes = editor.getContent();
+			localStorage.setItem('notesInputOpportunity', notes);
+		});
+	}
+});
+var notes_describe = tinymce.init({
+	selector: 'textarea#notesActivitiesDescribe',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+	}
+});
+var notes_result = tinymce.init({
+	selector: 'textarea#notesActivitiesResult',
+	height : "300",
+	promotion: false,
+	statusbar: false,
+	setup: function(editor) {
+	}
 });
 </script>
 <script>
@@ -2062,39 +2058,6 @@ var notesEitor = "";
 <script type="text/javascript">
 var notesOpportunityNotesLOC = localStorage.getItem('notesInputOpportunity');
 var notesEitorOppor = ""; 
-var notes_b = tinymce.init({
-	selector: 'textarea#notesOpportunity',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-		editor.on('init',function(e) {
-			if (notesOpportunityNotesLOC != null) {
-				/* editor.setContent(notesOpportunityNotesLOC); */
-			}
-		});
-		editor.on('input', function(e) {
-			notes = editor.getContent();
-			localStorage.setItem('notesInputOpportunity', notes);
-		});
-	}
-});
-var notes_describe = tinymce.init({
-	selector: 'textarea#notesActivitiesDescribe',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-	}
-});
-var notes_result = tinymce.init({
-	selector: 'textarea#notesActivitiesResult',
-	height : "300",
-	promotion: false,
-	statusbar: false,
-	setup: function(editor) {
-	}
-});
 </script>
 {{-- ============================================================================================ --}}
 <script>

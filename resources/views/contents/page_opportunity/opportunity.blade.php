@@ -4,7 +4,7 @@
 @endsection
 @section('pagetitle')
 	<div class="page-pretitle"></div>
-	<h4 class="page-title">Leads</h4>
+	<h4 class="page-title">Opportunity</h4>
 @endsection
 @section('breadcrumb')
 	<li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -30,12 +30,13 @@
 				<table class="table custom-datatables" id="customer-table" style="width: 100%;">
 					<thead>
 						<tr>
-							{{-- <th></th> --}}
-							<th style="width: 40%;">Project Title</th>
-							<th style="text-align: center; width: 25%;">Customer</th>
-							<th style="text-align: center; width: 10%;">Status</th>
-							<th style="text-align: center; width: 15%;">Salesperson</th>
-							<th style="text-align: center; width: 10%">Menus</th>
+							<th style="width: 25%;">Customer</th>
+							<th style="width: 25%;">Project Title</th>
+							<th style="width: 13%;">Status</th>
+							<th style="width: 10%;">Salesperson</th>
+							<th style="width: 10%;">Follow Up</th>
+							<th style="width: 12%;">Last Activity</th>
+							<th style="width: 5%">Menus</th>
 						</tr>
 					</thead>
 					<tbody class="table-tbody"></tbody>
@@ -82,24 +83,15 @@ function mainDataLeads() {
 				'id' : id
 			}
 		},
-		columnDefs: [
-			{
-				"targets": 2, 
-        "className": "text-center",
-			},
-			{
-				"targets": 3, 
-        "className": "text-center",
-			}
-		],
 		order:[[0,'asc']],
 		columns: [
 			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
-			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'customer', name: 'customer', orderable: true, searchable: true },
+			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
-			// {data: 'datein', name: 'datein', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
+			{data: 'activity', name: 'activity', orderable: true, searchable: true },
+			{data: 'last_activity', name: 'last_activity', orderable: true, searchable: true },
 			{data: 'menu', name: 'menu', orderable: false, searchable: false },
 		]
 	});	

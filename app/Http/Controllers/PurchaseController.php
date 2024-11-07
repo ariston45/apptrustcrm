@@ -312,6 +312,11 @@ class PurchaseController extends Controller
 	public function storeDataPurchase_a(Request $request)
 	{
 		$user = auth()->user();
+		$date_now = date('Y-m-d');
+		$checkPurchase = Ord_purchase::where('pur_oppr_id', $user->id)->first();
+		if ($checkPurchase != null) {
+			Ord_purchase::where('pur_id',$checkPurchase->pur_id)->delete();
+		}
 		$id = genIdPurchase();
 		$data_purchase = [
 			"pur_id" => $id,
@@ -321,6 +326,33 @@ class PurchaseController extends Controller
 			"pur_note" => $request->note_purchase,
 			"created_by" => $user->id,
 		];
+		$actionStore = Ord_purchase::insert($data_purchase);
+		$actionUpdate = Opr_opportunity::where('opr_id',$request->id)->update(['opr_close_status'=>'WIN','opr_close_date'=> $date_now]);
+		$result = [
+			'param'=>true,
+			'po_id' => $id, 
+		];
+		return $result;
+	}
+	/* Tags:... */
+	public function storeDataPurchase_b(Request $request)
+	{
+		$user = auth()->user();
+		$date_now = date('Y-m-d');
+		$checkPurchase = Ord_purchase::where('pur_oppr_id', $request->opportunity)->first();
+		if ($checkPurchase != null) {
+			Ord_purchase::where('pur_id',$checkPurchase->pur_id)->delete();
+		}
+		$id = genIdPurchase();
+		$data_purchase = [
+			"pur_id" => $id,
+			"pur_oppr_id" => $request->opportunity,
+			"pur_invoice" => $request->number_invoice,
+			"pur_date" => $request->date_purchase,
+			"pur_note" => $request->note_purchase,
+			"created_by" => $user->id,
+		];
+		$actionUpdate = Opr_opportunity::where('opr_id',$request->opportunity)->update(['opr_close_status'=>'WIN','opr_close_date'=> $date_now]);
 		$actionStore = Ord_purchase::insert($data_purchase);
 		$result = [
 			'param'=>true,
@@ -351,6 +383,9 @@ class PurchaseController extends Controller
 		$user = Auth::user();
 		$id_purchase = $request->id;
 		$purchase_data = Ord_purchase::where('pur_id',$id_purchase)->first();
+		if ($purchase_data == null) {
+			echo 'test'; die();
+		}
 		$id_oppor = $purchase_data->pur_oppr_id;
 		$allproduct = Prd_principle::get();
 		$opportunity = Opr_opportunity::join('prs_leads','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
