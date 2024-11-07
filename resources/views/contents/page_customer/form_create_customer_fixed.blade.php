@@ -34,7 +34,7 @@
 							<i class="ri-save-3-line icon" style="font-size: 14px;margin-right: 4px; vertical-align: middle;"></i> Save
 						</div>
 					</button>
-					<a href="{{ url('customer') }}">
+					<a href="{{ url('customer/contacts/'.$id) }}">
 						<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 							<div style="font-weight: 700;">
 								<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>

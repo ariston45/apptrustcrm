@@ -7,8 +7,7 @@
 	<h4 class="page-title">Opportunity</h4>
 @endsection
 @section('breadcrumb')
-	<li class="breadcrumb-item"><a href="#">Step one</a></li>
-	<li class="breadcrumb-item active"><a href="#">Step two</a></li>
+	<li class="breadcrumb-item active"><a href="#">Opportunity</a></li>
 @endsection
 @section('content')
 <div class="col-md-12 ">

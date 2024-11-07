@@ -20092,7 +20092,6 @@ namespace  {
             class Validator extends \Illuminate\Support\Facades\Validator {}
             class View extends \Illuminate\Support\Facades\View {}
             class Flare extends \Facade\Ignition\Facades\Flare {}
-            class DataTables extends \Yajra\DataTables\Facades\DataTables {}
 }
 
 

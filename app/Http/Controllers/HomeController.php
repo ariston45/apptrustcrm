@@ -32,12 +32,12 @@ class HomeController extends Controller
 		$act_ids = array();
 		$prs_ids = array();
 		$user_team_ids = checkTeamMgr($user->id);
-		$c_all = "";
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->select('act_id','aat_type_code')
 			->get();
 			#********************************
+			$c_all = "";
 			$c_activities = Act_activity::count();
 			$c_opportunities = Opr_opportunity::where('opr_close_status',null)->count();
 			$c_lead = Prs_lead::where('lds_stage_opr','false')->count();
@@ -143,8 +143,7 @@ class HomeController extends Controller
 		$activity_type = Act_activity_type::get();
 		return view('contents.page_home.home',compact(
 			'activity_type','users','user','lead_contacts','customer_all','users_mod',
-			'activity_type','cnt_todo','cnt_phone','cnt_email','cnt_visit','cnt_poc','cnt_webinar','cnt_video_call','cnt_total','user_all','user','customer_all','users','users_mod',
-			'c_all','c_activities','c_opportunities','c_ticket','c_customer','c_lead','c_purchase'
+			'activity_type','cnt_todo','cnt_phone','cnt_email','cnt_visit','cnt_poc','cnt_webinar','cnt_video_call','cnt_total','user_all','user','customer_all','users','users_mod','c_activities','c_opportunities','c_ticket','c_customer','c_lead','c_purchase'
 		));
 	}
 	public function sourceChartLead(Request $request)

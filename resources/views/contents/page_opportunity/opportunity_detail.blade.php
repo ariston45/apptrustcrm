@@ -4,10 +4,10 @@ opportunitys
 @endsection
 @section('pagetitle')
 <div class="page-pretitle"></div>
-{{-- <h4 class="page-title">opportunity Detail</h4> --}}
+<h4 class="page-title">Opportunities</h4>
 @endsection
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="#">Step one</a></li>
+<li class="breadcrumb-item"><a href="#">Opportunities</a></li>
 <li class="breadcrumb-item active"><a href="#">Step two</a></li>
 @endsection
 @section('content')

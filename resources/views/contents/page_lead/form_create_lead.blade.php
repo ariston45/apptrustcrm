@@ -12,11 +12,11 @@
 @endsection
 @section('pagetitle')
 	<div class="page-pretitle"></div>
-	<h4 class="page-title">Customer</h4>
+	<h4 class="page-title">Leads</h4>
 @endsection
 @section('breadcrumb')
-	<li class="breadcrumb-item"><a href="#">Step one</a></li>
-	<li class="breadcrumb-item active"><a href="#">Step two</a></li>
+	<li class="breadcrumb-item"><a href="{{ url('leads') }}">Leads</a></li>
+	<li class="breadcrumb-item active"><a href="#">Create Leads</a></li>
 @endsection
 @section('content')
 	<div class="col-md-12 ">
@@ -91,21 +91,25 @@
 									</select>
 								</div>
 							</div>
-							<div class="mb-3 row">
-								<label class="col-3 col-form-label custom-label required">Assign Lead</label>
-								<div class="col">
-									<select type="text" class="form-select" name="assign_sales" id="select-assign-sales" value="{{ $user->id }}" placeholder="Select marketing or sales here">
-										<option value="{{ null }}"></option>
-										@foreach ($sales as $list)
-											@if ($list->id == $user->id)
-											<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>	
-											@else
-											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
-											@endif
-										@endforeach
-									</select>
+							@if (rulesFeature(['AGM','ADM','MGR','MGR.PAS']))
+								<div class="mb-3 row">
+									<label class="col-3 col-form-label custom-label required">Assign Lead</label>
+									<div class="col">
+										<select type="text" class="form-select" name="assign_sales" id="select-assign-sales" placeholder="Select marketing or sales here">
+											<option value="{{ null }}"></option>
+											@foreach ($sales as $list)
+												@if ($list->id == $user->id)
+												<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>	
+												@else
+												<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
+												@endif
+											@endforeach
+										</select>
+									</div>
 								</div>
-							</div>
+							@else
+								<input type="hidden" name="assign_sales" value="{{ $user->id }}">
+							@endif
 							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label">Add Colaborator</label>
 								<div class="col">
@@ -266,6 +270,26 @@
 <script src="{{ asset('plugins/jquery-session/jquery.session.js') }}"></script>
 <script src="{{ asset('plugins/tom-select/dist/js/tom-select.base.js') }}"></script>
 {{-- Selection Input --}}
+@if (rulesFeature(['AGM','ADM','MGR','MGR.PAS']))
+<script>
+	var select_assign_sales = new TomSelect("#select-assign-sales",{
+		create: true,
+		maxItems: 1,
+		valueField: 'id',
+		labelField: 'title',
+		searchField: 'title',
+		render: {
+			option: function(data, escape) {
+				return '<div><span class="title">'+escape(data.title)+'</span></div>';
+			},
+			item: function(data, escape) {
+				return '<div id="select-assign-sales">'+escape(data.title)+'</div>';
+			}
+		}
+	});
+	/*=======================================================================*/
+</script>
+@endif
 <script>
 	var select_customer = new TomSelect("#select-customer",{
 		create: false,			
@@ -302,22 +326,7 @@
 		}
 	});
 	/*=======================================================================*/
-	var select_assign_sales = new TomSelect("#select-assign-sales",{
-		create: true,
-		maxItems: 1,
-		valueField: 'id',
-		labelField: 'title',
-		searchField: 'title',
-		render: {
-			option: function(data, escape) {
-				return '<div><span class="title">'+escape(data.title)+'</span></div>';
-			},
-			item: function(data, escape) {
-				return '<div id="select-assign-sales">'+escape(data.title)+'</div>';
-			}
-		}
-	});
-	/*=======================================================================*/
+	
 	var select_assign_sales_team = new TomSelect("#select-assign-team",{
 		create: false,
 		maxItems: 5,

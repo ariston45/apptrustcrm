@@ -21,8 +21,6 @@
 						<i class="ri-add-circle-line icon" style="font-size: 14px; vertical-align: middle;"></i> Create
 					</div>
 				</button>
-				{{-- <a href="{{ url('leads/create-lead') }}">
-				</a> --}}
 			</div>
 		</div>
 		<div class="card-body card-body-custom">
@@ -30,12 +28,11 @@
 				<table class="table custom-datatables" id="customer-table" style="width: 100%;">
 					<thead>
 						<tr>
-							{{-- <th></th> --}}
 							<th style="width: 40%;">Project Title</th>
-							<th style="text-align: center; width: 25%;">Customer</th>
-							<th style="text-align: center; width: 10%;">Status</th>
-							<th style="text-align: center; width: 15%;">Salesperson</th>
-							<th style="text-align: center; width: 10%">Menus</th>
+							<th style="width: 25%;">Customer</th>
+							<th style="width: 10%;">Status</th>
+							<th style="width: 15%;">Salesperson</th>
+							<th style="text-align:center; width: 5%">Menus</th>
 						</tr>
 					</thead>
 					<tbody class="table-tbody"></tbody>
@@ -203,7 +200,7 @@ function actionCreatePurchase() {
 <script>
 $('#myTable_filter input').addClass('form-control custom-datatables-filter');
 $('#myTable_length select').addClass('form-control form-select custom-datatables-leght');
-function mainDataLeads() {
+function mainDataPurchase() {
 	var id = "";
 	$('#customer-table').DataTable({
 		processing: true,serverSide: true,responsive: true,
@@ -221,16 +218,6 @@ function mainDataLeads() {
 				'id' : id
 			}
 		},
-		columnDefs: [
-			{
-				"targets": 2, 
-        "className": "text-center",
-			},
-			{
-				"targets": 3, 
-        "className": "text-center",
-			}
-		],
 		order:[[0,'asc']],
 		columns: [
 			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
@@ -243,7 +230,41 @@ function mainDataLeads() {
 		]
 	});	
 }
-mainDataLeads();
+mainDataPurchase();
+</script>
+<script>
+$(document).ready(function() {
+	$("#formContent2").submit(function(e) {
+		e.preventDefault();
+		var formData2 = new FormData(this);
+		$.ajaxSetup({
+			headers: {
+				"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
+			}
+		});
+		$.ajax({
+			type: "POST",
+			url: "{{ route('store-data-purchase-ii') }}",
+			data: formData2,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function(result) {
+				$('#customer-table').DataTable().ajax.reload();
+				if (result.param == true) {
+					$.alert({
+						type: 'green',
+						title: 'Success',
+						content: 'Data already created.',
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
+				}
+			}
+		});
+	});
+});
 </script>
 <script>
 $(document).ready(function() {

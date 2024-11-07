@@ -4,11 +4,11 @@ Leads
 @endsection
 @section('pagetitle')
 <div class="page-pretitle"></div>
-{{-- <h4 class="page-title">Lead Detail</h4> --}}
+<h4 class="page-title">Leads</h4>
 @endsection
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="#">Step one</a></li>
-<li class="breadcrumb-item active"><a href="#">Step two</a></li>
+<li class="breadcrumb-item"><a href="{{ url('leads') }}">Leads</a></li>
+<li class="breadcrumb-item active"><a href="#">Lead Detail</a></li>
 @endsection
 @section('content')
 <div class="card">
@@ -201,7 +201,9 @@ Leads
 									<span class="avatar"><i class="ri-user-line"></i></span>
 								</div>
 								<div class="col text-truncate" style="padding-left: 0px;">
-									<strong>{{ $list->cnt_fullname }}</strong>
+									<a href="#">
+										<strong>{{ $list->cnt_fullname }}</strong>
+									</a>
 									<div class="text-muted text-truncate">{{ $list->cst_name }}</div>
 								</div>
 								<div class="col-auto align-self-center">
