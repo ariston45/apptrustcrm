@@ -667,9 +667,9 @@ opportunitys
 									<button type="button" id="btn-remove-team" class="badge bg-cyan mt-1 mb-1" style="display: none;">x Close</button>
 									<div id="select-signed-user-team-area" style="display: none;">
 										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team" value="">
-											<option value="{{ null }}">{{ null }}</option>
+											<option value="{{ null }}"></option>
 											@foreach ($users as $list)
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
+											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
 											@endforeach
 										</select>
 									</div>

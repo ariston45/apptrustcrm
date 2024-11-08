@@ -198,13 +198,17 @@ Leads
 						<div class="card-body card-body-contact" style="">
 							<div class="row">
 								<div class="col-auto">
-									<span class="avatar"><i class="ri-user-line"></i></span>
+									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
+										<span class="avatar"><i class="ri-user-line"></i></span>
+									</a>
 								</div>
 								<div class="col text-truncate" style="padding-left: 0px;">
-									<a href="#">
+									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
 										<strong>{{ $list->cnt_fullname }}</strong>
 									</a>
-									<div class="text-muted text-truncate">{{ $list->cst_name }}</div>
+									<a href="{{ url('customer/detail-customer/'.$list->plc_customer_id.'?extpg=information') }}">
+										<div class="text-muted text-truncate">{{ $list->cst_name }}</div>
+									</a>
 								</div>
 								<div class="col-auto align-self-center">
 									<div class="dropdown">
@@ -482,8 +486,11 @@ Leads
 							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Assigned to</label>
 								<div class="col">
+									@if (checkRule(['STF','STF.TCH']))
+									<input type="text" name="assignment_user_view" class="form-control p-1" value="{{ $user->name }}" placeholder="Due Date" autocomplete="off" readonly>
+									<input type="hidden" name="assignment_user" value="{{ $user->id }}">
+									@else
 									<select type="text" id="select-signed-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
-										{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
 										@foreach ($users as $list)
 										@if ($list->id == $user->id)
 											<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>
@@ -492,6 +499,7 @@ Leads
 										@endif
 										@endforeach
 									</select>
+									@endif
 									<button type="button" id="btn-add-team" class="badge mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
 									<button type="button" id="btn-remove-team" class="badge mt-1 mb-1" style="display: none;">x Close</button>
 									<div id="select-signed-user-team-area" style="display: none;">
@@ -829,25 +837,26 @@ Leads
 <script src="{{ asset('plugins/tinymce/tinymce.min.js') }}"></script>
 <script src="{{ asset('plugins/litepicker/bundle/index.umd.min.js') }}"></script>
 {{-- ============================================================================================ --}}
+@if (checkRule(['STF','STF.TCH']))
 <script>
-
+	var select_signed_user = new TomSelect("#select-signed-user",{
+		create: false,			
+		valueField: 'id',
+		labelField: 'title',
+		searchField: 'title',
+		render: {
+			option: function(data, escape) {
+				return '<div><span class="title">'+escape(data.title)+'</span></div>';
+			},
+			item: function(data, escape) {
+				return '<div id="select-signed-user">'+escape(data.title)+'</div>';
+			}
+		}
+	});
 </script>
+@endif
 {{-- ============================================================================================ --}}
 <script>
-var select_signed_user = new TomSelect("#select-signed-user",{
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-signed-user">'+escape(data.title)+'</div>';
-		}
-	}
-});
 var select_signed_user_team = new TomSelect("#select-signed-user-team",{
 	persist: false,
 	createOnBlur: true,
@@ -1262,8 +1271,9 @@ function actionAddCardAvatar(params) {
 				+'<div class="card-status-start bg-primary"></div>'
 				+'<div class="card-body card-body-contact" style="">'
 					+'<div class="row">'
-						+'<div class="col-auto"><span class="avatar"><i class="ri-user-line"></i></span></div>'
-						+'<div class="col text-truncate" style="padding-left: 0px;"><strong>'+params.name_cnt+'</strong><div class="text-muted text-truncate">'+params.name_cst+'</div>'
+						+'<div class="col-auto"><a href="{!! url("customer/contacts/detail/'+params.cnt_id+'") !!}"><span class="avatar"><i class="ri-user-line"></i></span></div>'
+						+'<div class="col text-truncate" style="padding-left: 0px;"><a href="{!! url("customer/contacts/detail/'+params.personal_id+'") !!}"><strong>'+params.name_cnt+'</strong></a>'
+							+'<div class="text-muted text-truncate"><a href="{!! url("customer/detail-customer/'+params.plc_customer_id+'?extpg=information") !!}">'+params.name_cst+'</a></div>'
 					+'</div>'
 					+'<div class="col-auto align-self-center">'
 						+'<div class="dropdown">'

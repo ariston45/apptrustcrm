@@ -19,7 +19,7 @@ Customer
 		<div class="card-header card-header-custom card-header-light">
 			<h3 class="card-title">Contact Information</h3>
 			<div class="card-actions" style="padding-right: 10px;">
-				<a href="{{ url('management') }}">
+				<a href="{{ url('customer/contacts/'.$data_personal->cnt_cst_id) }}">
 					<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 						<div style="font-weight: 700;">
 							<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
@@ -38,7 +38,7 @@ Customer
 						</div>
 						<div class="col-auto ms-auto">
 							<div align="right">
-								<a href="{{ url('setting/user').'/'.$id }}">
+								<a href="">
 									<button class="btn btn-sm btn-success">
 										<i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit
 									</button>
@@ -46,76 +46,61 @@ Customer
 							</div>
 						</div>
 					</div>
-					<div class="row align-items-center mb-2">
+					<div class="row mb-2">
 						<div class="col-auto">
 							<span class="avatar avatar-md" style=""></span>
 						</div>
 						<div class="col-4"> 
-							<h2>{{ $user->name }}</h2>
-							<span class="text-muted"><strong>{{ $user->uts_team_name }}</strong></span> <br>
-							<span class="text-muted">{{ $user->uts_team_name }}</span>
+							<h2>{{ $data_personal->cnt_fullname }}</h2>
+							<span class="text-muted"><strong>{{ $data_personal->cst_name }}</strong></span> <br>
+							<span class="text-muted">{{ $data_personal->cnt_company_position }}</span>
 						</div>
 						<div class="col ml-3">
 							<div class="row">
 								<div class="col-3">
-									<label>Telephone</label>
+									<label><b>Telephone</b></label>
 								</div>
 								<div class="col-5">
-									@if (!$user->phone)
-										--
-									@else
-									{{ $user->phone }}
-									@endif
+									{!! $str_phone !!}
 								</div>
 							</div>
+							<span class="text-muted"><hr style="margin: 5px;"></span>
 							<div class="row">
 								<div class="col-3">
-									<label>Mobile</label>
+									<label><b>Mobile</b></label>
 								</div>
 								<div class="col-5">
-									@if (!$user->phone)
-										--
-									@else
-									{{ $user->phone }}
-									@endif
+									{!! $str_mobile !!}
 								</div>
 							</div>
+							<span class="text-muted"><hr style="margin: 5px;"></span>
 							<div class="row">
 								<div class="col-3">
-									<label>Email</label>
+									<label><b>Email</b></label>
 								</div>
 								<div class="col-5">
-									@if (!$user->email)
-										--
-									@else
-									{{ $user->email }}
-									@endif
+									{!! $str_email !!}
 								</div>
 							</div>
+							<span class="text-muted"><hr style="margin: 5px;"></span>
 							<div class="row">
 								<div class="col-3">
-									<label>Address</label>
+									<label><b>Address</b></label>
 								</div>
 								<div class="col-5">
-									@if (!$user->email)
-										--
-									@else
-									{{ $user->email }}
-									@endif
+									{!! $data_personal->cnt_priv_address !!}
 								</div>
 							</div>
+							<span class="text-muted"><hr style="margin: 5px;"></span>
 							<div class="row">
 								<div class="col-3">
-									<label>Notes</label>
+									<label> <b>Notes</b></label>
 								</div>
 								<div class="col-5">
-									@if (!$user->email)
-										--
-									@else
-									{{ $user->email }}
-									@endif
+									{!! $data_personal->cnt_notes !!}
 								</div>
 							</div>
+							<span class="text-muted"><hr style="margin: 5px;"></span>
 						</div>
 					</div>
 				</div>
@@ -542,7 +527,7 @@ function chartColumnPurchase(data) {
 	chart_4.render();
 };
 function actionStatisticActivity() {
-	var id = '{{ $id }}';
+	var id = '';
 	var data;
 	$.ajaxSetup({
 		headers: {
@@ -562,7 +547,7 @@ function actionStatisticActivity() {
 	});
 }
 function actionStatisticLead() {
-	var id = '{{ $id }}';
+	var id = '';
 	var data;
 	$.ajaxSetup({
 		headers: {
@@ -582,7 +567,7 @@ function actionStatisticLead() {
 	});
 }
 function actionStatisticOpportunity() {
-	var id = '{{ $id }}';
+	var id = '';
 	var data;
 	$.ajaxSetup({
 		headers: {
@@ -602,7 +587,7 @@ function actionStatisticOpportunity() {
 	});
 }
 function actionStatisticPurchase() {
-	var id = '{{ $id }}';
+	var id = '';
 	var data;
 	$.ajaxSetup({
 		headers: {

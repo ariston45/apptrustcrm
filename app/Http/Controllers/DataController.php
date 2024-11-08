@@ -1407,6 +1407,7 @@ class DataController extends Controller
 	/* Tags:... */
 	public function sourceActivities(Request $request)
 	{
+		// die();
 		if (in_array($request->act_status, array("beready","running","finished"))) {
 			$status = [
 				0 => $request->act_status
@@ -1451,7 +1452,7 @@ class DataController extends Controller
 				->get();
 			}
 		}elseif(checkRule(array('MGR'))){
-			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','manager','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
 			$lds_idr = array();
 			foreach ($lead_data as $key => $value) {
 				$lds_idr[$key] = $value['slm_lead'];

@@ -49,7 +49,11 @@ class ActivityController extends Controller
 	public function viewActivity(Request $request)
 	{
 		$user = Auth::user();
-		$users = User::get();
+		$users = User::join('user_structures', 'users.id', '=', 'user_structures.usr_user_id')
+		->leftJoin('user_teams', 'user_structures.usr_team_id', '=', 'user_teams.uts_id')
+		->select('id', 'name', 'level', 'uts_team_name')
+		->whereNotIn('level', ['ADM', 'AGM'])
+		->get();
 		$users_mod[0] = ["all_user"=>"Filter User"];
 		$idx_user = 1;
 		foreach ($users as $key => $value) {
@@ -65,7 +69,11 @@ class ActivityController extends Controller
 			->select('act_id','aat_type_code')
 			->get();
 		} elseif(checkRule(array('MGR'))) {
-			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','manager'])
+			->where('slm_user',$user->id)
+			->select('slm_lead')
+			->get()
+			->toArray();
 			$lds_idr = array();
 			foreach ($lead_data as $key => $value) {
 				$lds_idr[$key] = $value['slm_lead'];
@@ -124,11 +132,29 @@ class ActivityController extends Controller
 		$cnt_video_call = $all_activities->where('aat_type_code','act_video_call')->count();
 		$cnt_total = $cnt_todo+$cnt_phone+$cnt_email+$cnt_visit+$cnt_poc+$cnt_webinar+$cnt_video_call;
 		$activity_type = Act_activity_type::get();
-		$user_all = User::join('user_structures','users.id','=','user_structures.usr_user_id')
-		->leftjoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
-		->whereIn('level',['STF','STF.TCH','MGR.TCH','MGR.PAS','MGR','AGM','ADM'])
-		->select('id','name','uts_team_name')
-		->get();
+		
+		if (in_array($user->level, ['AGM','ADM', 'MGR.PAS'])) {
+			# code...
+			$user_all = User::join('user_structures','users.id','=','user_structures.usr_user_id')
+			->leftjoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
+			->whereIn('level',['STF','STF.TCH','MGR.TCH','MGR.PAS','MGR','AGM','ADM'])
+			->select('id','name','uts_team_name')
+			->get();
+		}else if(in_array($user->level, ['MGR'])){
+			$team_users = checkTeamMgr($user->id);
+			$user_all = User::join('user_structures', 'users.id', '=', 'user_structures.usr_user_id')
+			->leftjoin('user_teams', 'user_structures.usr_team_id', '=', 'user_teams.uts_id')
+			->whereIn('id', $team_users)
+			->select('id', 'name', 'uts_team_name')
+			->get();
+		}else{
+			$team_users = checkTeamMgr($user->id);
+			$user_all = User::join('user_structures', 'users.id', '=', 'user_structures.usr_user_id')
+			->leftjoin('user_teams', 'user_structures.usr_team_id', '=', 'user_teams.uts_id')
+			->whereIn('id', $team_users)
+			->select('id', 'name', 'uts_team_name')
+			->get();
+		}
 		$customer_all = Cst_customer::select('cst_id','cst_name')->get();
 		return view('contents.page_activity.activity',compact(
 			'activity_type','cnt_todo','cnt_phone','cnt_email','cnt_visit','cnt_poc','cnt_webinar','cnt_video_call','cnt_total','user_all','user','customer_all','users','users_mod'

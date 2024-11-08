@@ -685,7 +685,7 @@ class LeadController extends Controller
 					'plc_attendant_id' => $person->cnt_id,
 					'plc_attendant_rule' => $person->cnt_company_position,
 					'plc_customer_id' => $person->cnt_cst_id,
-					'created_by' => $user->id
+					'created_by' => $user->id,
 				];
 			}else{
 				$result = [
@@ -724,14 +724,15 @@ class LeadController extends Controller
 		->join('cst_customers','prs_contacts.plc_customer_id','=','cst_customers.cst_id')
 		->where('plc_attendant_id',$person_id )
 		->where('plc_lead_id',$request->id)
-		->select('plc_id','plc_attendant_id','cst_name','cnt_fullname')
+		->select('plc_id','plc_attendant_id','cst_name','cnt_fullname', 'plc_customer_id')
 		->first();
 		$result = [
 			'param' => true,
 			'contact_id' => $person_contact->plc_id,
 			'personal_id' => $person_contact->plc_attendant_id,
 			'name_cst' => $person_contact->cst_name,
-			'name_cnt' => $person_contact->cnt_fullname
+			'name_cnt' => $person_contact->cnt_fullname,
+			'plc_customer_id' => $person_contact->plc_customer_id,
 		];
 		return $result;
 	}

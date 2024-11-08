@@ -97,7 +97,6 @@ class OpportunityController extends Controller
 		->where('slm_lead',$id_lead)
 		->select('users.id as userid','name','username', 'slm_rules','uts_team_name')->get();
 		$sales_selected = $sales->where('slm_rules','master')->first();
-		$sales_selected = $sales->where('slm_rules','master')->first();
 		if ($sales_selected == null) {
 			$sales_dataset_null = ['name' => null,'userid'=>null];
 			$sales_selected = (object) $sales_dataset_null;

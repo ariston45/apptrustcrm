@@ -178,11 +178,32 @@ class CustomerController extends Controller
   {
     $auth = Auth::user();
     $id = $request->id;
-    $data_personal = Cst_personal::join('')
+    $data_personal = Cst_personal::join('cst_customers', 'cst_personals.cnt_cst_id','=', 'cst_customers.cst_id')
     ->where('cnt_id',$request->id)
+    // ->select('cst_name', 'cnt_fullname', 'cnt_company_position', 'view_option', 'cnt_notes')
     ->first();
-    die();
-    return view('contents.page_customer.contact_info', compact('data_personal', 'user'));
+    #telephon
+    $data_telephone = Cst_contact_phone::where('pho_cnt_id',$request->id)
+    ->get();
+    $str_phone = "";
+    foreach ($data_telephone as $key => $value) {
+      $str_phone.="- ".$value->pho_number."<br>";
+    }
+    $data_mobile = Cst_contact_mobile::where("mob_cnt_id", $request->id)
+    ->get();
+    $str_mobile ="";
+    foreach ($data_mobile as $key => $value) {
+      $str_mobile .= "- " . $value->mob_number . "<br>";
+    }
+    $data_email = Cst_contact_email::where('eml_cnt_id',$request->id)
+    ->get();
+    $str_email = "";
+    foreach ($data_email as $key => $value) {
+      $str_email .= "- " . $value->eml_address . "<br>";
+    }
+    // dd($data_personal);
+    // die();
+    return view('contents.page_customer.contact_info', compact('id','data_personal', 'str_phone', 'str_mobile', 'str_email'));
   }
   /* Tags:... */
   public function deleteContact(Request $request)

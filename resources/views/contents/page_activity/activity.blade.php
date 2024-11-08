@@ -265,7 +265,11 @@ opportunitys
 							<div class="mb-2 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Assigned to</label>
 								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-assign-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
+									@if (checkRule(['STF','STF.TCH']))
+									<input type="text" name="assignment_user_view" class="form-control p-1" value="{{ $user->name }}" placeholder="Due Date" autocomplete="off" readonly>
+									<input type="hidden" name="assignment_user" class="form-control p-1" value="{{ $user->id }}" placeholder="Due Date" autocomplete="off" readonly>
+									@else
+									<select type="text" id="select-assign-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="" readonly>
 										@foreach ($user_all as $list)
 										@if ( $user->id == $list->id)
 										<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>
@@ -274,11 +278,12 @@ opportunitys
 										@endif
 										@endforeach
 									</select>
+									@endif
 									<button type="button" id="btn-add-team" class="badge mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
 									<button type="button" id="btn-remove-team" class="badge mt-1 mb-1" style="display: none;">x Close</button>
 									<div id="select-signed-user-team-area" style="display: none;">
 										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-team-user" value="">
-											@foreach ($user_all as $list)
+											@foreach ($users as $list)
 											@if ( $user->id == $list->id)
 											<option value="{{ $list->id }}" selected>{{ $list->uts_team_name }} - {{ $list->name }}</option>
 											@else
@@ -482,7 +487,19 @@ opportunitys
 <script src="{{ asset('plugins/litepicker/bundle/index.umd.min.js') }}"></script>
 {{-- ============================================================================================ --}}
 {{-- Script 1 --}}
-
+@if (!checkRule(['STF','STF.TCH']))
+	<script>
+		var select_assign_user = new TomSelect("#select-assign-user",{
+			create: false,
+			maxItems: 1,
+			maxOptions: 40,			
+			valueField: 'id',
+			labelField: 'title',
+			searchField: 'title',
+			render: {}
+		});
+	</script>
+@endif
 <script>
 var array = @json($users_mod);
 console.log(array);
@@ -538,15 +555,7 @@ var select_project_name = new TomSelect("#select-project-name",{
 	}
 });
 /*===============================================================================================*/
-var select_assign_user = new TomSelect("#select-assign-user",{
-	create: false,
-	maxItems: 1,
-	maxOptions: 40,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {}
-});
+
 /*===============================================================================================*/
 var select_team_user = new TomSelect("#select-team-user",{
 	create: false,
