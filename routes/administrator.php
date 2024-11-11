@@ -128,8 +128,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-data-activity', [DataController::class, 'sourceActivities'])->name('source-data-activity');
 		Route::match(['get', 'post'],'source-data-activity-instant', [DataController::class, 'sourceActivitiesInstant'])->name('source-data-activity-instant');
 		Route::match(['get', 'post'],'source-data-activity-cst', [DataController::class, 'sourceActivitiesCst'])->name('source-data-activity-cst');
-		Route::post('source-data-activity-calender', [ActivityController::class, 'sourceDataActivityCalender'])->name('source-data-activity-calender');
-		Route::post('source-data-activity-calender-tck', [ActivityController::class, 'sourceDataTiketCalender'])->name('source-data-activity-calender-tck');
+		Route::match(['get', 'post'],'source-data-activity-calender', [ActivityController::class, 'sourceDataActivityCalender'])->name('source-data-activity-calender');
 		Route::post('source-data-activity-calender-cst', [ActivityController::class, 'sourceDataActivityCalenderCst'])->name('source-data-activity-calender-cst');
 		Route::match(['get', 'post'],'source-data-activity-detail-calender', [ActivityController::class, 'sourceDataActivityDetailCalender'])->name('source-data-activity-detail-calender');
 		Route::match(['get', 'post'],'all-lead-activities', [ActivityController::class, 'sourceAllLeadActivities'])->name('all-lead-activities');
@@ -137,7 +136,6 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('store-new-activty', [ActivityController::class, 'storeActivitiesNew'])->name('store-new-activty');
 		Route::post('store-data-lead-activities', [ActivityController::class, 'storeActivitiesLead'])->name('store-data-lead-activities');
 		Route::post('store-close-activity', [ActivityController::class, 'storeCloseActivities'])->name('store-close-activity');
-		Route::post('store-ticket-activity', [ActivityController::class, 'storeTicketActivities'])->name('store-ticket-activity');
 		#deleting data
 		Route::post('delete-data-lead-activities', [ActivityController::class, 'deleteActivitiesLead'])->name('delete-data-lead-activities');
 		#udating data
@@ -197,7 +195,6 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-data-purchased', [PurchaseController::class, 'sourceDataPurchased'])->name('source-data-purchased');
 		Route::match(['get', 'post'], 'source-data-purchased-bycst', [PurchaseController::class, 'sourceDataPurchasedByCustomer'])->name('source-data-purchased-bycst');
 		Route::match(['get', 'post'],'action-check-opportunity', [PurchaseController::class, 'actionCheckOpr'])->name('action-check-opportunity');
-		
 	});
 	# Product
 	Route::prefix('product')->group(function(){
@@ -250,6 +247,8 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('ticket-detail/{id}', [ActivityController::class, 'viewTicketDetail']);
 		Route::post('store-new-ticket', [ActivityController::class, 'storeTicketsNew'])->name('store-new-ticket');
 		Route::match(['get', 'post'],'source-data-ticket', [DataController::class, 'sourceTickets'])->name('source-data-ticket');
+		Route::match(['get', 'post'], 'source-data-activity-calender-tck', [ActivityController::class, 'sourceDataTiketCalender'])->name('source-data-activity-calender-tck');
+		Route::post('store-ticket-activity', [ActivityController::class, 'storeTicketActivities'])->name('store-ticket-activity');
 	});
 	# Managemet
 	Route::prefix('management')->group(function () {
@@ -272,6 +271,10 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-data-purchases-user', [DataController::class, 'sourceDataPurchasesUser'])->name('source-data-purchases-user');
 	});
 
+	# Exporting
+	Route::prefix('management')->group(function () {
+		Route::get('export-staf-report', [DataController::class, 'exportStaffReport']);
+	});
 	# CRUD
 	Route::prefix('crud')->group(function(){
 		Route::post('store-user', [ActionController::class,'storeUser'])->name('store-user');

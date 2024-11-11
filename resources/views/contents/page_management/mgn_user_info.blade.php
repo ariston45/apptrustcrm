@@ -19,6 +19,13 @@ Customer
 		<div class="card-header card-header-custom card-header-light">
 			<h3 class="card-title">Information</h3>
 			<div class="card-actions" style="padding-right: 10px;">
+				<a href="{{ url('management/export-staf-report') }}">
+					<button id="btn-action-save" class="btn btn-sm btn-light btn-pill" style="vertical-align: middle;" form="formContent1">
+						<div style="font-weight: 700;">
+							<i class="ri-file-excel-2-line" style="font-size: 14px;margin-right: 4px; vertical-align: middle;"></i> Export Excel
+						</div>
+					</button>
+				</a>
 				<a href="{{ url('management') }}">
 					<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 						<div style="font-weight: 700;">

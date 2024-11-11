@@ -66,6 +66,7 @@ class ActivityController extends Controller
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			# code...
 			$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','aat_type_code')
 			->get();
 		} elseif(checkRule(array('MGR'))) {
@@ -82,6 +83,7 @@ class ActivityController extends Controller
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->whereIn('act_activities.act_lead_id',$lds_ids)
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','aat_type_code')
 			->get();
 		} elseif(checkRule(array('STF'))) {
@@ -94,6 +96,7 @@ class ActivityController extends Controller
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->whereIn('act_activities.act_lead_id',$lds_ids)
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','aat_type_code')
 			->get();
 		} elseif(checkRule(array('MGR.TCH'))) {
@@ -108,6 +111,7 @@ class ActivityController extends Controller
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->whereIn('act_activities.act_id',$act_ids)
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','aat_type_code')
 			->get();
 		} elseif(checkRule(array('STF.TCH','STF'))) {
@@ -120,6 +124,7 @@ class ActivityController extends Controller
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->whereIn('act_activities.act_id',$act_ids)
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','aat_type_code')
 			->get();
 		}
@@ -226,6 +231,7 @@ class ActivityController extends Controller
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -241,6 +247,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_lead_id',$lds_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -256,6 +263,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_lead_id',$lds_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -271,6 +279,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_id',$act_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -285,6 +294,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_id',$act_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'ACTIVITY')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -340,6 +350,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_lead_id',$lds_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'TICKET')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -355,6 +366,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_lead_id',$lds_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+				->where('act_label_category', 'TICKET')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -370,6 +382,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_id',$act_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'TICKET')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -384,6 +397,7 @@ class ActivityController extends Controller
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('act_id',$act_id)
 			->whereBetween('act_task_times_due',[$start,$end])
+			->where('act_label_category', 'TICKET')
 			->select('act_id','cst_name','aat_type_button','aat_custom_class_1','act_activities.act_task_times_due','act_todo_result','aat_custom_style_1','aat_type_code',
 			'users.name as assign','aat_type_name','cst_name')
 			->get();
@@ -1482,6 +1496,7 @@ class ActivityController extends Controller
 			$lds_ids = array_unique($lds_idr);
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_label_category', 'TICKET')
 			->whereIn('act_activities.act_lead_id',$lds_ids)
 			->select('act_id','aat_type_code')
 			->get();
@@ -1494,8 +1509,9 @@ class ActivityController extends Controller
 			$lds_ids = array_unique($lds_idr);
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_label_category','TICKET')
 			->whereIn('act_activities.act_lead_id',$lds_ids)
-			->select('act_id','aat_type_code')
+			->select('act_id','aat_type_code', 'act_label_category')
 			->get();
 		} elseif(checkRule(array('MGR.TCH'))) {
 			$user = Auth::user();
@@ -1508,10 +1524,11 @@ class ActivityController extends Controller
 			$act_ids = array_unique($act_idr);
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_label_category', 'TICKET')
 			->whereIn('act_activities.act_id',$act_ids)
 			->select('act_id','aat_type_code')
 			->get();
-		} elseif(checkRule(array('STF.TCH','STF'))) {
+		} elseif(checkRule(array('STF.TCH'))) {
 			$act_access = Act_activity_access::where('acs_user_id',$user->id)->select('acs_act_id')->get();
 			$act_idr = array();
 			foreach ($act_access as $key => $value) {
@@ -1520,6 +1537,7 @@ class ActivityController extends Controller
 			$act_ids = array_unique($act_idr);
 			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
 			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			->where('act_label_category', 'TICKET')
 			->whereIn('act_activities.act_id',$act_ids)
 			->select('act_id','aat_type_code')
 			->get();

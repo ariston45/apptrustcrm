@@ -43,7 +43,7 @@
 					</a>
 				</div>
 			</div>
-			<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="Get" autocomplete="off">
+			<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="Get" autocomplete="new-password">
 				@csrf
 				<input type="hidden" name="image" value="{{ null }}">
 				<div class="card-body card-body-custom">
@@ -76,9 +76,9 @@
 						</div>
 						<div class="col-xl-6">
 							@if ($user->level == 'MGR')
-							<input type="text" name="division" value="{{ $user_str->usr_devision_id }}">
-							<input type="text" name="team" value="{{ $user_str->usr_team_id }}">
-							<input type="text" name="access" value="STF">
+							<input type="hidden" name="division" value="{{ $user_str->usr_division_id }}">
+							<input type="hidden" name="team" value="{{ $user_str->usr_team_id }}">
+							<input type="hidden" name="access" value="STF">
 							@else
 							<div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label required">Set Devision</label>
@@ -117,13 +117,13 @@
 							<div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label required" style="text-align: right;">Set Username</label>
 								<div id="select-customer-area" class="col">
-									<input name="username" id="user-username" type="text" class="form-control">
+									<input name="username" id="user-username" type="text" class="form-control" autocomplete="new-password">
 								</div>
 							</div>
 							<div class="mb-3 row">
 								<label class="col-4 col-form-label custom-label required">Password</label>
 								<div class="col">
-									<input name="password" id="user-password" type="password" class="form-control">
+									<input name="password" id="user-password" type="password" class="form-control" autocomplete="new-password">
 								</div>
 							</div>
 						</div>

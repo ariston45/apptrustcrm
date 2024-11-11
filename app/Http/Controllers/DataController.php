@@ -1436,6 +1436,7 @@ class DataController extends Controller
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1447,6 +1448,7 @@ class DataController extends Controller
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1466,6 +1468,7 @@ class DataController extends Controller
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1478,6 +1481,7 @@ class DataController extends Controller
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1497,6 +1501,7 @@ class DataController extends Controller
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1509,6 +1514,7 @@ class DataController extends Controller
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1528,6 +1534,7 @@ class DataController extends Controller
 				->whereIn('act_id',$act_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1540,6 +1547,7 @@ class DataController extends Controller
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1558,6 +1566,7 @@ class DataController extends Controller
 				->whereIn('act_id',$act_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1570,6 +1579,7 @@ class DataController extends Controller
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
+				->where('act_label_category', 'ACTIVITY')
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
@@ -1819,10 +1829,9 @@ class DataController extends Controller
 			<div style="text-align:center;">
 			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
 			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
-			<a class="dropdown-item" href="'. url('ticket/ticket-detail') .'/'. $colect_data->act_id.'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Activity</a>
+			<a class="dropdown-item" href="'. url('ticket/ticket-detail') .'/'. $colect_data->act_id.'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Ticket</a>
       </div>
-			</div>
-			';
+			</div>';
 		})
 		->addColumn('number_index', function () {
 			return 1;
@@ -2385,5 +2394,10 @@ class DataController extends Controller
 		})
 		->rawColumns(['number_index','title', 'customer','due_date', 'assign','menu','info','complete','project'])
 		->make('true');
+	}
+	/* Tags:... */
+	public function exportStaffReport(Request $request)
+	{
+		
 	}
 }

@@ -163,11 +163,12 @@ class SettingController extends Controller
 		$user_all = User::whereIn('level',['MKT','MGR.PAS','MGR','AGM','TCK'])->get();
 		$division = User_division::get();
 		$user_str = User_structure::where('usr_user_id',$user->id)
-		->get();
+		->first();
+		// dd($user_str);
 		$divisions = User_division::get();
 		$team = User_team::get();
 		$access = array('STF' => 'Staff','MGR'=>'Manager','MGR.PAS'=>'Manager All Access', 'AGM' => 'Management','ADM' => 'Administrator');
-		return view('contents.page_setting.form_create_user',compact('user','user_str','division','team','access'));
+		return view('contents.page_setting.form_create_user',compact('user', 'user_str','division','team','access'));
 	}
 	/* Tags:... */
 	public function storeDataUser(Request $request)
