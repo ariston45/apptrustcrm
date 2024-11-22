@@ -52,6 +52,21 @@
                         </button>
                       </div>
                     </div>
+                    @if ($errors->has('login_gagal'))
+                      <div class="mb-2 mt-3">
+                        <div class="alert alert-danger alert-dismissible m-0" role="alert">
+                          <div class="d-flex">
+                            <div>
+                              <i class="ri-error-warning-line icon alert-icon" style="font-size: 24px;"></i>
+                            </div>
+                            <div>
+                              Invalid username or password. <br> Please try again.
+                            </div>
+                          </div>
+                          <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                        </div>
+                      </div>
+                    @endif
                     <div class="form-footer">
                       <button type="submit" class="btn btn-primary w-100">Sign in</button>
                     </div>

@@ -14,6 +14,7 @@ use App\Models\Addr_district;
 use App\Models\Addr_province;
 use App\Models\Cst_bussiness_field;
 use App\Models\Cst_customer;
+use App\Models\Cst_institution;
 use App\Models\Cst_personal;
 use App\Models\Opr_opportunity;
 use App\Models\Prd_principle;
@@ -46,7 +47,7 @@ class LeadController extends Controller
 	public function formCreateLead(Request $request)
 	{
 		$user = Auth::user();
-		$customer = Cst_customer::get();
+		$customer = Cst_institution::get();
 		// $sales = User::whereIn('level',['STF','MGR','MGR.PAS'])->get();
 		$sales = User::join('user_structures','users.id','=','user_structures.usr_user_id')
 		->leftjoin('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
@@ -109,18 +110,19 @@ class LeadController extends Controller
 		$base_x = Str::replace(',', '.', $base_val);
 		$target_val =  Str::remove('.',Str::substr($request->target_value,3));
 		$target_x = Str::replace(',', '.', $target_val);
+		$id_cst = getIdCustomer($request->customer);
 		if ($request->lead_title != null && $request->customer != null) {
 			# code...
 			$data_lead = [
 				"lds_id" => $id,
 				"lds_title" => $request->lead_title,
 				"lds_status" => 1,
-				"lds_customer" => $request->customer
+				"lds_customer" => $id_cst,
+				"lds_subcustomer" => $request->customer, 
 			];
 		} else {
 			$err[] = "Data of Project title or Customer Select input is null, please enter the data correctly.";
 		}
-		
 		#action store
 		$data_lead_value = [
 			"lvs_lead_id" => $id,

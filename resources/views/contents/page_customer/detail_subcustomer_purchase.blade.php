@@ -7,7 +7,7 @@ Customer
 @endsection
 @section('pagetitle')
 <div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->ins_name }}</h4>
+<h4 class="page-title">Customer : {{ $company->cst_name }}</h4>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -37,7 +37,7 @@ Customer
 			</div>
 		</div>
 		<div class="row g-0">
-			@include('contents.page_customer.detail_customer_menu',['id' => $id])
+			@include('contents.page_customer.detail_subcustomer_menu',['id' => $id])
 			<div id="" class="col d-flex flex-column">
 				<div class="card-body">
 					<div class="row mb-2">

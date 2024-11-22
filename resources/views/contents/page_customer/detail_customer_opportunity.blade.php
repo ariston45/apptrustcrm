@@ -7,7 +7,7 @@ Customer
 @endsection
 @section('pagetitle')
 <div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->cst_name }}</h4>
+<h4 class="page-title">Customer : {{ $company->ins_name }}</h4>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>

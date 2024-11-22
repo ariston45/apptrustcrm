@@ -32,9 +32,9 @@
               <tr>
                 {{-- <th></th> --}}
                 <th>Customer</th>
-                <th style="text-align: center;">Institution</th>
-                <th style="text-align: center;">City</th>
-                <th style="text-align: center;">Last Activity</th>
+                <th style="text-align: left;">Sub-Customer</th>
+                <th style="text-align: left;">City</th>
+                <th style="text-align: left;">Last Activity</th>
                 <th style="text-align: center;">Menus</th>
               </tr>
             </thead>
@@ -84,8 +84,8 @@
         order:[[0,'asc']],
         columns: [
           // {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
-          {data: 'name', name: 'name', orderable: true, searchable: true },
-          {data: 'institution', name: 'institution', orderable: true, searchable: true },
+          {data: 'customer', name: 'customer', orderable: true, searchable: true },
+          {data: 'sub_customer', name: 'sub_customer', orderable: true, searchable: true},
           {data: 'city', name: 'city', orderable: true, searchable: true },
           // {data: 'datein', name: 'datein', orderable: true, searchable: true },
           {data: 'lastactive', name: 'lastactive', orderable: true, searchable: true },

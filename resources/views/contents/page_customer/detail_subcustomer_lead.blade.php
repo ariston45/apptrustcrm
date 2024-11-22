@@ -34,7 +34,7 @@ Customer
 			</div>
 		</div>
 		<div class="row g-0">
-			@include('contents.page_customer.detail_customer_menu',['id' => $id])
+			@include('contents.page_customer.detail_subcustomer_menu',['id' => $id])
 			<div id="" class="col d-flex flex-column">
 				<div class="card-body">
 					<div class="row mb-2">

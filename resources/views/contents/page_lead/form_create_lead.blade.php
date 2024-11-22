@@ -60,8 +60,16 @@
 									<select type="text" class="form-select" name="customer" id="select-customer" value="" placeholder="Select customer here">
 										<option value="{{ null }}"></option>
 										@foreach ($customer as $list)
-											<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
+											<option value="{{ $list->ins_id }}">{{ $list->ins_name }}</option>
 										@endforeach
+									</select>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label class="col-3 col-form-label custom-label" style="text-align: right;">Select Sub Customer</label>
+								<div id="select-customer-area" class="col">
+									<select type="text" class="form-select" name="sub_customer" id="select-sub-customer" value="" placeholder="Select customer here">
+										<option value="{{ null }}"></option>
 									</select>
 								</div>
 							</div>
@@ -305,10 +313,26 @@
 			}
 		}
 	});
+	var select_sub_customer = new TomSelect("#select-sub-customer",{
+		create: false,			
+		valueField: 'id',
+		labelField: 'title',
+		searchField: 'title',
+		render: {
+			option: function(data, escape) {
+				return '<div><span class="title">'+escape(data.title)+'</span></div>';
+			},
+			item: function(data, escape) {
+				return '<div id="select-signed-user">'+escape(data.title)+'</div>';
+			}
+		}
+	});
 	select_customer.on('change',function () {
 		var cst_id = select_customer.getValue();
 		actionGetContacts(cst_id);
+		actionGetSubcustomer(cst_id);
 	});
+	
 	/*=======================================================================*/
 	var select_customer_contact = new TomSelect("#select-customer-contact",{
 		create: true,
@@ -390,8 +414,32 @@ function actionGetContacts(id) {
 	select_customer_contact.clearOptions();
 	select_customer_contact.addOptions(dataOption_1);
 };
-function actionResetFormContent() {  
-
+function actionGetSubcustomer(id) {
+	var dataOption_3 = [];  
+	$.ajaxSetup({
+		headers: {
+			"X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
+		}
+	});
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('sub-customers') }}",
+		async: false,
+		data: {
+			"id": id
+		},
+		success: function(result) {
+			for (let n = 0; n < result.data.length; n++) {
+				dataOption_3.push({
+					id:result.data[n].id,
+					title:result.data[n].title
+				});
+			}
+		}
+	});
+	select_sub_customer.clear();
+	select_sub_customer.clearOptions();
+	select_sub_customer.addOptions(dataOption_3);
 };
 </script>
 {{-- Onload Js --}}

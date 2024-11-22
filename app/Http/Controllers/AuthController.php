@@ -38,7 +38,7 @@ class AuthController extends Controller
 		}
 		return redirect('login')
 		->withInput()
-		->withErrors(['login_gagal' => 'These credentials do not match our records.']);
+		->withErrors(['login_gagal' => 'Invalid username or password. <br> Please try again.']);
 	}
 
 	public function logout(Request $request)

@@ -192,3 +192,17 @@ function rulesFeature($data)
     return false;
   }
 }
+function getIdSubcustomer($id) {
+  $subcustomer = Cst_customer::where('cst_institution', $id)->get();
+  $ids_cst = [];
+  foreach ($subcustomer as $key => $value) {
+    $ids_cst[$key] = $value->cst_id;
+  }
+  return $ids_cst;
+}
+function getIdCustomer($id)
+{
+  $customer = Cst_customer::where('cst_id', $id)
+  ->first();
+  return $customer->cst_institution;
+}

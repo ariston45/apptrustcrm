@@ -7,7 +7,7 @@ Customer
 @endsection
 @section('pagetitle')
 <div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->ins_name }}</h4>
+<h4 class="page-title">Customer : {{ $company->cst_name }}</h4>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -29,7 +29,7 @@ Customer
 			</div>
 		</div>
 		<div class="row g-0">
-			@include('contents.page_customer.detail_customer_menu',['id' => $id])
+			@include('contents.page_customer.detail_subcustomer_menu',['id' => $id])
 			<div id="" class="col d-flex flex-column">
 				<div class="card-body">
 					<div class="row mb-2">
@@ -52,8 +52,8 @@ Customer
 							<span class="avatar avatar-xl" style=""></span>
 						</div>
 						<div class="col-auto"> 
-							<h1>{{ $company->ins_name }}</h1>
-							{{-- <h3 class="text-muted">{{ $company->ins_name }}</h3> --}}
+							<h1>{{ $company->cst_name }}</h1>
+							<h3 class="text-muted">{{ $company->ins_name }}</h3>
 						</div>
 					</div>
 					{{-- <h3 class="mt-2">Business Profile</h3> --}}
@@ -62,10 +62,10 @@ Customer
 						<div class="col-xl-6 col-sm-12">
 							<div class="form-label info-title-cst"> <strong>Business Field</strong> </div>
 							<span class="text-muted info-text-cst">
-								@if ($company->cst_business_field == null)
+								@if ($company->ins_business_field == null)
 								-
 								@else
-								{{ $company->cst_business_field }}
+								{{ $company->ins_business_field }}
 								@endif
 							</span>
 						</div>
@@ -140,7 +140,7 @@ Customer
 							<div class="form-label"> <strong>Contacts</strong> </div>
 						</div>
 						<div class="col-auto ms-auto">
-							<a href="{{ url('customer/create-contact') }}/{{ $id }}">
+							<a href="{{ url('customer/create-customer') }}">
 								<button class="btn btn-sm btn-primary">Add New Contact</button>
 							</a>
 						</div>

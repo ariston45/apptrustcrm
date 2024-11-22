@@ -59,13 +59,18 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'], 'create-new-opportunity-cst/{id}', [OpportunityController::class, 'formNewOpportunityCst'])->name('form-new-opportunity');
 		Route::match(['get', 'post'], 'purchased', [CustomerController::class, 'actionPageCustomerPurchased'])->name('customer-load-page-purchased');
 		Route::get('detail-customer/{id}', [CustomerController::class, 'detailCustomer']);
+		Route::get('detail-sub-customer/{id}', [CustomerController::class, 'detailSubCustomer']);
+		route::match(['get'], 'list-subcustomer/{id}', [CustomerController::class, 'actionPageSubcustomerList']);
 		route::match(['get'], 'detail-customer-activities/{id}' , [CustomerController::class, 'activityCustomer']);
+		route::match(['get'], 'detail-subcustomer-activities/{id}', [CustomerController::class, 'activitySubCustomer']);
 		route::match(['get'], 'detail-customer-opportunities/{id}' , [CustomerController::class, 'actionPageCustomerOpportunity']);
 		route::match(['get'], 'detail-customer-purchasing/{id}', [CustomerController::class, 'actionPageCustomerPurchase']);
 		#####
 		Route::get('/', [CustomerController::class,'CustomerDataView']);
 		Route::get('create-customer',[CustomerController::class,'viewFormCreateCustomer']);
+		Route::get('create-subcustomer', [CustomerController::class, 'viewFormCreateSubCustomer']);
 		Route::get('create-contact/{id}', [CustomerController::class, 'viewFormCreateCustomerFixed']);
+		Route::post('store-contact', [CustomerController::class, 'storeContact'])->name('store-contact');
 		Route::post('store-customer', [CustomerController::class, 'storeCreateCustomer'])->name('store-customer');
 		Route::post('source-data-individu', [CustomerController::class, 'sourceDataInvidu'])->name('source-data-individu');
 		Route::get('detail-customer/person-update/{id}', [CustomerController::class, 'updatePersonData']);
@@ -83,7 +88,6 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'sub-customers',[CustomerController::class,'actionGetSubcustomer'])->name('sub-customers');
 		Route::match(['get', 'post'],'action-get-city-select',[CustomerController::class,'actionGetCity'])->name('action-get-city-select');
 		Route::match(['get', 'post'],'action-get-district-select',[CustomerController::class,'actionGetDistrict'])->name('action-get-district-select');
-	
 		Route::match(['get', 'post'],'source-data-contact',[DataController::class, 'sourceDataContact'])->name('source-data-contact');
 	});
 	# Leads
@@ -128,8 +132,11 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'source-data-activity', [DataController::class, 'sourceActivities'])->name('source-data-activity');
 		Route::match(['get', 'post'],'source-data-activity-instant', [DataController::class, 'sourceActivitiesInstant'])->name('source-data-activity-instant');
 		Route::match(['get', 'post'],'source-data-activity-cst', [DataController::class, 'sourceActivitiesCst'])->name('source-data-activity-cst');
+		Route::match(['get', 'post'], 'source-data-activity-subcst', [DataController::class, 'sourceActivitiesSubCst'])->name('source-data-activity-subcst');
 		Route::match(['get', 'post'],'source-data-activity-calender', [ActivityController::class, 'sourceDataActivityCalender'])->name('source-data-activity-calender');
+		
 		Route::post('source-data-activity-calender-cst', [ActivityController::class, 'sourceDataActivityCalenderCst'])->name('source-data-activity-calender-cst');
+		Route::post('source-data-activity-calender-subcst', [ActivityController::class, 'sourceDataActivityCalenderSubCst'])->name('source-data-activity-calender-subcst');
 		Route::match(['get', 'post'],'source-data-activity-detail-calender', [ActivityController::class, 'sourceDataActivityDetailCalender'])->name('source-data-activity-detail-calender');
 		Route::match(['get', 'post'],'all-lead-activities', [ActivityController::class, 'sourceAllLeadActivities'])->name('all-lead-activities');
 		#storing activity date
@@ -165,6 +172,7 @@ Route::group(['middleware' => ['auth']], function () {
 		// 
 		Route::match(['post','get'],'source-opportunities', [DataController::class, 'sourceDataOpportunities'])->name('source-opportunities');
 		Route::post('source-opportunities-cst', [DataController::class, 'sourceDataOpportunitiesCst'])->name('source-opportunities-cst');
+		Route::post('source-subcustomer-cst', [DataController::class, 'sourceDataSubCustomer'])->name('source-subcustomer-cst');
 		Route::match(['post','get'],'store-product-opportunity', [OpportunityController::class, 'storeProductOpportunity'])->name('store-product-opportunity');
 		Route::post('update-product-opportunity', [OpportunityController::class, 'updateProductOpportunity'])->name('update-product-opportunity');
 		Route::post('product-principle', [OpportunityController::class, 'listProductPrinciple'])->name('product-principle');
@@ -194,6 +202,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'store-purchase-date', [PurchaseController::class,'storeDatePurchase'])->name('store-purchase-date');
 		Route::match(['get', 'post'],'source-data-purchased', [PurchaseController::class, 'sourceDataPurchased'])->name('source-data-purchased');
 		Route::match(['get', 'post'], 'source-data-purchased-bycst', [PurchaseController::class, 'sourceDataPurchasedByCustomer'])->name('source-data-purchased-bycst');
+		Route::match(['get', 'post'], 'source-data-purchased-bysubcst', [PurchaseController::class, 'sourceDataPurchasedBySubCustomer'])->name('source-data-purchased-bysubcst');
 		Route::match(['get', 'post'],'action-check-opportunity', [PurchaseController::class, 'actionCheckOpr'])->name('action-check-opportunity');
 	});
 	# Product

@@ -64,15 +64,13 @@
 							<label class="form-label" style="text-align: center;">Add Image Here</label>
 						</div>
 						<div class="col-xl-9">
-							<h2 class="page-title">{{ $company->cst_name }}</h2>
+							<h2 class="page-title">{{ $company->ins_name }}</h2>
 							<small class="form-hint">{{ $company->cst_business_field }}</small>
 							<div class="mb-3" id="person-name-area">
 								<label class="col-form-label">Person Names</label>
-								<input name="person_name" id="person-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of person" value="{{ old('person_name') }}" >
-								<input type="hidden" name="idperson" id="idperson" value="{{ genIdPerson() }}">
-								<input type="hidden" name="institution_name" value="{{ $company->cst_name }}">
-								<input type="hidden" name="business_category" value="{{ $company->cst_business_field }}">
-								<input type="hidden" name="cststatus" value="individual" >
+								<input name="person_name" id="person-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of person" value="{{ old('person_name') }}" required>
+								<input type="hidden" name="cst_id" value="{{ $id }}" >
+								<input type="hidden" name="cststatus" value="INDIVIDUAL" >
 								<div class="col">
 								</div>
 							</div>
@@ -81,9 +79,20 @@
 					<div class="row mb-3">
 						<div class="col-xl-6">
 							<div class="mb-3 row" id="job-position-area">
+								<label class="col-3 col-form-label custom-label">Sub Customer</label>
+								<div class="col">
+									<select type="text" class="form-select " name="sub_customer" placeholder="Select sub customer" id="select-subcustomer" value="" required>
+										<option value="{{ null }}"></option>
+										@foreach ($subcustomer as $list)
+											<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
+										@endforeach
+									</select>
+								</div>
+							</div>
+							<div class="mb-3 row" id="job-position-area">
 								<label class="col-3 col-form-label custom-label">Job Position</label>
 								<div class="col">
-									<input name="job_position" id="job-position" type="text" class="form-control" placeholder="Type job position here">
+									<input name="job_position" id="job-position" type="text" class="form-control" placeholder="Type job position here" required>
 								</div>
 							</div>
 							<div class="mb-3 row">
@@ -119,9 +128,15 @@
 									<input name="web" id="web" type="text" class="form-control" placeholder="Type web address here" >
 								</div>
 							</div>
+							<div class="mb-3 row">
+								<label class="col-3 col-form-label custom-label">Notes</label>
+								<div class="col">
+									<textarea rows="5" class="form-control" name="note"></textarea>
+								</div>
+							</div>
 						</div>
 						<div class="col-xl-6">
-							<div class="mb-3 row">
+							{{-- <div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label required">Address</label>
 								<div class="col">
 									<div class="typeahead__container">
@@ -162,122 +177,23 @@
 										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="card" style="border: none;">
-					<div class="card-header">
-						<ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
-							{{-- <li id="button-one" class="nav-item" role="presentation">
-								<button href="#tabs-contacts" class="nav-link @if ($a == 'tab1' || $a == 'none') active @endif" data-bs-toggle="tab" aria-selected="true"role="tab">
-									<i class="ri-contacts-line" style="margin-right: 6px;"></i> Contacts
-								</button>
-							</li> --}}
-							<li id="button-two" class="nav-item " role="presentation">
-								<button type="button" href="#tabs-leads" class="nav-link nav-button-tab @if ($a == 'tab2') active @endif" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">
-									<i class="ri-filter-2-line" style="margin-right: 6px;"></i> Leads
-								</button>
-							</li>
-							<li id="button-three" class="nav-item" role="presentation">
-								<button type="button" href="#tabs-notes" class="nav-link nav-button-tab @if ($a == 'tab3') active @endif" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">
-									<i class="ri-file-text-line" style="margin-right: 6px;"></i> Notes
-								</button>
-							</li>
-							<li id="button-setting" class="nav-item ms-auto" role="presentation">
-								<button type="button" href="#tabs-setting" class="nav-link nav-button-tab  @if ($a == 'set') active @endif" title="Settings" data-bs-toggle="tab"aria-selected="false" tabindex="-1" role="tab" style="padding-top: 5px;padding-bottom: 11px;">
-									<i class="ri-settings-3-line icon"></i>
-								</button>
-							</li>
-						</ul>
-					</div>
-					<div class="card-body" id="tab-card-body" style="@if ($a == 'none') display:none; @endif">
-						<div class="tab-content">
-							{{-- <div class="tab-pane @if ($a == 'tab1' || $a == 'none') active show @endif" id="tabs-contacts"role="tabpanel">
-								<h4>Contacts</h4>
 							</div> --}}
-							<div class="tab-pane @if ($a == 'tab2') active show @endif" id="tabs-leads" role="tabpanel">
-								{{-- <h4>Create New Lead</h4> --}}
-								<div class="col-xl-9">
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Lead Title</label>
-										<div class="col">
-											<input name="lead_title" id="lead-title" type="text" class="form-control val-input-lead" placeholder="Type title of lead here ...">
-										</div>
-									</div>
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Lead status</label>
-										<div class="col">
-											<select type="text" class="form-select val-input-lead" name="lead_status" placeholder="Select lead status for now ..." id="select-lead-status" value="">
-												<option value="{{ null }}">Select lead status for now ...</option>
-												@foreach ($lead_status as $item)
-												<option value="{{ $item->pls_id }}">{{ $item->pls_status_name }}</option>
-												@endforeach
-											</select>
-										</div>
-									</div>
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Product Interest</label>
-										<div class="col">
-											<select type="text" class="form-select val-input-lead" name="product_interest" placeholder="select products that interest to customers" id="select-product-interest" value="">
-												<option value="">Select products that interest to customers</option>
-												@foreach ($products as $item)
-												<option value="{{ $item->psp_id }}">{{ $item->psp_subproduct_name }}</option>
-												@endforeach
-											</select>
-										</div>
-									</div>
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Product Quantity</label>
-										<div class="col">
-											<input name="product_quantity" id="product-quantity" type="number" class="form-control val-input-lead" placeholder="Input product quantity here ...">
-										</div>
-									</div>
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Base Value</label>
-										<div class="col val-text-param">
-											<p id="estimate-base-value">Rp0,00</p>
-											{{-- <input name="base_value" id="base-value" type="number" class="form-control val-input-lead" readonly> --}}
-										</div>
-									</div>
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Target Value</label>
-										<div class="col">
-											<input name="target_value" id="target-value" type="number" class="form-control val-input-lead" placeholder="Input target sales value here ...">
-										</div>
-									</div>
-									<div class="mb-3 row" id="">
-										<label class="col-3 col-form-label">Describe</label>
-										<div class="col">
-											<textarea rows="5" class="form-control val-input-lead" placeholder="Here can be your description" name="lead_describe"></textarea>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="tab-pane @if ($a == 'tab3') active show @endif" id="tabs-notes" role="tabpanel">
-								<div class="mb-3">
-									<h4>Add a Note About This Customer</h4>
-									<textarea name="notes" id="idnotes" class="cnotes"></textarea>
-								</div>
-							</div>
-							<div class="tab-pane @if ($a == 'set') active show @endif" id="tabs-setting"	role="tabpanel">
-								<div class="mb-3">
-                  <div class="form-label">Setting for data view customrt</div>
-									<select type="text" class="form-select val-input-option mb-2" name="view_option" placeholder="Select lead status for now ..." id="select-option-view" value="">
-										<option value="{{ null }}">Select lead status for now ...</option>
-										<option value="MODERATE">Moderate</option>
-										<option value="PRIVATE">Private</option>
-										<option value="PUBLIC">Public</option>
+							<div class="mb-3 row">
+								<label class="col-3 col-form-label custom-label required">Address</label>
+								<div class="col">
+									<select type="text" class="form-select mb-2 " name="addr_province" placeholder="Select province" id="addr-province" value="">
+										<option value="{{ null }}"></option>
+										@foreach ($provincies as $list)
+										<option value="{{ $list->prov_name }}">{{ $list->prov_name }}</option>
+										@endforeach
 									</select>
-									<span id="opt_public" style="display: none;">
-										Other marketers can view data customer including your activities, your leads, your opportunity, and your sales with this customer.
-									</span>
-									<span id="opt_moderate" style="display: none;">
-										Other marketers can view data customer but they can not view activities, your leads, your opportunity, and your sales with this customer.
-									</span>
-									<span id="opt_private" style="display: none;">
-										
-									</span>
+									<select type="text" class="form-select mb-2" name="addr_city" placeholder="Select city" id="addr-city" value="">
+										<option value="{{ null }}"></option>
+									</select>
+									<select type="text" class="form-select mb-2" name="addr_district" placeholder="Select district" id="addr-district" value="">
+										<option value="{{ null }}"></option>
+									</select>
+									<input id="addr-street" name="addr_street" type="text" class="form-control mb-2" placeholder="Street" autocomplete="off">
 								</div>
 							</div>
 						</div>
@@ -445,6 +361,72 @@
 	<script src="{{ asset('plugins/jquery-session/jquery.session.js') }}"></script>
 	<script src="{{ asset('plugins/tom-select/dist/js/tom-select.base.js') }}"></script>
 	<script src="{{ asset('plugins/summernote/summernote-lite.min.js') }}"></script>
+	<script>
+		var select_subcustomer = new TomSelect("#select-subcustomer",{
+			create: true,			
+			valueField: 'id',
+			labelField: 'title',
+			searchField: 'title',
+			render: {
+				option: function(data, escape) {
+					return '<div><span class="title">'+escape(data.title)+'</span></div>';
+				},
+				item: function(data, escape) {
+					return '<div id="select-category">'+escape(data.title)+'</div>';
+				}
+			}
+		});
+		var addr_province = new TomSelect("#addr-province",{
+			create: true,			
+			valueField: 'id',
+			labelField: 'title',
+			searchField: 'title',
+			render: {
+				option: function(data, escape) {
+					return '<div><span class="title">'+escape(data.title)+'</span></div>';
+				},
+				item: function(data, escape) {
+					return '<div id="addr-province">'+escape(data.title)+'</div>';
+				}
+			}
+		});
+		var addr_city = new TomSelect("#addr-city",{
+			create: true,			
+			valueField: 'id',
+			labelField: 'title',
+			searchField: 'title',
+			render: {
+				option: function(data, escape) {
+					return '<div><span class="title">'+escape(data.title)+'</span></div>';
+				},
+				item: function(data, escape) {
+					return '<div id="addr-city">'+escape(data.title)+'</div>';
+				}
+			}
+		});
+		var addr_district = new TomSelect("#addr-district",{
+			create: true,			
+			valueField: 'id',
+			labelField: 'title',
+			searchField: 'title',
+			render: {
+				option: function(data, escape) {
+					return '<div><span class="title">'+escape(data.title)+'</span></div>';
+				},
+				item: function(data, escape) {
+					return '<div id="addr-district">'+escape(data.title)+'</div>';
+				}
+			}
+		});
+		addr_province.on('change',function () {
+			var prov_id = addr_province.getValue();
+			actionGetCity(prov_id);
+		});
+		addr_city.on('change',function () {
+			var city_id = addr_city.getValue();
+			actionGetDistrict(city_id);
+		});
+	</script>
 	<script type="text/javascript">
 		function preventPage(p) {
 			if (p == 1) {
@@ -454,351 +436,66 @@
 				});
 			}
 		}
-	</script>
-	<script>
-		$.typeahead({
-			input: '.js-typeahead',
-			minLength: 1,
-			order: "asc",
-			offset: true,
-			hint: true,
-			source: {
-				customer: {
-					ajax: {
-						headers: {
-							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-						},
-						type: "POST",
-						url: "{{ route('source-data-customer') }}",
-						data: {
-							myKey: "myValue"
-						},
-					}
-				}
-			},
-			callback: {
-				onClick: function() {
-					$('#institution-name').attr('readonly', true);
-					var val1 = $('#institution-name').val();
-				},
-				onCancel: function() {
-					$('#institution-name').attr('readonly', false);
-				}
-			}
-		});
-		$('#addr-district').click(function() {
-			var value_district = document.getElementById('addr-city').value;
-			var value_province = document.getElementById('addr-province').value;
-			autocompleteDistrict(value_district, value_province);
-		});
-		$('#addr-city').click(function() {
-			var value_district = document.getElementById('addr-district').value;
-			var value_province = document.getElementById('addr-province').value;
-			autocompleteCity(value_district, value_province);
-		});
-		$('#addr-province').click(function() {
-			var value_district = document.getElementById('addr-district').value;
-			var value_city = document.getElementById('addr-city').value;
-			autocompleteProvince(value_district, value_city);
-		});
-		// var value_district,value_city;
-		function autocompleteDistrict(value_district, value_province) {
-			$.typeahead({
-				input: '.typeahead-district',
-				minLength: 1,
-				highlight: true,
-				order: "asc",
-				offset: true,
-				hint: true,
-				cache: false,
-				dynamic: true,
-				cancelButton: false,
-				source: {
-					district: {
-						ajax: {
-							headers: {
-								'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-							},
-							type: "POST",
-							url: "{{ route('source-data-district') }}",
-							data: {
-								data_city: value_district,
-								data_province: value_province,
-							},
-						}
-					}
-				},
-				callback: {
-					onClickAfter: function(item) {
-						$('#addr-district').attr('readonly', true);
-					},
-					onCancel: function() {
-						$('#addr-district').attr('readonly', false);
-					},
-				}
-			});
-		}
-		function autocompleteCity(value_district, value_province) {
-			$.typeahead({
-				input: '.typeahead-city',
-				minLength: 1,
-				order: "asc",
-				offset: true,
-				hint: true,
-				cache: false,
-				dynamic: true,
-				cancelButton: false,
-				source: {
-					city: {
-						ajax: {
-							headers: {
-								'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-							},
-							type: "POST",
-							url: "{{ route('source-data-city') }}",
-							data: {
-								data_district: value_district,
-								data_province: value_province,
-							},
-						}
-					}
-				},
-				callback: {
-					onClickAfter: function() {
-						$('#addr-city').attr('readonly', true);
-					},
-				}
-			});
-		}
-		function autocompleteProvince(value_district, value_city) {
-			$.typeahead({
-				input: '.typeahead-province',
-				minLength: 1,
-				order: "asc",
-				offset: true,
-				hint: true,
-				cache: false,
-				dynamic: true,
-				cancelButton: false,
-				source: {
-					city: {
-						ajax: {
-							headers: {
-								'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-							},
-							type: "POST",
-							url: "{{ route('source-data-province') }}",
-							data: {
-								data_district: value_district,
-								data_city: value_city,
-							},
-						}
-					}
-				},
-				callback: {
-					onClickAfter: function() {
-						$('#addr-province').attr('readonly', true);
-					},
-				},
-				debug: true,
-			});
-		}
-
-		function clearAddrDistrict() {
-			$('#addr-district').val("");
-			$('#addr-district').attr('readonly', false);
-		}
-
-		function clearAddrCity() {
-			$('#addr-city').val("");
-			$('#addr-city').attr('readonly', false);
-		}
-
-		function clearAddrProvince() {
-			$('#addr-province').val("");
-			$('#addr-province').attr('readonly', false);
-		}
-	</script>
-	<script>
-		$('.nav-button-tab').click(function () {
-			$('#tab-card-body').show();
-		});
-	</script>
-	<script>
-		$('#button-one').on('click', function() {
-			window.history.replaceState(null, null, "?act=tab1");
-		});
-		$('#button-two').on('click', function() {
-			window.history.replaceState(null, null, "?act=tab2");
-		});
-		$('#button-three').on('click', function() {
-			window.history.replaceState(null, null, "?act=tab3");
-		});
-		$('#button-setting').on('click', function() {
-			window.history.replaceState(null, null, "?act=set");
-		});
-	</script>
-	<script>
-		$('.opt-status').click(function() {
-			var optVal1 = $("input[name='cststatus']:checked").val();
-			if (optVal1 == 'institution') {
-				$('#person-name-area').slideUp();
-				$('#job-position-area').slideUp();
-				$('#person-name').prop('disabled', true);
-				$('#web-name-area').slideDown();
-				$('#web').prop('disabled', false);
-				$('#idperson').prop('disabled', true);
-			} else {
-				$('#person-name-area').slideDown();
-				$('#job-position-area').slideDown();
-				$('#person-name').prop('disabled', false);
-				$('#web-name-area').slideUp();
-				$('#web').prop('disabled', true);
-				$('#idperson').prop('disabled', false);
-			}
-		});
-	</script>
-	<script>
-		$(document).on("click", ".browse", function() {
-			var file = $(this)
-				.parent()
-				.parent()
-				.parent()
-				.find("#inputFile");
-			file.trigger("click");
-		});
-		$('input[class=input_file]').change(function(e) {
-			$('#inputPreview').fadeIn();
-			$('#closeImageProfile').fadeIn();
-			$('#inputAvatar').hide();
-			var fileName = e.target.files[0].name;
-			$("#inputFileName").val(fileName);
-			var reader = new FileReader();
-			reader.onload = function(e) {
-				document.getElementById("inputPreview").src = e.target.result;
-			};
-			reader.readAsDataURL(this.files[0]);
-		});
-		$('#closeImageProfile').on("click", function() {
-			$('#inputPreview').hide();
-			$('#inputAvatar').fadeIn();
-			$('#inputFile').val("");
-			$('#closeImageProfile').hide();
-		});
-	</script>
-	<script>
-		$('#product-quantity').on('input',function () {
-			var productVal;
-			var idproduct = $("#select-product-interest").val();
-			var ctproduct = $("#product-quantity").val();
+		function actionGetCity(id) {  
+			var dataOption_2 = [];  
 			$.ajaxSetup({
 				headers: {
 					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 				}
 			});
-			$.ajax({
+			var response = $.ajax({
 				type: 'POST',
-				url: "{{ route('ajaxlink-product-value') }}",
-				data: {id:idproduct,cnt:ctproduct},
+				url: "{{ route('action-get-city-select') }}",
+				async: false,
+				data: {
+					"id": id
+				},
 				success: function(result) {
-					$("#estimate-base-value").html(result);
+					for (let n = 0; n < result.data.length; n++) {
+						dataOption_2.push({
+							id:result.data[n].id,
+							title:result.data[n].title
+						});
+					}
 				}
 			});
-		});
-		$('#select-product-interest').on('change',function () {
-			var productVal;
-			var idproduct = $("#select-product-interest option:selected").val();
-			var ctproduct = $("#product-quantity").val();
+			addr_city.clear();
+			addr_city.clearOptions();
+			addr_city.addOptions(dataOption_2);
+		};
+		function actionGetDistrict(id) {
+			var dataOption_3 = [];  
 			$.ajaxSetup({
 				headers: {
 					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 				}
 			});
-			$.ajax({
+			var response = $.ajax({
 				type: 'POST',
-				url: "{{ route('ajaxlink-product-value') }}",
-				data: {id:idproduct,cnt:ctproduct},
+				url: "{{ route('action-get-district-select') }}",
+				async: false,
+				data: {
+					"id": id
+				},
 				success: function(result) {
-					$("#estimate-base-value").html(result);
+					for (let n = 0; n < result.data.length; n++) {
+						dataOption_3.push({
+							id:result.data[n].id,
+							title:result.data[n].title
+						});
+					}
 				}
 			});
-		});
-		
-	</script>
-	<script>
-		$(document).ready(function() {
-			$('#idnotes').summernote({
-				height: 150,
-				codemirror: {
-					theme: 'monokai'
-				},
-			});
-			$('#idnotes').on('summernote.change', function(we, contents, $editable) {
-				var inData = $('#idnotes').summernote('code');
-				localStorage.setItem('noteData',inData);
-			});
-			var outdata = localStorage.getItem('noteData');
-			$('#idnotes').summernote('pasteHTML', outdata);
-		});
-
+			addr_district.clear();
+			addr_district.clearOptions();
+			addr_district.addOptions(dataOption_3);
+		};
 	</script>
 	<script>
 		$(document).ready(function() {
 			$('#formContent1').submit(function(e) {
 				e.preventDefault();
 				var formData = new FormData(this);
-				formData.append('notes', $('#idnotes').summernote('code'));
-				var leadArr = [
-					formData.get('lead_title'),formData.get('lead_status'),formData.get('product_interest'),
-					formData.get('product_quantity'),formData.get('lead_notes'),formData.get('estimate_close')
-				];
-				if (formData.get('lead_title') != "") {
-					var strErr = [];
-					var keyInputs = ["Lead Titles","Lead Status","Product Interest", "Product quatity", "Lead Notes","Estimate Close"];
-					for (let i = 0; i < leadArr.length; i++) {
-						if (leadArr[i] == "") {
-							strErr[i] = keyInputs[i];
-						}
-					}
-					if (strErr.length > 0) {
-						var str = strErr.join(', ');
-						var strVal = str.substring(1); 
-						$.alert({
-							type: 'red',
-							title: 'Error Input',
-							content: 'If you want create lead, columns '+strVal+' can not gift null value.',
-							animateFromElement: false,
-							animation: 'opacity',
-							closeAnimation: 'opacity'
-						});
-					}else{
-						$.ajaxSetup({
-							headers: {
-								'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-							}
-						});
-						$.ajax({
-							type: 'POST',
-							url: "{{ route('store-lead-data') }}",
-							data: formData,
-							cache: false,
-							contentType: false,
-							processData: false,
-							success: function(result) {
-								if (result == true) {
-									$.alert({
-										type: 'green',
-										title: 'Success',
-										content: 'Data stored in database.',
-										animateFromElement: false,
-										animation: 'opacity',
-										closeAnimation: 'opacity'
-									});
-								}
-							}
-						});
-					}
-				}
 				$.ajaxSetup({
 					headers: {
 						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -806,20 +503,34 @@
 				});
 				$.ajax({
 					type: 'POST',
-					url: "{{ route('store-customer') }}",
+					url: "{{ route('store-contact') }}",
 					data: formData,
 					cache: false,
 					contentType: false,
 					processData: false,
 					success: function(result) {
-						if (result == true) {
-							$.alert({
+						if (result.param == true) {
+							$.confirm({
 								type: 'green',
 								title: 'Success',
 								content: 'Data stored in database.',
 								animateFromElement: false,
 								animation: 'opacity',
-								closeAnimation: 'opacity'
+								closeAnimation: 'opacity',
+								buttons: {
+									goToCustomer:{
+										text:"Go To Customer",
+										action:function () {  
+											window.location.href = "{{ url('customer/contacts/detail') }}/"+result.idcnt;
+										}
+									}
+								}
+							});
+						}else{
+							$.alert({
+								title: 'Warning.',
+								content: result.msg,
+								type: 'red',
 							});
 						}
 					}
@@ -875,108 +586,6 @@
 		});
 		$(document).on('click', '.btn-close-three', function() {
 			$(this).parents('div.input-group').remove();
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			var el;
-			window.TomSelect && (new TomSelect(el = document.getElementById('select-tags'), {
-				copyClassesToDropdown: false,
-				dropdownClass: 'dropdown-menu ts-dropdown',
-				optionClass: 'dropdown-item',
-				controlInput: '<input>',
-				render: {
-					item: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-					option: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-				},
-			}));
-		});
-		document.addEventListener("DOMContentLoaded", function() {
-			var el;
-			window.TomSelect && (new TomSelect(el = document.getElementById('select-lead-status'), {
-				copyClassesToDropdown: false,
-				dropdownClass: 'dropdown-menu ts-dropdown',
-				optionClass: 'dropdown-item',
-				controlInput: '<input>',
-				render: {
-					item: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-					option: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-				},
-			}));
-		});
-		document.addEventListener("DOMContentLoaded", function() {
-			var el;
-			window.TomSelect && (new TomSelect(el = document.getElementById('select-product-interest'), {
-				copyClassesToDropdown: false,
-				dropdownClass: 'dropdown-menu ts-dropdown',
-				optionClass: 'dropdown-item',
-				controlInput: '<input>',
-				render: {
-					item: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-					option: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-				},
-			}));
-		});
-		document.addEventListener("DOMContentLoaded", function() {
-			var el;
-			window.TomSelect && (new TomSelect(el = document.getElementById('select-option-view'), {
-				copyClassesToDropdown: false,
-				dropdownClass: 'dropdown-menu ts-dropdown',
-				optionClass: 'dropdown-item',
-				controlInput: '<input>',
-				render: {
-					item: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-					option: function(data, escape) {
-						if (data.customProperties) {
-							return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +
-								escape(data.text) + '</div>';
-						}
-						return '<div>' + escape(data.text) + '</div>';
-					},
-				},
-			}));
 		});
 	</script>
 @endpush

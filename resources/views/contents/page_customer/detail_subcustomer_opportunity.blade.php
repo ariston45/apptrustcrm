@@ -7,7 +7,7 @@ Customer
 @endsection
 @section('pagetitle')
 <div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->ins_name }}</h4>
+<h4 class="page-title">Customer : {{ $company->cst_name }}</h4>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -19,6 +19,14 @@ Customer
 		<div class="card-header card-header-custom card-header-light">
 			<h3 class="card-title">Detail Customer</h3>
 			<div class="card-actions" style="padding-right: 10px;">
+				<a href="{{ url('customer/create-new-opportunity-cst') }}/{{ $id }}">
+					<button class="btn btn-sm btn-default btn-pill" style="vertical-align: middle;">
+						<div style="font-weight: 700;">
+							<i class="ri-add-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
+							Create
+						</div>
+					</button>
+				</a>
 				<a href="{{ url('customer') }}">
 					<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 						<div style="font-weight: 700;">
@@ -29,12 +37,12 @@ Customer
 			</div>
 		</div>
 		<div class="row g-0">
-			@include('contents.page_customer.detail_customer_menu',['id' => $id])
+			@include('contents.page_customer.detail_subcustomer_menu',['id' => $id])
 			<div id="" class="col d-flex flex-column">
 				<div class="card-body">
 					<div class="row mb-2">
 						<div class="col">
-							<h2 align="left">Activities</h2>
+							<h2 align="left">Opportunities</h2>
 						</div>
 						<div class="col-auto">
 							<div align="right">
@@ -43,207 +51,26 @@ Customer
 						</div>
 					</div>
 					<div class="row mb-3">
-						<div class="col-xl-8 mb-sm-2 mb-xl-0">
-							<div id="calender"></div>			
-						</div>
-						<div id="act-detail-no-display" class="col-xl-4" style="display: true;">
-							<div class="card bg-muted-lt" style="min-height: 390px;">
-								<div class="card-body p-0 d-flex flex-column justify-content-center">
-									<div style="text-align: center;">No Data View</div>
-								</div>
-							</div>
-						</div>
-						<div id="act-detail-display" class="col-xl-4" style="display: none;">
-							<div class="card bg-muted-lt" style="min-height: 390px;">
-								<div class="card-body p-2">
-									<div class="row">
-										<div class="col-11">
-											<div class="row pb-2">
-												<div class="col-md-5 col-xl-12">
-													<strong>Customer</strong>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-customer">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div class="col-md-5 col-xl-12">
-													<strong>Activity</strong>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-type">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div	div class="col-md-5 col-xl-12">
-													<strong>Due Date</strong>
-												</div>
-												<div	div class="col-auto">
-													<span id="value-act-due-date">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div class="col-md-5 col-xl-12">
-													<strong>Assign</strong>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-assign">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div class="col-md-5 col-xl-12">
-													<strong>Team</strong>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-team">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div class="col-md-5 col-xl-12">
-													<strong>PIC</strong>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-personal">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div class="col-md-5 col-xl-12">
-													<strong>Completion</strong>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-completion">-</span>
-												</div>
-											</div>
-											<div class="row pb-2">
-												<div class="col-12">
-													<u><strong>Information Describe : </strong></u>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-describe">-</span>
-												</div>
-												<div class="col-12">
-													<u><strong>Information Result : </strong></u>
-												</div>
-												<div class="col-auto">
-													<span id="value-act-result">-</span>
-												</div>
-											</div>
-										</div>
-										<div class="col p-0">
-											<div class="col-auto ms-auto" style="text-align: right;float: right;">
-												<button class="badge text-muted bg-transparent pt-0" onclick="actionResetDetailCalender()"><i class="ri-close-circle-fill icon"></i></button>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
+						<div id="table-default" class="">
+							<table class="table custom-datatables" id="opportunity-table" style="width: 100%;">
+								<thead>
+									<tr>
+										{{-- <th></th> --}}
+										<th style="width: 40%;">Project Title</th>
+										<th style="text-align: center; width: 25%;">Customer</th>
+										<th style="text-align: center; width: 10%;">Status</th>
+										<th style="text-align: center; width: 15%;">Salesperson</th>
+										<th style="text-align: center; width: 10%">Menus</th>
+									</tr>
+								</thead>
+								<tbody class="table-tbody"></tbody>
+							</table>
 						</div>
 					</div>
 					<div id="row">
-						<div class="col-12">
-							<div id="init-page-activities" class="row mb-2">
-								<em class="col text-muted lh-base mb-1"><i>Activities</i></em>
-								<div class="col-auto">
-									<input type="hidden" id="param-code-status" name="code_status" value="act_total" readonly>
-								</div>
-							</div>
-							<div id="contact-area" class="row">
-								<div class="col-6 col-sm-4 col-md-2 col-xl py-3 pt-1 pb-2">
-									<a href="#init-page-activities" id="id-btn-act_total" class="btn btn-square bg-dark-lt" style="display: inherit;" onclick="actionLoadActivities('act_total')">
-										<div id="id-total-activities">{{ $cnt_total }}</div>
-										<div><i class="ri-database-line" style="vertical-align: bottom;"></i> Total</div>
-									</a>
-								</div>
-								@php
-									$count_activity = null;
-								@endphp
-								@foreach ($activity_type as $list)
-								@if ($list->aat_type_code == 'act_todo')
-									@php
-										$count_activity = $cnt_todo;
-									@endphp
-								@elseif ($list->aat_type_code == 'act_phone')
-									@php
-										$count_activity = $cnt_phone;
-									@endphp
-								@elseif ($list->aat_type_code == 'act_email')
-									@php
-										$count_activity = $cnt_email;
-									@endphp
-								@elseif ($list->aat_type_code == 'act_visit')
-									@php
-										$count_activity = $cnt_visit;
-									@endphp
-								@elseif ($list->aat_type_code == 'act_poc')
-									@php
-										$count_activity = $cnt_poc;
-									@endphp
-								@elseif ($list->aat_type_code == 'act_webinar')
-									@php
-										$count_activity = $cnt_webinar;
-									@endphp
-								@elseif ($list->aat_type_code == 'act_video_call')
-									@php
-										$count_activity = $cnt_video_call;
-									@endphp	
-								@endif
-								<div class="col-6 col-sm-4 col-md-2 col-xl py-3 pt-1 pb-2">
-									<a href="#init-page-activities" id="id-btn-{{ $list->aat_type_code }}" class="{{ $list->aat_custom_class_2 }}" style="display: inherit;" onclick="actionLoadActivities('{{ $list->aat_type_code }}')">
-										<div id="id-{{ $list->aat_type_code }}">{{ $count_activity }}</div>
-										<div> <i class="{{ $list->aat_icon }}" style="vertical-align: bottom;"></i> {{ $list->aat_type_name }}</div>
-									</a>
-								</div>
-								@endforeach
-							</div>
-							<div class="col-12 mb-3">
-								<div class="table table-default">
-									<table class="table custom-datatables" id="activity-table" style="width: 100%;">
-										<thead>
-											<tr>
-												{{-- <th></th> --}}
-												<th style="width: 5%;"></th>
-												<th style="text-align: center; width: 15%;">Due date</th>
-												<th style="text-align: center; width: 8%;">Activity</th>
-												<th style="text-align: center; width: 15%;">Customer</th>
-												<th style="text-align: center; width: 31%;">Info</th>
-												<th style="text-align: center; width: 15%;">Project</th>
-												{{-- <th style="text-align: center; width: 15%;">Assign</th> --}}
-												<th style="text-align: center; width: 9%;">Completion</th>
-											</tr>
-										</thead>
-										<tbody class="table-tbody"></tbody>
-									</table>
-								</div>
-							</div>
-						</div>
+						
 					</div>
 				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<div id="modal-change-activity-status" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Change Activity Status</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
-			</div>
-			<div class="modal-body p-3">
-				<form id="formContent2" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
-					@csrf
-					<input type="hidden" id="activity_id_i" name="act_id" value="">
-					<select type="text" class="form-select ts-input-custom" name="status" id="select-act-status" value="">
-						<option value="{{ null }}">{{ null }}</option>
-						<option value="beready">Beready</option>
-						<option value="running">Running</option>
-						<option value="finished">Finish</option>
-					</select>
-				</form>
-			</div>
-			<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
-				<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-				<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent2"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
 			</div>
 		</div>
 	</div>
@@ -284,19 +111,10 @@ Customer
 		padding-bottom: 6px;
 		text-align: left;
 	}
+
 	.table tr:nth-child(even){background-color: #f2f2f2;}
+
 	.table tr:hover {background-color: #ddd;}
-	.ts-control{
-		padding-bottom: 0.28rem;
-		padding-top: 0.28rem;
-		padding-left: 0.39rem;
-	}
-	.ts-wraper{
-		
-	}
-	.ts-input-custom{
-		min-height: 0.53rem;
-	}
 </style>
 @endpush
 @push('script')
@@ -306,27 +124,50 @@ Customer
 <script src="{{ asset('plugins/tinymce/tinymce.min.js') }}"></script>
 <script src="{{ asset('plugins/fullcalender-scheduler/dist/index.global.js') }}"></script>
 <script src="{{ asset('plugins/litepicker/bundle/index.umd.min.js') }}"></script>
-{{-- Variables --}}
 <script>
-var select_act_status = new TomSelect("#select-act-status",{
-	persist: false,
-	createOnBlur: true,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+$('#myTable_filter input').addClass('form-control custom-datatables-filter');
+$('#myTable_length select').addClass('form-control form-select custom-datatables-leght');
+function mainDataLeads() {
+	var id = "{{ $id }}";
+	$('#opportunity-table').DataTable({
+		processing: true,serverSide: true,responsive: true,
+		pageLength: 15,
+		lengthMenu: [ [15, 30, 60, -1], [15, 30, 60, "All"] ],
+		language: {
+			lengthMenu : "Show  _MENU_",
+			search: "Find Opportunity"
 		},
-		item: function(data, escape) {
-			return '<div id="select-act-status">'+escape(data.title)+'</div>';
-		}
-	}
-});
+		ajax: {
+			'url': '{!! route("source-opportunities-cst") !!}',
+			'type': 'POST',
+			'data': {
+				'_token': '{{ csrf_token() }}',
+				'id' : id
+			}
+		},
+		columnDefs: [
+			{
+				"targets": 2, 
+        "className": "text-center",
+			},
+			{
+				"targets": 3, 
+        "className": "text-center",
+			}
+		],
+		order:[[0,'asc']],
+		columns: [
+			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
+			{data: 'title', name: 'title', orderable: true, searchable: true },
+			{data: 'customer', name: 'customer', orderable: true, searchable: true },
+			{data: 'status', name: 'status', orderable: true, searchable: true },
+			// {data: 'datein', name: 'datein', orderable: true, searchable: true },
+			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
+			{data: 'menu', name: 'menu', orderable: false, searchable: false },
+		]
+	});	
+}
 </script>
-{{-- fullcalender --}}
-{{-- ============================================================ --}}
 <script>
 function actionViewMiniDetail(id) {  
 	$('#act-detail-no-display').hide();
@@ -395,13 +236,12 @@ function mainDataActivity(type_act,status_act) {
 			search: "Find Activity"
 		},
 		ajax: {
-			'url': '{!! route("source-data-activity-cst") !!}',
+			'url': '{!! route("source-data-activity") !!}',
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',
 				'act_status' : status_act,
-				'act_param': type_act,
-				'cst_id': '{{ $id }}'
+				'act_param': type_act
 			}
 		},
 		columnDefs: [
@@ -524,133 +364,8 @@ function actionResetDetailCalender() {
 	$('#act-detail-display').hide();  
 	$('#act-detail-no-display').fadeIn();
 };
-function actionGetDataActivity(id) {
-	var data ='';  
-	$.ajaxSetup({
-		headers: {
-			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-		}
-	});
-	var response = $.ajax({
-		type: 'POST',
-		url: "{{ route('lead-activities-detail') }}",
-		async: false,
-		data: {
-			"id": id
-		},
-		success: function(result) {
-			data = result;
-		}
-	});
-	return data;
-}
-function actionChangeStatusAct(id,status) {  
-	$('#modal-change-activity-status').modal('toggle');
-	var res_act = actionGetDataActivity(id);
-	$('#activity_id_i').val(res_act.act_id);
-	select_act_status.setValue([res_act.actstatus]);
-};
 </script>
 <script>
-mainDataActivity('act_total','all_status');
-</script>
-<script>
-$(document).ready(function() {
-	$('#formContent2').submit(function(e) {
-		e.preventDefault();
-		var formData2 = new FormData(this);
-		$.ajaxSetup({
-			headers: {
-				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		});
-		$.ajax({
-			type: 'POST',
-			url: "{{ route('update-status-lead-activities') }}",
-			data: formData2,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: function(result) {
-				if (result.param == true) {
-					$.alert({
-						type: 'green',
-						title: 'Success',
-						content: 'Data already updated.',
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-					actionLoadActivities('act-total');
-				}else{
-					$.alert({
-						type: 'red',
-						title: 'Something error!',
-						content: result.message,
-						animateFromElement: false,
-						animation: 'opacity',
-						closeAnimation: 'opacity'
-					});
-				}
-			}
-		});
-	});
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-	var now = '{{ date("Y-m-d") }}';
-	var calendarEl = document.getElementById('calender');
-	var calendar = new FullCalendar.Calendar(calendarEl, {
-		schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-		themeSystem: 'bootstrap5',
-		initialDate: now,
-		height: 390,
-		editable: true,
-		selectable: true,
-		nowIndicator: true,
-		dayMaxEventRows: true,
-		aspectRatio: 1,
-		scrollTime: '00:00',
-		headerToolbar: {
-			left: 'today prev,next',
-			center: 'title',
-			right: 'dayGridMonth,timeGridWeek,resourceTimelineDay'
-		},
-		initialView: 'dayGridMonth',
-		views: {
-			timeGrid: {
-				dayMaxEventRows: 4 // adjust to 6 only for timeGridWeek/timeGridDay
-			}
-		},
-		dateClick: function(info) {
-		},
-		eventClick: function(info) {
-			actionViewMiniDetail(info.event.id);
-		},
-		resourceGroupField: 'activity',
-		resources: [
-			{ id: 'a', title: 'todo', eventColor: '#00A4B6'},
-			{ id: 'b', title: 'Phone', eventColor: '#1EAD4E' },
-			{ id: 'c', title: 'Email', eventColor: '#0D6DB6'},
-			{ id: 'd', title: 'Visit', eventColor: '#F29833'},
-			{ id: 'e', title: 'POC', eventColor:'#E72E3C'},
-			{ id: 'f', title: 'Video Call', eventColor: '#0C9BD8'},
-			{ id: 'g', title: 'Webinar', eventColor: '#96509A'},
-		],
-		events: function (fetchInfo, successCallback, failureCallback) {
-			var startDate = fetchInfo.start;
-			var endDate = fetchInfo.end;
-			var eventData = sourceDataActivityCalender(startDate,endDate);
-			successCallback(eventData);
-		},
-		eventTimeFormat: {
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: false
-		}
-	});
-	calendar.render();
-});
+mainDataLeads();
 </script>
 @endpush

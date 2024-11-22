@@ -2,6 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use DataTables;
+use Auth;
+use DB;
+#
+use Illuminate\Support\Carbon;
+use Str;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+#
 use App\Models\Act_activity;
 use App\Models\Act_activity_access;
 use App\Models\Addr_city;
@@ -10,19 +22,16 @@ use App\Models\Addr_province;
 use App\Models\Addr_subdistrict;
 use App\Models\Cst_contact_email;
 use App\Models\Cst_contact_mobile;
-use App\Models\Cst_customer;
 use App\Models\Cst_institution;
 use App\Models\Cst_personal;
 use App\Models\Prs_lead;
-use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Prs_salesperson;
 use App\Models\Prs_accessrule;
-use DataTables;
-use Str;
-use Auth;
-use DB;
-use Illuminate\Support\Carbon;
+#
+use App\Models\Prs_salesperson;
+use App\Models\Cst_customer;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+#
 class DataController extends Controller
 {
 	# <===========================================================================================================================================================>
@@ -268,10 +277,7 @@ class DataController extends Controller
 			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
 			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
 			<a class="dropdown-item" href="'.url('customer/detail-customer/'.$colect_data->cst_id.'?extpg=information').'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Customer</a>
-			<a class="dropdown-item" href="'.url('customer/contacts/'.$colect_data->cst_id).'"><i class="ri-user-add-line" style="margin-right:6px;"></i>Contacts</a>
-			<a class="dropdown-item" href="'.url('customer/detail-customer-activities/'.$colect_data->cst_id.'?extpg=activities').'"><i class="ri-run-line" style="margin-right:6px;"></i>Activities</a>
-      <a class="dropdown-item" href="#"><i class="ri-filter-2-line" style="margin-right:6px;"></i>Leads</a>
-			<a class="dropdown-item" href="#"><i class="ri-briefcase-2-line" style="margin-right:6px;"></i>Opportunities</a>
+			<a class="dropdown-item" href="'.url('customer/contacts/'.$colect_data->ins_id).'"><i class="ri-user-add-line" style="margin-right:6px;"></i>Contacts</a>
       </div>
 			</div>
 			';
@@ -279,11 +285,11 @@ class DataController extends Controller
 		->addColumn('number_index', function () {
 			return 1;
 		})
-		->addColumn('name', function ($colect_data) {
-			return $colect_data->cst_name;
+		->addColumn('customer', function ($colect_data) {
+			return '<di><b><a href="' . url('customer/detail-customer/' . $colect_data->ins_id . '?extpg=information') . '">' . $colect_data->ins_name . '</a></b></di>';
 		})
-		->addColumn('institution', function ($colect_data) {
-			return $colect_data->ins_name;
+		->addColumn('sub_customer', function ($colect_data) {
+			return '<di><a href="' . url('customer/detail-sub-customer/' . $colect_data->cst_id . '?extpg=information') . '">' . $colect_data->cst_name . '</a></di>';
 		})
 		->addColumn('category', function ($colect_data) {
 			if ($colect_data->cst_business_field == null) {
@@ -294,9 +300,9 @@ class DataController extends Controller
 		})
 		->addColumn('city', function ($colect_data) {
 			if ($colect_data->loc_city == null) {
-				return "<div style='text-align:center;'>-</div>";
+				return "<div style='text-align:left;'>-</div>";
 			} else {
-				return "<div style='text-align:center;'>".$colect_data->loc_city."</div>";
+				return "<div style='text-align:left;'>".$colect_data->loc_city."</div>";
 			}
 		})
 		->addColumn('datein', function ($colect_data) {
@@ -309,8 +315,76 @@ class DataController extends Controller
 		->addColumn('lastactive', function ($colect_data) {
 			return "-";
 		})
-		->rawColumns(['number_index','menu', 'name','ins_name', 'category', 'city', 'datein','lastactive'])
+		->rawColumns(['number_index','menu', 'customer', 'sub_customer', 'category', 'city', 'datein','lastactive'])
 		->make('true');
+	}
+	public function sourceDataSubCustomer(Request $request)
+	{
+		$colect_data = Cst_institution::join('cst_customers', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
+		->leftJoin(
+			DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
+			function ($join) {
+				$join->on('cst_customers.cst_id', '=', 'locations.loc_cst_id');
+			}
+		)
+		->where('ins_id',$request->id)
+		->select('ins_id', 'cst_id', 'ins_name', 'cst_name', 'ins_business_field', 'cst_business_field', 'loc_city', 'cst_customers.created_at')
+		->get();
+		$num = 1;
+		return DataTables::of($colect_data)
+			->addIndexColumn()
+			->addColumn('empty_str', function ($k) {
+				return '';
+			})
+			->addColumn('menu', function ($colect_data) {
+				return '
+			<div style="text-align:center;">
+			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
+			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
+			<a class="dropdown-item" href="' . url('customer/detail-customer/' . $colect_data->cst_id . '?extpg=information') . '"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Customer</a>
+			<a class="dropdown-item" href="' . url('customer/contacts/' . $colect_data->cst_id) . '"><i class="ri-user-add-line" style="margin-right:6px;"></i>Contacts</a>
+			<a class="dropdown-item" href="' . url('customer/detail-customer-activities/' . $colect_data->cst_id . '?extpg=activities') . '"><i class="ri-run-line" style="margin-right:6px;"></i>Activities</a>
+      <a class="dropdown-item" href="#"><i class="ri-filter-2-line" style="margin-right:6px;"></i>Leads</a>
+			<a class="dropdown-item" href="#"><i class="ri-briefcase-2-line" style="margin-right:6px;"></i>Opportunities</a>
+      </div>
+			</div>
+			';
+			})
+			->addColumn('number_index', function () {
+				return 1;
+			})
+			->addColumn('customer', function ($colect_data) {
+				return '<di><b><a href="' . url('customer/detail-customer/' . $colect_data->ins_id . '?extpg=information') . '">' . $colect_data->ins_name . '</a></b></di>';
+			})
+			->addColumn('sub_customer', function ($colect_data) {
+				return '<di><a href="' . url('customer/detail-sub-customer/' . $colect_data->cst_id . '?extpg=information') . '">' . $colect_data->cst_name . '</a></di>';
+			})
+			->addColumn('category', function ($colect_data) {
+				if ($colect_data->cst_business_field == null) {
+					return "<div style='text-align:center;'>-</div>";
+				} else {
+					return $colect_data->cst_business_field;
+				}
+			})
+			->addColumn('city', function ($colect_data) {
+				if ($colect_data->loc_city == null) {
+					return "<div style='text-align:left;'>-</div>";
+				} else {
+					return "<div style='text-align:left;'>" . $colect_data->loc_city . "</div>";
+				}
+			})
+			->addColumn('datein', function ($colect_data) {
+				if ($colect_data->created_at == null) {
+					return '<div style="text-align:left;">-</div>';
+				} else {
+					return '<div style="text-align:left;">' . $colect_data->created_at . '</div>';
+				}
+			})
+			->addColumn('lastactive', function ($colect_data) {
+				return "-";
+			})
+			->rawColumns(['number_index', 'menu', 'customer', 'sub_customer', 'category', 'city', 'datein', 'lastactive'])
+			->make('true');
 	}
 	public function sourceDataContact(Request $request)
 	{
@@ -638,6 +712,7 @@ class DataController extends Controller
 	{
 		$id = $request->id;
 		$user = Auth::user();
+		$ids_cst = getIdSubcustomer($id);
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
@@ -652,7 +727,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('cst_id','=', $id)
+			->whereIn('cst_id', $ids_cst)
 			->where('lds_stage_opr','false')
 			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
 			->get();
@@ -676,7 +751,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('lds_customer',$id)
+			->whereIn('lds_customer', $ids_cst)
 			->whereIn('lds_id',$lead_id)
 			->where('lds_stage_opr','false')
 			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
@@ -726,7 +801,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('lds_customer',$id)
+			->whereIn('lds_customer', $ids_cst)
 			->where('lds_stage_opr','false')
 			->whereIn('lds_id',$lead_ids)
 			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
@@ -751,7 +826,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('lds_customer',$id)
+			->whereIn('lds_customer', $ids_cst)
 			->where('lds_stage_opr','false')
 			->whereIn('lds_id',$lead_ids)
 			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
@@ -1200,6 +1275,7 @@ class DataController extends Controller
 	public function sourceDataOpportunitiesCst(Request $request)
 	{
 		$customer_id = $request->id;
+		$cst_ids = getIdSubcustomer($customer_id);
 		$user = Auth::user();
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$lead_data = Prs_accessrule::where('slm_rules','master')->select('slm_lead')->get()->toArray();
@@ -1223,7 +1299,7 @@ class DataController extends Controller
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
-			->where('lds_customer',$request->id)
+			->whereIn('lds_customer', $cst_ids)
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
@@ -1252,7 +1328,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('lds_customer',$request->id)
+			->whereIn('lds_customer', $cst_ids)
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
@@ -1282,7 +1358,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('lds_customer',$request->id)
+			->whereIn('lds_customer', $cst_ids)
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
@@ -1311,7 +1387,7 @@ class DataController extends Controller
 				function($join){
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
-			->where('lds_customer',$request->id)
+			->whereIn('lds_customer', $cst_ids)
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
@@ -1340,7 +1416,7 @@ class DataController extends Controller
 			function($join){
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
-			->where('lds_customer',$request->id)
+			->whereIn('lds_customer', $cst_ids)
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
@@ -2111,7 +2187,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('act_run_status',$status)
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
@@ -2121,7 +2197,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_run_status',$status)
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
@@ -2140,7 +2216,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_run_status',$status)
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
@@ -2151,7 +2227,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_run_status',$status)
@@ -2172,7 +2248,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_run_status',$status)
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
@@ -2183,7 +2259,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_run_status',$status)
@@ -2203,7 +2279,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('act_id',$act_id)
 				->whereIn('act_run_status',$status)
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
@@ -2214,7 +2290,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('act_id',$act_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_run_status',$status)
@@ -2234,7 +2310,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('act_id',$act_id)
 				->whereIn('act_run_status',$status)
 				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
@@ -2245,7 +2321,7 @@ class DataController extends Controller
 				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_cst', $request->cst_id)
+				->where('cst_institution', $request->cst_id)
 				->whereIn('act_id',$act_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_run_status',$status)
@@ -2304,6 +2380,216 @@ class DataController extends Controller
 		})
 		->rawColumns(['number_index','title', 'customer','due_date', 'assign','menu','info','complete','project'])
 		->make('true');
+	}
+	public function sourceActivitiesSubCst(Request $request)
+	{
+		if (in_array($request->act_status, array("beready", "running", "finished"))) {
+			$status = [
+				0 => $request->act_status
+			];
+		} else {
+			$status = array("beready", "running", "finished");
+		}
+		$user = Auth::user();
+		if (checkRule(array('ADM', 'AGM', 'MGR.PAS'))) {
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			} else {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->where('act_activity_types.aat_type_code', $request->act_param)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			}
+		} elseif (checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['colaborator', 'master', 'manager'])->where('slm_user', $user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_id = array_unique($lds_idr);
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('prs_leads.lds_id', $lds_id)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			} else {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('prs_leads.lds_id', $lds_id)
+					->where('act_activity_types.aat_type_code', $request->act_param)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			}
+			// die('stop');
+		} elseif (checkRule(array('STF'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['colaborator', 'master'])->where('slm_user', $user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lds_id = array_unique($lds_idr);
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('prs_leads.lds_id', $lds_id)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			} else {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('prs_leads.lds_id', $lds_id)
+					->where('act_activity_types.aat_type_code', $request->act_param)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			}
+		} elseif (checkRule(array('MGR.TCH'))) {
+			$tech_team = checkTeamMgr($user->id);
+			$act_access = Act_activity_access::whereIn('acs_user_id', $tech_team)->select('acs_act_id')->get();
+			$act_id = array();
+			foreach ($act_access as $key => $value) {
+				$act_id[$key] = $value->acs_act_id;
+			}
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('act_id', $act_id)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			} else {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('act_id', $act_id)
+					->where('act_activity_types.aat_type_code', $request->act_param)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			}
+		} elseif (checkRule(array('STF.TCH'))) {
+			$tech_team = checkTeamMgr($user->id);
+			$act_access = Act_activity_access::where('acs_user_id', $user->id)->select('acs_act_id')->get();
+			$act_id = array();
+			foreach ($act_access as $key => $value) {
+				$act_id[$key] = $value->acs_act_id;
+			}
+			if ($request->act_param == 'act_total' || $request->act_param == null) {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('act_id', $act_id)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			} else {
+				$colect_data = Act_activity::join('cst_customers', 'act_activities.act_cst', '=', 'cst_customers.cst_id')
+				->join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->where('act_cst', $request->cst_id)
+					->whereIn('act_id', $act_id)
+					->where('act_activity_types.aat_type_code', $request->act_param)
+					->whereIn('act_run_status', $status)
+					->select('act_id', 'cst_name', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
+					->orderByDesc('act_activities.act_task_times_due')
+					->get();
+			}
+		}
+		return DataTables::of($colect_data)
+			->addIndexColumn()
+			->addColumn('empty_str', function ($k) {
+				return '';
+			})
+			->addColumn('menu', function ($colect_data) {
+				return '
+			<div style="text-align:center;">
+			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
+			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
+			<a class="dropdown-item" href="' . url('activity/activity-detail') . '/' . $colect_data->act_id . '"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Activity</a>
+      </div>
+			</div>
+			';
+			})
+			->addColumn('number_index', function () {
+				return 1;
+			})
+			->addColumn('title', function ($colect_data) {
+				return '<style="text-align:center;">' . $colect_data->aat_type_button . '</style>';
+			})
+			->addColumn('customer', function ($colect_data) {
+				return $colect_data->cst_name;
+			})
+			->addColumn('due_date', function ($colect_data) {
+				$date = date('d/M Y, h:i a', strtotime($colect_data->act_task_times_due));
+				return $date;
+			})
+			->addColumn('assign', function ($colect_data) {
+				return '<style="text-align:center;">' . $colect_data->assign . '</style>';
+			})
+			->addColumn('info', function ($colect_data) {
+				return '<style="text-align:center;">' . $colect_data->act_todo_result . '</style>';
+			})
+			->addColumn('complete', function ($colect_data) {
+				$btn = '';
+				if ($colect_data->act_run_status == 'beready') {
+					$btn .= '<button class="badge bg-blue text-blue-fg" onclick="actionChangeStatusAct(\'' . $colect_data->act_id . '\',\'beready\')">Beready</button>';
+				} else if ($colect_data->act_run_status == 'running') {
+					$btn .= '<button class="badge bg-green text-green-fg" onclick="actionChangeStatusAct(\'' . $colect_data->act_id . '\',\'running\')">Running</button>';
+				} else {
+					$btn .= '<button class="badge bg-muted-lt" onclick="actionChangeStatusAct(\'' . $colect_data->act_id . '\',\'finished\')">Finish</button>';
+				}
+				return $btn;
+			})
+			->addColumn('project', function ($colect_data) {
+				return $colect_data->lds_title;
+			})
+			->rawColumns(['number_index', 'title', 'customer', 'due_date', 'assign', 'menu', 'info', 'complete', 'project'])
+			->make('true');
 	}
 	public function sourceActivitiesUser(Request $request)
 	{
@@ -2398,6 +2684,98 @@ class DataController extends Controller
 	/* Tags:... */
 	public function exportStaffReport(Request $request)
 	{
-		
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+		// Menulis data ke dalam spreadsheet
+		# column definition
+		$sheet->getColumnDimension('A')->setAutoSize(true);
+		$sheet->getColumnDimension('B')->setAutoSize(true);
+		$sheet->getColumnDimension('C')->setAutoSize(true);
+		$sheet->getColumnDimension('D')->setAutoSize(true);
+		$sheet->getColumnDimension('E')->setAutoSize(true);
+		$sheet->getColumnDimension('F')->setAutoSize(true);
+		$sheet->getColumnDimension('G')->setAutoSize(true);
+		$sheet->getColumnDimension('H')->setAutoSize(true);
+		$sheet->getColumnDimension('I')->setAutoSize(true);
+		$sheet->getColumnDimension('J')->setAutoSize(true);
+		$sheet->getColumnDimension('K')->setAutoSize(true);
+		$sheet->getColumnDimension('L')->setAutoSize(true);
+		$sheet->getColumnDimension('M')->setAutoSize(true);
+		$sheet->getColumnDimension('N')->setAutoSize(true);
+		$sheet->getColumnDimension('O')->setAutoSize(true);
+		$sheet->getColumnDimension('P')->setAutoSize(true);
+		$sheet->getColumnDimension('Q')->setAutoSize(true);
+		$sheet->getColumnDimension('R')->setAutoSize(true);
+		$sheet->getColumnDimension('S')->setAutoSize(true);
+		$sheet->getColumnDimension('T')->setAutoSize(true);
+		$sheet->getColumnDimension('U')->setAutoSize(true);
+		$sheet->getColumnDimension('V')->setAutoSize(true);
+		$sheet->getColumnDimension('W')->setAutoSize(true);
+		# Title
+		$sheet->mergeCells('A1:A2');
+		$sheet->mergeCells('B1:B2');
+		$sheet->mergeCells('C1:C2');
+		$sheet->mergeCells('D1:F1');
+		$sheet->mergeCells('G1:L1');
+		$sheet->mergeCells('M1:M2');
+		$sheet->mergeCells('N1:T1');
+		$sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('A1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+		$sheet->getStyle('B1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+		$sheet->getStyle('C1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('C1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+		$sheet->getStyle('D1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('G1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('M1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+		$sheet->getStyle('M1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('N1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+		$sheet->getStyle('A1:T2')->getFont()->setBold(true)->getColor()->setARGB('e6e7e9');
+		$sheet->getStyle('A1:T2')->getFill()->getStartColor()->setARGB('39656b');
+		$sheet->getStyle('A1:T2')->getFill()->setFillType(Fill::FILL_SOLID);
+		$sheet->getStyle('A1:T2')->getBorders()->applyFromArray([
+			'allBorders' => [
+				'borderStyle' => Border::BORDER_MEDIUM,  // Jenis border: tipis
+				'color' => ['argb' => 'e6e7e9'],     // Warna border: hitam dalam format ARGB
+			],
+		]);
+
+		$sheet->setCellValue('A1', 'No');
+		$sheet->setCellValue('B1', 'Nama');
+		$sheet->setCellValue('C1', 'Team');
+		$sheet->setCellValue('D1', 'Lead');
+		$sheet->setCellValue('D2', 'Propecting');
+		$sheet->setCellValue('E2', 'Qualifying');
+		$sheet->setCellValue('F2', 'Opportunity');
+		$sheet->setCellValue('G2', 'Dead End');
+		$sheet->setCellValue('H1', 'Opportunity');
+		$sheet->setCellValue('H2', 'Presentation');
+		$sheet->setCellValue('I2', 'POC');
+		$sheet->setCellValue('J2', 'Proposal');
+		$sheet->setCellValue('K2', 'Presentation');
+		$sheet->setCellValue('L2', 'Win');
+		$sheet->setCellValue('M2', 'Lose');
+		$sheet->setCellValue('N1', 'Purchase');
+		$sheet->setCellValue('M1', 'Activity');
+		$sheet->setCellValue('M2', 'To Do');
+		$sheet->setCellValue('N2', 'Phone');
+		$sheet->setCellValue('O2', 'Email');
+		$sheet->setCellValue('P2', 'Visit');
+		$sheet->setCellValue('Q2', 'POC');
+		$sheet->setCellValue('R2', 'Webinar');
+		$sheet->setCellValue('T2', 'Video Call');
+		# Test
+		$sheet->setCellValue('A3', '1');
+		$sheet->setCellValue('B3', 'John Doe');
+		$sheet->setCellValue('C3', 'johndoe@example.com');
+		// Menyimpan file spreadsheet ke dalam format XLSX
+		$writer = new Xlsx($spreadsheet);
+		$fileName = 'data-export.xlsx';
+		$filePath = storage_path($fileName);
+
+		$writer->save($filePath);
+
+		// Mengunduh file
+		return response()->download($filePath)->deleteFileAfterSend(true);
 	}
 }

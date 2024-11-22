@@ -16,7 +16,7 @@ opportunitys
 	<div class="card-header card-header-custom card-header-light">
 		<h3 class="card-title">Purchase Order</h3>
 		<div class="card-actions" style="padding-right: 10px;">
-			<a href="{{ url('opportunities') }}">
+			<a href="{{ url('purchased') }}">
 				<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 					<div style="font-weight: 700;">
 						<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
