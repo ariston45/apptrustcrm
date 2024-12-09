@@ -71,14 +71,19 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('create-subcustomer', [CustomerController::class, 'viewFormCreateSubCustomer']);
 		Route::get('create-contact/{id}', [CustomerController::class, 'viewFormCreateCustomerFixed']);
 		Route::post('store-contact', [CustomerController::class, 'storeContact'])->name('store-contact');
+		Route::post('update-contact', [CustomerController::class, 'updateContact'])->name('update-contact');
 		Route::post('store-customer', [CustomerController::class, 'storeCreateCustomer'])->name('store-customer');
+		Route::post('store-subcustomer', [CustomerController::class, 'storeCreateSubCustomer'])->name('store-subcustomer');
 		Route::post('source-data-individu', [CustomerController::class, 'sourceDataInvidu'])->name('source-data-individu');
 		Route::get('detail-customer/person-update/{id}', [CustomerController::class, 'updatePersonData']);
-		Route::get('detail-customer/company-update/{id}', [CustomerController::class, 'updateCompanyData']);
-		Route::patch('store-update-customer', [CustomerController::class, 'storeUpdateCustomer'])->name('store-update-customer');
+		Route::get('detail-customer/update/{id}', [CustomerController::class, 'updateCustomerData']);
+		Route::get('detail-sub-customer/update/{id}', [CustomerController::class, 'updateSubcustomerData']);
+		Route::post('store-update-customer', [CustomerController::class, 'storeUpdateCustomer'])->name('store-update-customer');
+		Route::post('store-update-subcustomer', [CustomerController::class, 'storeUpdateSubCustomer'])->name('store-update-subcustomer');
 		Route::patch('store-update-personal', [CustomerController::class, 'storeUpdatePersonal'])->name('store-update-personal');
 		Route::get('contacts/{idcs}', [CustomerController::class, 'viewContactCustomer']);
 		Route::get('contacts/detail/{id}', [CustomerController::class, 'viewContactDetail']);
+		Route::get('contacts/update/{id}', [CustomerController::class, 'updatePersonData']);
 		Route::post('contacts/delete/{id}', [CustomerController::class, 'deleteContact']);
 		#####
 		Route::match(['get', 'post'], 'source-data-lead-cst', [DataController::class, 'sourceDataLeadCst'])->name('source-data-lead-cst');
@@ -86,6 +91,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::match(['get', 'post'],'person-contact',[CustomerController::class,'actionGetPersonContact'])->name('customer-person-contact');
 		Route::match(['get', 'post'],'activity-pic-contact',[CustomerController::class,'actionGeActivitiContact'])->name('activity-pic-contact');
 		Route::match(['get', 'post'],'sub-customers',[CustomerController::class,'actionGetSubcustomer'])->name('sub-customers');
+		Route::match(['get', 'post'], 'get-customers', [CustomerController::class, 'actionGetCustomer'])->name('get-customers');
 		Route::match(['get', 'post'],'action-get-city-select',[CustomerController::class,'actionGetCity'])->name('action-get-city-select');
 		Route::match(['get', 'post'],'action-get-district-select',[CustomerController::class,'actionGetDistrict'])->name('action-get-district-select');
 		Route::match(['get', 'post'],'source-data-contact',[DataController::class, 'sourceDataContact'])->name('source-data-contact');

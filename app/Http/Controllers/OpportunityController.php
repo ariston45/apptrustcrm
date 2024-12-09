@@ -17,6 +17,7 @@ use App\Models\Opr_value_other;
 use App\Models\Ord_purchase;
 use App\Models\Prs_accessrule;
 use App\Models\Prs_lead_value;
+use App\Models\Cst_institution;
 use App\Models\Prs_qualification;
 use App\Models\Prs_salesperson;
 use App\Models\User;
@@ -46,7 +47,9 @@ class OpportunityController extends Controller
 		->whereNotIn('level',['ADM','AGM'])
 		->get();
 		$opportunity = Opr_opportunity::join('prs_leads','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
-		->where('opr_id',$id_oppor)->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes','opr_estimate_closing')->first();
+		->where('opr_id',$id_oppor)
+		->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer', 'lds_subcustomer','opr_status','opr_notes','opr_estimate_closing')
+		->first();
 		$closing = date('d M/Y',strtotime($opportunity->opr_estimate_closing));
 		$id_lead = $opportunity->lds_id;
 		$opportunity_value = Opr_value::where('ovs_opr_id',$id_oppor)->first();
@@ -60,22 +63,15 @@ class OpportunityController extends Controller
 			];
 		}
 		$lead_contacts = Prs_contact::join('cst_personals', 'prs_contacts.plc_attendant_id','=', 'cst_personals.cnt_id')
-		->leftjoin('cst_customers','cst_customers.cst_id','=','cst_personals.cnt_cst_id')
-		->select('plc_id', 'cnt_id', 'plc_lead_id', 'plc_attendant_id', 'plc_attendant_rule', 'plc_customer_id', 'cnt_fullname', 'cnt_company_position','cst_name')
+		->leftjoin('cst_institutions','cst_institutions.ins_id','=','cst_personals.cnt_cst_id')
+		// ->select('plc_id', 'cnt_id', 'plc_lead_id', 'plc_attendant_id', 'plc_attendant_rule', 'plc_customer_id', 'cnt_fullname', 'cnt_company_position','cst_name')
 		->where('plc_lead_id',$id_lead)
 		->get();
-		$cst_ids= explode(',',$opportunity->lds_customer);
-		$lead_customer = Cst_customer::join('cst_institutions','cst_customers.cst_institution','=', 'cst_institutions.ins_id')
-		->whereIn('cst_id', $cst_ids)
-		->select('cst_id','ins_id', 'ins_name', 'cst_name', 'view_option')
-		->get();
-		$opportunity_customer = array();
-		foreach ($lead_customer as $key => $value) {
-			$opportunity_customer[$key] = $value->cst_name;
-		}
-		$all_contacts = Cst_personal::join('cst_customers','cst_personals.cnt_cst_id','=','cst_customers.cst_id')
-		->whereIn('cnt_cst_id', $cst_ids)
-		->select('cnt_id','cnt_fullname','cst_name')
+		$lead_customer = Cst_institution::where('ins_id', $opportunity->lds_customer)->first();
+		$lead_subcustomer = Cst_customer::where('cst_id', $opportunity->lds_subcustomer)->first();
+		$all_contacts = Cst_personal::leftjoin('cst_institutions','cst_personals.cnt_cst_id','=', 'cst_institutions.ins_id')
+		->where('cnt_cst_id', $opportunity->lds_customer)
+		->select('cnt_id','cnt_fullname','ins_name', 'cnt_company_position')
 		->get();
 		$institution_names = Str::title($lead_customer->first()->ins_name);
 		// $status = Prs_lead_statuses::where('pls_code_name','!=','dead_end')->get();
@@ -160,7 +156,7 @@ class OpportunityController extends Controller
 		$purchase_data = Ord_purchase::where("pur_oppr_id",$id_oppor)->first();
 		return view('contents.page_opportunity.opportunity_detail',compact(
 			'id_oppor','id_lead','user','users','status','opportunity','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
-			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opportunity_customer','opr_product','opr_other','opr_value','other_value','tab_row',
+			'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value','opportunity_value','opr_product','opr_other','opr_value','other_value','tab_row','lead_subcustomer',
 			'all_contacts','lead_contacts','activity_type','allproduct','closing','purchase_data'
 		));
 	}
@@ -221,7 +217,7 @@ class OpportunityController extends Controller
 	public function storeNewOpportunity(Request $request)
 	{
 		$opr_id = genIdOpportunity();
-		$date_now = date('Y-m-d');
+		$date_now = date('Y-m-d H:i:s');
 		$est_closing = date('Y-m-d h:i:s', strtotime($request->est_closing_date));
 		$lead = Prs_lead::where('lds_id',$request->lead_id)->select('lds_title')->first();
 		$data_opr = [
@@ -254,7 +250,7 @@ class OpportunityController extends Controller
 	{
 		$opr_id = genIdOpportunity();
 		$est_closing = date('Y-m-d h:i:s', strtotime($request->est_closing_date));
-		$date_now = date('Y-m-d');
+		$date_now = date('Y-m-d H:i:s');
 		$data_opr = [
 			'opr_id' => $opr_id,
 			'opr_lead_id' => $request->lead_id,

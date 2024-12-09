@@ -28,8 +28,8 @@
 				<table class="table custom-datatables" id="customer-table" style="width: 100%;">
 					<thead>
 						<tr>
-							<th style="width: 40%;">Project Title</th>
 							<th style="width: 25%;">Customer</th>
+							<th style="width: 40%;">Project Title</th>
 							<th style="width: 10%;">Status</th>
 							<th style="width: 15%;">Salesperson</th>
 							<th style="text-align:center; width: 5%">Menus</th>
@@ -221,8 +221,8 @@ function mainDataPurchase() {
 		order:[[0,'asc']],
 		columns: [
 			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
-			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'customer', name: 'customer', orderable: true, searchable: true },
+			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
 			// {data: 'datein', name: 'datein', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },

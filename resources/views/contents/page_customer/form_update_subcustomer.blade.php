@@ -22,7 +22,7 @@
 	<div class="col-md-12 ">
 		<div class="card" style="margin-bottom:150px;">
 			<div class="card-header card-header-custom card-header-light">
-				<h3 class="card-title">Create Customer</h3>
+				<h3 class="card-title">Update Data Customer</h3>
 				<div class="card-actions" style="padding-right: 10px;">
 					<button id="btn-action-reset" class="btn btn-sm btn-light btn-pill" style="vertical-align: middle;">
 						<div style="font-weight: 700;">
@@ -34,7 +34,7 @@
 							<i class="ri-save-3-line icon" style="font-size: 14px;margin-right: 4px; vertical-align: middle;"></i> Save
 						</div>
 					</button>
-					<a href="{{ url('customer') }}">
+					<a href="{{ url('customer/detail-sub-customer/'.$id.'?extpg=information') }}">
 						<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
 							<div style="font-weight: 700;">
 								<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
@@ -46,25 +46,6 @@
 			<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="Get" autocomplete="off">
 				@csrf
 				<div class="card-body card-body-custom">
-					<div class="row align-items-center mb-3">
-						<div class="col">
-						</div>
-					</div>
-					<div class="row" style="text-align: right;">
-						<div class="col-xl-12 mb-2">
-							<div class="mb-3 row">
-								<div class="col">
-									<a href="{{ url('customer/create-customer') }}" class="btn btn-light btn-square" style="width: 300px;"> 
-										<i class="ri-community-fill icon" style="font-size: 16px; vertical-align: middle; margin-right: 4px;"></i> Customer 
-									</a>
-									<a href="{{ url('customer/create-subcustomer') }}" class="btn btn-primary btn-square" style="width: 300px;"> 
-										<i class="ri-community-fill icon" style="font-size: 16px; vertical-align: middle; margin-right: 4px;"></i> Sub-Customer 
-									</a>
-								</div>
-							</div>
-							<hr class="mb-3 mt-0">
-						</div>
-					</div>
 					<div class="row">
 						<div class="col-xl-2">
 							<input type="file" name="fileImage" class="input_file" id="inputFile" style="display: none;">
@@ -80,18 +61,27 @@
 						</div>
 						<div class="col-xl-6">
 							<div class="mb-3 row" id="person-name-area">
-								<label class="col-3 col-form-label custom-label">Name</label>
+								<label class="col-3 col-form-label custom-label">Name Sub Customer</label>
 								<div class="col">
-									<input name="customer_name" id="customer-name" type="text" class="form-control" aria-describedby="customerName" placeholder="Name of person" value="{{ old('customer_name') }}" >
+									<input name="subcustomer_name" id="customer-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of customer" value="{{ $customer->cst_name }}" >
+									<input type="hidden" name="cststatus" value="CUSTOMER">
+									<input type="hidden" name="cst_id" value="{{ $id }}">
+									@if ($location != null)
+									<input type="hidden" name="loc_id" value="{{ $location->loc_id }}">
+									@else
+									<input type="hidden" name="loc_id" value="">
+									@endif
 								</div>
 							</div>
 							<div class="mb-3 row" id="institution-category-area">
-								<label class="col-3 col-form-label custom-label">Select Customer</label>
+								<label class="col-3 col-form-label custom-label">Business Field </label>
 								<div class="col">
-									<select type="text" class="form-select select-categories" name="customer" placeholder="Select subcustomer" id="select-customer" value="" onclick="actionGetCustomer()">
-										<option value="{{ null }}"></option>
-										@foreach ($institution as $list)
-											<option value="{{ $list->ins_id }}">{{ $list->ins_name }}</option>
+									<select type="text" class="form-select select-categories" name="business_category[]" multiple placeholder="Select business categories of company" id="select-category" value="">
+										@foreach ($fields as $list)
+											<option value="{{ $list }}" selected>{{ $list }}</option>
+										@endforeach
+										@foreach ($business_fields as $item)
+										<option value="{{ $item->bus_name }}">{{ $item->bus_name }}</option>
 										@endforeach
 									</select>
 								</div>
@@ -99,40 +89,88 @@
 							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label" style="text-align: right;">Mobile</label>
 								<div id="multiInputMobile" class="col">
-									<div class="input-group">
+									@if (count($mobile)>0)
+										@foreach ($mobile as $key => $list)
+											@if ($key === 0)
+											<div class="input-group mb-2">
+												<input name="mobile[]" id="mobile" type="text" class="form-control" value="{{ $list }}" placeholder="Type mobile number or whatsapp number here">
+												<button id="add-button-one" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+											</div>
+											@else
+											<div class="input-group mb-2">
+												<input name="mobile[]" id="mobile" type="text" class="form-control" value="{{ $list }}" placeholder="Type mobile number or whatsapp number here">
+												<button class="btn btn-addons btn-close-one" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											</div>
+											@endif
+										@endforeach
+									@else
+									<div class="input-group mb-2">
 										<input name="mobile[]" id="mobile" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here">
 										<button id="add-button-one" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
 									</div>
+									@endif
 								</div>
 							</div>
 							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label">Phone</label>
 								<div id="multiInputPhone" class="col">
-									<div class="input-group">
+									@if (count($phone)>0)
+										@foreach ($phone as $key => $list)
+											@if ($key === 0)
+											<div class="input-group mb-2">
+												<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button id="add-button-two" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+											</div>
+											@else
+											<div class="input-group mb-2">
+												<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button class="btn btn-addons btn-close-two" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											</div>	
+											@endif
+										@endforeach
+									@else
+									<div class="input-group mb-2">
 										<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here">
 										<button id="add-button-two" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
 									</div>
+									@endif
 								</div>
 							</div>
 							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label">Email</label>
 								<div id="multiInputEmail" class="col">
-									<div class="input-group">
-										<input name="email[]" id="email" type="email" class="form-control" placeholder="Type email address here">
-										<button id="add-button-three" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
-									</div>
+									@if (count($email)>0)
+										@foreach ($email as $key => $list)
+											@if ($key === 0)
+											<div class="input-group mb-2">
+												<input name="email[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button id="add-button-three" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+											</div>
+											@else
+											<div class="input-group mb-2">
+												<input name="email[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button class="btn btn-addons btn-close-three" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											</div>	
+											@endif
+										@endforeach
+									@else
+										<div class="input-group mb-2">
+											<input name="email[]" id="email" type="email" class="form-control" placeholder="Type email address here">
+											<button id="add-button-three" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+										</div>	
+									@endif
 								</div>
 							</div>
 							<div class="mb-3 row" id="web-name-area">
 								<label class="col-3 col-form-label custom-label">Web</label>
 								<div class="col">
-									<input name="web" id="web" type="text" class="form-control" placeholder="Type web address here" >
+									<input name="web" id="web" type="text" class="form-control" value="{{ $customer->cst_web }}" placeholder="Type web address here" >
 								</div>
 							</div>
 							<div class="mb-3 row" id="web-name-area">
 								<label class="col-3 col-form-label custom-label">Notes</label>
 								<div class="col">
-									<textarea rows="5" class="form-control" placeholder="Here can be your description"></textarea>
+									<textarea rows="5" class="form-control" name="note" placeholder="Here can be your description">{{ $customer->cst_notes }}</textarea>
 								</div>
 							</div>
 						</div>
@@ -140,19 +178,44 @@
 							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label required">Address</label>
 								<div class="col">
-									<select type="text" class="form-select mb-2 " name="addr_province" placeholder="Select province" id="addr-province" value="">
-										<option value="{{ null }}"></option>
-										@foreach ($provincies as $list)
-										<option value="{{ $list->prov_name }}">{{ $list->prov_name }}</option>
-										@endforeach
-									</select>
+									@if (isset($location))
+										<select type="text" class="form-select mb-2 " name="addr_province" placeholder="Select province" id="addr-province" value="">
+											<option value="{{ $location->loc_province }}">{{ $location->loc_province }}</option>
+											@foreach ($provincies as $list)
+											<option value="{{ $list->prov_name }}">{{ $list->prov_name }}</option>
+											@endforeach
+										</select>
+									@else
+										<select type="text" class="form-select mb-2 " name="addr_province" placeholder="Select province" id="addr-province" value="">
+											<option value="{{ null }}"></option>
+											@foreach ($provincies as $list)
+											<option value="{{ $list->prov_name }}">{{ $list->prov_name }}</option>
+											@endforeach
+										</select>
+									@endif
+									@if (isset($location))
+									<select type="text" class="form-select mb-2" name="addr_city" placeholder="Select city" id="addr-city" value="">
+										<option value="{{ $location->loc_city }}">{{ $location->loc_city }}</option>
+									</select>	
+									@else
 									<select type="text" class="form-select mb-2" name="addr_city" placeholder="Select city" id="addr-city" value="">
 										<option value="{{ null }}"></option>
 									</select>
+									@endif
+									@if (isset($location))
+									<select type="text" class="form-select mb-2" name="addr_district" placeholder="Select district" id="addr-district" value="">
+										<option value="{{ $location->loc_district }}">{{ $location->loc_district }}</option>
+									</select>	
+									@else
 									<select type="text" class="form-select mb-2" name="addr_district" placeholder="Select district" id="addr-district" value="">
 										<option value="{{ null }}"></option>
 									</select>
-									<input id="addr-street" name="addr_street" type="text" class="form-control mb-2" placeholder="Street" autocomplete="off">
+									@endif
+									@if (isset($location))
+									<input id="addr-street" name="addr_street" type="text" class="form-control mb-2" placeholder="Street" value="{{ $location->loc_street }}" autocomplete="off">	
+									@else
+									<input id="addr-street" name="addr_street" type="text" class="form-control mb-2" placeholder="Street" autocomplete="off">	
+									@endif
 								</div>
 							</div>
 						</div>
@@ -343,11 +406,9 @@
 <script src="{{ asset('plugins/summernote/summernote-lite.min.js') }}"></script>
 {{-- Varibles --}}
 <script>
-
-</script>
-<script>
 /************************************************************************/
-var select_customer = new TomSelect("#select-customer",{
+
+var select_category = new TomSelect("#select-category",{
 	create: true,			
 	valueField: 'id',
 	labelField: 'title',
@@ -357,7 +418,7 @@ var select_customer = new TomSelect("#select-customer",{
 			return '<div><span class="title">'+escape(data.title)+'</span></div>';
 		},
 		item: function(data, escape) {
-			return '<div id="select-companies">'+escape(data.title)+'</div>';
+			return '<div id="select-category">'+escape(data.title)+'</div>';
 		}
 	}
 });
@@ -426,7 +487,7 @@ function preventPage(p) {
 		});
 	}
 }
-function actionGetCustomer() {
+function actionGetCustomer(id) {
 	var dataOption_1 = [];  
 	$.ajaxSetup({
 		headers: {
@@ -435,7 +496,7 @@ function actionGetCustomer() {
 	});
 	var response = $.ajax({
 		type: 'POST',
-		url: "{{ route('get-customers') }}",
+		url: "{{ route('sub-customers') }}",
 		async: false,
 		data: {
 			"id": id
@@ -514,9 +575,49 @@ $('.nav-button-tab').click(function () {
 	$('#tab-card-body').show();
 });
 /***********************************************************************/
-
+$('#button-one').on('click', function() {
+	window.history.replaceState(null, null, "?act=tab1");
+});
+$('#button-two').on('click', function() {
+	window.history.replaceState(null, null, "?act=tab2");
+});
+$('#button-three').on('click', function() {
+	window.history.replaceState(null, null, "?act=tab3");
+});
+$('#button-setting').on('click', function() {
+	window.history.replaceState(null, null, "?act=set");
+});
 /***********************************************************************/
-
+$('.opt-status').click(function() {
+	var optVal1 = $("input[name='cststatus']:checked").val();
+	if (optVal1 == 'institution') {
+		$('#person-name-area').slideUp();
+		$('#job-position-area').slideUp();
+		$('#person-name').prop('disabled',true);
+		$('#institution-category-area').slideDown();
+		$('#select-category-ts-control').prop('disabled',false);
+		$('#web-name-area').slideDown();
+		$('#web').prop('disabled', false);
+		$('#idperson').prop('disabled', true);
+	} else {
+		$('#person-name-area').slideDown();
+		$('#person-name').prop('disabled', false);
+		$('#institution-category-area').slideUp();
+		$('#select-category-ts-control').prop('disabled',true);
+		$('#job-position-area').slideDown();
+		$('#web-name-area').slideUp();
+		$('#web').prop('disabled', true);
+		$('#idperson').prop('disabled', false);
+	}
+});
+$(document).on("click", ".browse", function() {
+	var file = $(this)
+	.parent()
+	.parent()
+	.parent()
+	.find("#inputFile");
+	file.trigger("click");
+});
 /****************************************************************************/
 $('input[class=input_file]').change(function(e) {
 	$('#inputPreview').fadeIn();
@@ -538,13 +639,91 @@ $('#closeImageProfile').on("click", function() {
 	$('#closeImageProfile').hide();
 });
 /****************************************************************************/
-
+$('#product-quantity').on('input',function () {
+	var productVal;
+	var idproduct = $("#select-product-interest").val();
+	var ctproduct = $("#product-quantity").val();
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('ajaxlink-product-value') }}",
+		data: {id:idproduct,cnt:ctproduct},
+		success: function(result) {
+			$("#estimate-base-value").html(result);
+		}
+	});
+});
 /****************************************************************************/
-
+$('#select-product-interest').on('change',function () {
+	var productVal;
+	var idproduct = $("#select-product-interest option:selected").val();
+	var ctproduct = $("#product-quantity").val();
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('ajaxlink-product-value') }}",
+		data: {id:idproduct,cnt:ctproduct},
+		success: function(result) {
+			$("#estimate-base-value").html(result);
+		}
+	});
+});
 /****************************************************************************/
-
+$('#select-option-view').on('change', function () {
+	var idoption = $("#select-option-view option:selected").val();
+	if (idoption == 'PUBLIC') {
+		$('#opt_public').fadeIn();
+		$('#opt_moderate').hide();
+		$('#opt_private').hide();
+	}else if(idoption == 'MODERATE'){
+		$('#opt_moderate').fadeIn();
+		$('#opt_public').hide();
+		$('#opt_private').hide();
+	}else if(idoption == 'PRIVATE'){
+		$('#opt_private').fadeIn();
+		$('#opt_public').hide();
+		$('#opt_moderate').hide();
+	}
+});
 /****************************************************************************/
-
+$('#add-button-one').click(function() {
+	$("#multiInputMobile").append(
+	'<div class="input-group mt-2">' +
+	'<input name="mobile[]" id="phone" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here">' +
+	'<button class="btn btn-addons btn-close-one" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
+	);
+});
+$(document).on('click', '.btn-close-one', function() {
+	$(this).parents('div.input-group').remove();
+});
+$('#add-button-two').click(function() {
+	$("#multiInputPhone").append(
+	'<div class="input-group mt-2">' +
+	'<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here">' +
+	'<button class="btn btn-addons btn-close-two" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
+	);
+});
+$(document).on('click', '.btn-close-two', function() {
+	$(this).parents('div.input-group').remove();
+});
+$('#add-button-three').click(function() {
+	$("#multiInputEmail").append(
+	'<div class="input-group mt-2">' +
+	'<input name="email[]" id="email" type="text" class="form-control" placeholder="Type email address here">' +
+	'<button class="btn btn-addons btn-close-three" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
+	);
+});
+$(document).on('click', '.btn-close-three', function() {
+	$(this).parents('div.input-group').remove();
+});
 </script>
 {{-- Form Action --}}
 <script>
@@ -554,7 +733,7 @@ $(document).ready(function() {
 		var formData = new FormData(this);
 		$.ajax({
 			type: 'POST',
-			url: "{{ route('store-subcustomer') }}",
+			url: "{{ route('store-update-subcustomer') }}",
 			data: formData,
 			cache: false,
 			contentType: false,
@@ -572,13 +751,7 @@ $(document).ready(function() {
 							goToLead:{
 								text:"Go To Customer",
 								action:function () {  
-									window.location.href = "{{ url('customer/detail-subcustomer') }}/"+result.cst_id+"?extpg=information";
-								}
-							},
-							createAgain:{
-								text:"Create Again",
-								action:function () {  
-									window.location.reload();
+									window.location.href = "{{ url('customer/detail-sub-customer') }}/"+result.id+"?extpg=information";
 								}
 							}
 						}

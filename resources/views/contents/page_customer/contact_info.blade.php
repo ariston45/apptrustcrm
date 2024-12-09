@@ -38,7 +38,7 @@ Customer
 						</div>
 						<div class="col-auto ms-auto">
 							<div align="right">
-								<a href="">
+								<a href="{{ url('customer/contacts/update/'.$id) }}">
 									<button class="btn btn-sm btn-success">
 										<i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit
 									</button>
@@ -52,7 +52,7 @@ Customer
 						</div>
 						<div class="col-4"> 
 							<h2>{{ $data_personal->cnt_fullname }}</h2>
-							<span class="text-muted"><strong>{{ $data_personal->cst_name }}</strong></span> <br>
+							<span class="text-muted"><strong>{{ $data_personal->cst_name }}</strong></span>
 							<span class="text-muted">{{ $data_personal->cnt_company_position }}</span>
 						</div>
 						<div class="col ml-3">
@@ -88,7 +88,29 @@ Customer
 									<label><b>Address</b></label>
 								</div>
 								<div class="col-5">
-									{!! $data_personal->cnt_priv_address !!}
+									@if ($data_loc == null)
+										<span class="text-muted">Province : - </span> <br>
+									@else
+										<span class="text-muted">Province : </span> {{ $data_loc->loc_province }} <br>
+									@endif
+									
+									@if ($data_loc == null)
+										<span class="text-muted">City : - </span> <br>
+									@else
+										<span class="text-muted">City : </span> {{ $data_loc->loc_city }} <br>
+									@endif
+
+									@if ($data_loc == null)
+										<span class="text-muted">District : - </span> <br>
+									@else
+										<span class="text-muted">District : </span> {{ $data_loc->loc_district }} <br>
+									@endif
+
+									@if ($data_loc == null)
+										<span class="text-muted">Street : - </span> <br>
+									@else
+										<span class="text-muted">Street : </span> {{ $data_loc->loc_street }} <br>
+									@endif
 								</div>
 							</div>
 							<span class="text-muted"><hr style="margin: 5px;"></span>

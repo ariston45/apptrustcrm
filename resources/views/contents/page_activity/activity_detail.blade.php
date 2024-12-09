@@ -32,8 +32,15 @@ opportunitys
 	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
 		<div class="row mb-1">
 			<div class="col">
-				<h2 class="mb-1"><b>{{ $customer->cst_name }}</b></h2>
-				<div class="page-pretitle-custom mb-2">{{ $customer->ins_name }}</div>
+				<h2 class="mb-1"><b>{{ $customer->ins_name }}</b></h2>
+				<div class="page-pretitle-custom mb-2">
+					Sub Customer : 
+					@if ($subcustomer->cst_name == null)
+						-
+					@else
+						{{ $subcustomer->cst_name }}
+					@endif
+				</div>
 			</div>
 			<div class="col-auto">
 				<div id="area-act-status">
@@ -311,7 +318,7 @@ opportunitys
 									<select type="text" id="select-signed-user-i" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
 										<option value="{{ $main_activity->userid }}">{{ $main_activity->name }}</option>
 										@foreach ($all_user as $list)
-										<option value="{{ $list->id }}">{{ $list->name }}</option>
+										<option value="{{ $list->id }}">{{ $list->name }} - {{ $list->uts_team_name }}</option>
 										@endforeach
 									</select>
 									<button type="button" id="btn-add-team-i" class="badge bg-cyan mt-1 mb-1" onclick="actionViewInputTeamI()">+ Team</button>
@@ -322,7 +329,7 @@ opportunitys
 											@if (in_array($list->id,$team_id_ar))
 											<option value="{{ $list->id }}" selected>{{ $list->name }}</option>
 											@else
-											<option value="{{ $list->id }}">{{ $list->name }}</option>	
+											<option value="{{ $list->id }}">{{ $list->name }} - {{ $list->uts_team_name }}</option>	
 											@endif
 											@endforeach
 										</select>
@@ -416,6 +423,7 @@ opportunitys
 						<input type="hidden" id="lead-status-id" name="lead_status_id" value="{{ $main_activity->lds_status }}" readonly>
 						<input type="hidden" id="lead-id" name="lead_id" value="{{ $main_activity->lds_id }}" readonly>
 						<input type="hidden" id="lead-id" name="customer" value="{{ $main_activity->act_cst }}" readonly>
+						<input type="hidden" id="lead-id" name="subcustomer" value="{{ $main_activity->act_subcst }}" readonly>
 						<div class="col-xl-6 col-md-12">
 							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Date</label>
@@ -447,7 +455,7 @@ opportunitys
 									<select type="text" id="select-assigned-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
 										<option value="{{ $user->id }}">{{ $user->name }}</option>
 										@foreach ($all_user as $list)
-										<option value="{{ $list->id }}">{{ $list->name }}</option>
+										<option value="{{ $list->id }}">{{ $list->name }} - {{ $list->uts_team_name }}</option>
 										@endforeach
 									</select>
 									<button type="button" id="btn-add-team" class="badge mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
@@ -456,7 +464,7 @@ opportunitys
 										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team" value="">
 											<option value="{{ null }}"></option>
 											@foreach ($all_user as $list)
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
+											<option value="{{ $list->id }}">{{ $list->name }} - {{ $list->uts_team_name }}</option>
 											@endforeach
 										</select>
 									</div>
@@ -511,7 +519,7 @@ opportunitys
 	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
 		<div class="modal-content">
 			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Close & Create Activities</h5>
+				<h5 class="modal-title">Close & Create Ticket</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
 			</div>
 			<div class="modal-body p-3">
@@ -521,6 +529,7 @@ opportunitys
 						<input type="hidden" id="lead-status-id" name="lead_status_id" value="{{ $main_activity->lds_status }}" readonly>
 						<input type="hidden" id="lead-id" name="lead_id" value="{{ $main_activity->lds_id }}" readonly>
 						<input type="hidden" id="lead-id" name="customer" value="{{ $main_activity->act_cst }}" readonly>
+						<input type="hidden" id="lead-id" name="subcustomer" value="{{ $main_activity->act_subcst }}" readonly>
 						<div class="col-xl-6 col-md-12">
 							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
 								<label class="col-3 col-form-label">Date</label>
@@ -552,7 +561,7 @@ opportunitys
 									<select type="text" id="select-assigned-user-2st" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
 										<option value="{{ $user->id }}">{{ $user->name }}</option>
 										@foreach ($all_user as $list)
-										<option value="{{ $list->id }}">{{ $list->name }}</option>
+										<option value="{{ $list->id }}">{{ $list->name }} - {{ $list->uts_team_name }}</option>
 										@endforeach
 									</select>
 									<button type="button" id="btn-add-team-2st" class="badge mt-1 mb-1" onclick="actionViewInputTeam2st()">+ Team</button>
@@ -561,7 +570,7 @@ opportunitys
 										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team-2st" value="">
 											<option value="{{ null }}"></option>
 											@foreach ($all_user as $list)
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
+											<option value="{{ $list->id }}">{{ $list->name }} - {{ $list->uts_team_name }}</option>
 											@endforeach
 										</select>
 									</div>
@@ -1108,6 +1117,7 @@ function actionAutoSaveActResult() {
 		if (check2 == 'checkOn') {
 			$('#lbl-autocheck-act-result').html('Saving...');
 			var editorValue2 = tinyMCE.get('textingContent2').getContent();
+			
 			$.ajaxSetup({
 				headers: {
 					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1118,7 +1128,7 @@ function actionAutoSaveActResult() {
 				url: "{{ route('update-result-activity') }}",
 				data: {
 					"id": {{ $id_activity }},
-					"todo_describe": editorValue2
+					"todo_result": editorValue2
 				},
 				async: false,
 				success: function(result) {
@@ -1131,13 +1141,13 @@ function actionAutoSaveActResult() {
 	},5000);
 };
 function actionStorePreActivity(data) {  
-	console.log(data);
+	// console.log(data);
 };
 function actionStorePostActivity(data) {  
-	console.log(data);
+	// console.log(data);
 };
 function actionStoreDescribeAct() {
-	console.log(editorPreActivity);
+	// console.log(editorPreActivity);
 	// alert(1);
 };
 function actionReschedule() { 

@@ -626,16 +626,6 @@ function mainDataActivity(type_act,status_act) {
 				'usr_id': '{{ $id }}'
 			}
 		},
-		columnDefs: [
-			{
-				"targets": 2, 
-				"className": "text-center",
-			},
-			{
-				"targets": 3, 
-				"className": "text-center",
-			}
-		],
 		order:[[0,'asc']],
 		columns: [
 			{data: 'menu', name: 'menu', orderable: false, searchable: false },

@@ -38,7 +38,7 @@ Customer
 						</div>
 						<div class="col-auto ms-auto">
 							<div align="right">
-								<a href="{{ url('customer/detail-customer/company-update/'.$id) }}">
+								<a href="{{ url('customer/detail-sub-customer/update/'.$id) }}">
 									<button class="btn btn-sm btn-success">
 										<i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit
 									</button>
@@ -62,11 +62,7 @@ Customer
 						<div class="col-xl-6 col-sm-12">
 							<div class="form-label info-title-cst"> <strong>Business Field</strong> </div>
 							<span class="text-muted info-text-cst">
-								@if ($company->ins_business_field == null)
-								-
-								@else
-								{{ $company->ins_business_field }}
-								@endif
+								{!! $str_bf !!}
 							</span>
 						</div>
 						<div class="col-xl-6 col-sm-12">
@@ -140,7 +136,7 @@ Customer
 							<div class="form-label"> <strong>Contacts</strong> </div>
 						</div>
 						<div class="col-auto ms-auto">
-							<a href="{{ url('customer/create-customer') }}">
+							<a href="{{ url('customer/create-contact/'.$company->ins_id) }}">
 								<button class="btn btn-sm btn-primary">Add New Contact</button>
 							</a>
 						</div>

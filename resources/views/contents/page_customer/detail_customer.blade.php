@@ -38,7 +38,7 @@ Customer
 						</div>
 						<div class="col-auto ms-auto">
 							<div align="right">
-								<a href="{{ url('customer/detail-customer/company-update/'.$id) }}">
+								<a href="{{ url('customer/detail-customer/update/'.$id) }}">
 									<button class="btn btn-sm btn-success">
 										<i class="ri-edit-2-line" style="margin-right: 5px;"></i> Edit
 									</button>
@@ -62,11 +62,7 @@ Customer
 						<div class="col-xl-6 col-sm-12">
 							<div class="form-label info-title-cst"> <strong>Business Field</strong> </div>
 							<span class="text-muted info-text-cst">
-								@if ($company->cst_business_field == null)
-								-
-								@else
-								{{ $company->cst_business_field }}
-								@endif
+								{!! $str_bf !!}
 							</span>
 						</div>
 						<div class="col-xl-6 col-sm-12">
@@ -117,20 +113,27 @@ Customer
 						<div class="col-xl-6 col-sm-12">
 							<div class="form-label info-title-cst"> <strong>Notes</strong> </div>
 							<span class="text-muted info-text-cst">
-								@if ($company->cst_notes == null)
+								@if ($company->ins_note == null)
 								-
 								@else
-								{!! html_entity_decode($company->cst_notes) !!}
+								{!! html_entity_decode($company->ins_note) !!}
 								@endif
 							</span>
 						</div>
 						<div class="col-xl-6 col-sm-12">
 							<div class="form-label info-title-cst"> <strong>Lastest Project</strong> </div>
 							<span class="text-muted info-text-cst">
-								Salesperson : <br>
-								Project : <br>
-								Status : <br>
-								Closing : <br>
+								@if ($lastproject_data)
+									Salesperson : {{ $lastproject_data->name }}<br>
+									Project : {{ $lastproject_data->title }}<br>
+									Status : {{ $lastproject_data->status }}<br>
+									Closing : {{ date('d-M-Y',strtotime($lastproject_data->close_date))  }}<br>
+								@else
+									Salesperson : -<br>
+									Project : -<br>
+									Status : -<br>
+									Closing : -<br>
+								@endif
 							</span>
 						</div>
 					</div>

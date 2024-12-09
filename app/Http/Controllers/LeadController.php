@@ -13,6 +13,10 @@ use App\Models\Addr_subdistrict;
 use App\Models\Addr_district;
 use App\Models\Addr_province;
 use App\Models\Cst_bussiness_field;
+use App\Models\Cst_contact_email;
+use App\Models\Cst_contact_mobile;
+use App\Models\Cst_contact_phone;
+
 use App\Models\Cst_customer;
 use App\Models\Cst_institution;
 use App\Models\Cst_personal;
@@ -110,15 +114,15 @@ class LeadController extends Controller
 		$base_x = Str::replace(',', '.', $base_val);
 		$target_val =  Str::remove('.',Str::substr($request->target_value,3));
 		$target_x = Str::replace(',', '.', $target_val);
-		$id_cst = getIdCustomer($request->customer);
+		// $id_cst = getIdCustomer($request->customer);
 		if ($request->lead_title != null && $request->customer != null) {
 			# code...
 			$data_lead = [
 				"lds_id" => $id,
 				"lds_title" => $request->lead_title,
 				"lds_status" => 1,
-				"lds_customer" => $id_cst,
-				"lds_subcustomer" => $request->customer, 
+				"lds_customer" => $request->customer,
+				"lds_subcustomer" => $request->sub_customer, 
 			];
 		} else {
 			$err[] = "Data of Project title or Customer Select input is null, please enter the data correctly.";
@@ -405,23 +409,25 @@ class LeadController extends Controller
 		$id_lead = $request->id;
 		$lead = Prs_lead::leftjoin('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
 		->where('lds_id',$id_lead)
-		->select('lds_id','lds_title','lds_status','lds_describe','lds_customer','pls_status_name')
+		->select('lds_id','lds_title','lds_status','lds_describe','lds_customer', 'lds_subcustomer','pls_status_name')
 		->first();
 		$lead_contacts = Prs_contact::join('cst_personals', 'prs_contacts.plc_attendant_id','=', 'cst_personals.cnt_id')
 		->leftjoin('cst_customers','cst_customers.cst_id','=','cst_personals.cnt_cst_id')
 		->select('plc_id', 'plc_lead_id', 'plc_attendant_id', 'plc_attendant_rule', 'plc_customer_id','cnt_id', 'cnt_fullname', 'cnt_company_position','cst_name')
 		->where('plc_lead_id',$id_lead)
 		->get();
-		$cst_ids= explode(',',$lead->lds_customer);
-		$lead_customer = Cst_customer::join('cst_institutions','cst_customers.cst_institution','=', 'cst_institutions.ins_id')
-		->whereIn('cst_id', $cst_ids)
+		// dd($lead_contacts);
+		#***********************
+		$institution_names =Cst_institution::where('ins_id',$lead->lds_customer)->first();
+		$sub_customer = Cst_customer::join('cst_institutions','cst_customers.cst_institution','=', 'cst_institutions.ins_id')
+		->where('cst_id', $lead->lds_subcustomer)
 		->select('cst_id','ins_id', 'ins_name', 'cst_name', 'view_option')
+		->first();
+		#***********************
+		$all_contacts = Cst_personal::join('cst_institutions','cst_personals.cnt_cst_id','=', 'cst_institutions.ins_id')
+		->where('cnt_cst_id', $lead->lds_customer)
 		->get();
-		$all_contacts = Cst_personal::join('cst_customers','cst_personals.cnt_cst_id','=','cst_customers.cst_id')
-		->whereIn('cnt_cst_id', $cst_ids)
-		->select('cnt_id','cnt_fullname','cst_name')
-		->get();
-		$institution_names = str::title($lead_customer->first()->ins_name);
+		// dd($all_contacts);
 		$status = Prs_lead_statuses::where('pls_code_name','!=','dead_end')->get();
 		$lead_value = Prs_lead_value::where('lvs_lead_id',$id_lead)->first();
 		if ($lead_value == null) {
@@ -486,7 +492,7 @@ class LeadController extends Controller
 		return view('contents.page_lead.lead_detail',
 			compact(
 				'user','users','id_lead','status','lead','sales','member_name','team_member_id','tech_name','team_tech_id','sales_selected', 'team_selected',
-				'user_marketing','user_tech','institution_names', 'lead_customer', 'lead_value',
+				'user_marketing','user_tech','institution_names', 'lead_value','sub_customer',
 				'ident_need','ident_budget','all_contacts','lead_contacts','activity_type','principle','checkOppor'
 			)
 		);
@@ -700,7 +706,8 @@ class LeadController extends Controller
 			$person_id = genIdPerson();
 			$data_person = [
 				"cnt_id" => $person_id,
-				"cnt_cst_id" => $request->customer,
+				"cnt_cst_id" => $request->id_cst,
+				"cnt_subcst_id" => $request->id_subcst,
 				"cnt_fullname" => $request->contact,
 				"cnt_nickname" => null,
 				"cnt_company_position" => $request->position,
@@ -712,27 +719,54 @@ class LeadController extends Controller
 				'plc_lead_id' => $request->id,
 				'plc_attendant_id' => $person_id,
 				'plc_attendant_rule' => $request->position,
-				'plc_customer_id' => $request->customer,
+				'plc_customer_id' => $request->id_cst,
 				'created_by' =>$user->id
 			];
 			$actionCreatePerson = Cst_personal::insert($data_person);
 		}
 		$actionCreatePersonLead = Prs_contact::insert($data_person_lead);
-		// $person = Cst_personal::join('cst_customers', 'cst_personals.cnt_cst_id','=', 'cst_customers.cst_id')
-		// ->where('cnt_id', $person_id)
-		// ->select('cnt_id','cst_id','cnt_fullname','cst_name')
-		// ->first();
+		if (ISSET($request->type)) {
+			if ($request->type === 'mobile') {
+				$dt_contact = [
+					'mob_cnt_id' => $person_id,
+					'mob_param' => 'INDIVIDUAL',
+					'mob_label' => null,
+					'mob_number' => $request->textcontact,
+					'created_by' => $user->id,
+				];
+				Cst_contact_mobile::insert($dt_contact);
+			}else if ($request->type === 'telephone') {
+				$dt_contact = [
+					'pho_cnt_id' => $person_id,
+					'pho_param' => 'INDIVIDUAL',
+					'pho_label' => null,
+					'pho_number' => $request->textcontact,
+					'created_by' => $user->id,
+				];
+				Cst_contact_phone::insert($dt_contact);
+			} else if ($request->type === 'email') {
+				$dt_contact = [
+					'eml_cnt_id' => $person_id,
+					'eml_param' => 'INDIVIDUAL',
+					'eml_label' => null,
+					'eml_address' => $request->textcontact,
+					'created_by' => $user->id,
+				];
+				Cst_contact_email::insert($dt_contact);
+			}
+			
+		}
 		$person_contact = Prs_contact::join('cst_personals','prs_contacts.plc_attendant_id','=','cst_personals.cnt_id')
-		->join('cst_customers','prs_contacts.plc_customer_id','=','cst_customers.cst_id')
+		->leftjoin('cst_institutions','prs_contacts.plc_customer_id','=', 'cst_institutions.ins_id')
 		->where('plc_attendant_id',$person_id )
 		->where('plc_lead_id',$request->id)
-		->select('plc_id','plc_attendant_id','cst_name','cnt_fullname', 'plc_customer_id')
+		->select('plc_id','plc_attendant_id','ins_name','cnt_fullname', 'plc_customer_id', 'cnt_company_position')
 		->first();
 		$result = [
 			'param' => true,
 			'contact_id' => $person_contact->plc_id,
 			'personal_id' => $person_contact->plc_attendant_id,
-			'name_cst' => $person_contact->cst_name,
+			'name_cst' => $person_contact->cnt_company_position,
 			'name_cnt' => $person_contact->cnt_fullname,
 			'plc_customer_id' => $person_contact->plc_customer_id,
 		];

@@ -22,7 +22,7 @@
 	<div class="col-md-12 ">
 		<div class="card" style="margin-bottom:150px;">
 			<div class="card-header card-header-custom card-header-light">
-				<h3 class="card-title">Create Customer</h3>
+				<h3 class="card-title">Update Data Customer</h3>
 				<div class="card-actions" style="padding-right: 10px;">
 					<button id="btn-action-reset" class="btn btn-sm btn-light btn-pill" style="vertical-align: middle;">
 						<div style="font-weight: 700;">
@@ -43,16 +43,11 @@
 					</a>
 				</div>
 			</div>
-			<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+			<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="Get" autocomplete="off">
 				@csrf
-				@method('PATCH')
 				<div class="card-body card-body-custom">
-					<div class="row align-items-center mb-3">
-						<div class="col">
-						</div>
-					</div>
 					<div class="row">
-						<div class="col-xl-3 mb-3">
+						<div class="col-xl-2">
 							<input type="file" name="fileImage" class="input_file" id="inputFile" style="display: none;">
 							<input type="hidden" class="input_text" id="inputFileName">
 							<div id="photo-frame" class="browse">
@@ -64,182 +59,188 @@
 							</div>
 							<label class="form-label" style="text-align: center;">Add Image Here</label>
 						</div>
-						<div class="col-xl-9">
-							<div class="mb-3 row" id="institution-name-area">
-								<label class="col-3 col-form-label custom-label">Institution Name</label>
+						<div class="col-xl-6">
+							<div class="mb-3 row" id="person-name-area">
+								<label class="col-3 col-form-label custom-label">Name</label>
 								<div class="col">
-									<input name="institution_name" id="institution-name" type="text" class="form-control" aria-describedby="" placeholder=""value="{{ $company->cst_name }}" >
+									<input name="subcustomer_name" id="customer-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of customer" value="{{ $customer->ins_name }}" >
+									<input type="hidden" name="cststatus" value="SUBCUSTOMER">
+									<input type="hidden" name="cst_id" value="{{ $id }}">
+									@if ($location != null)
+									<input type="hidden" name="loc_id" value="{{ $location->loc_id }}">
+									@else
+									<input type="hidden" name="loc_id" value="">
+									@endif
 								</div>
 							</div>
 							<div class="mb-3 row" id="institution-category-area">
-								<label class="col-3 col-form-label custom-label">Business Field Categories</label>
+								<label class="col-3 col-form-label custom-label">Business Field </label>
 								<div class="col">
-									<select type="text" class="form-select select-categories" name="business_category" id="select-category" value="">
-										<option value="{{ $company->cst_business_field }}">{{ $company->cst_business_field }}</option>
+									<select type="text" class="form-select select-categories" name="business_category[]" multiple placeholder="Select business categories of company" id="select-category" value="">
+										@foreach ($fields as $list)
+											<option value="{{ $list }}" selected>{{ $list }}</option>
+										@endforeach
 										@foreach ($business_fields as $item)
 										<option value="{{ $item->bus_name }}">{{ $item->bus_name }}</option>
 										@endforeach
 									</select>
 								</div>
 							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-xl-6">
-							<div class="row">
+							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label" style="text-align: right;">Mobile</label>
 								<div id="multiInputMobile" class="col">
-									@if (count($mobile) == 0)
-										<div class="input-group mb-2">
-											<input name="mobile[]" id="mobile" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here">
-											<button class="btn btn-addons add-button-one" type="button"><i class="ri-add-line custom-icon-min"></i></button>	
-										</div>
-									@else
-										@foreach ($mobile as $i => $item)
-										<div class="input-group mb-2">
-											<input name="mobile[]" id="mobile" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here" value="{{ $item }}">
-											@if ($i == 0)
-											<button class="btn btn-addons add-button-one" type="button"><i class="ri-add-line custom-icon-min"></i></button>	
+									@if (count($mobile)>0)
+										@foreach ($mobile as $key => $list)
+											@if ($key === 0)
+											<div class="input-group mb-2">
+												<input name="mobile[]" id="mobile" type="text" class="form-control" value="{{ $list }}" placeholder="Type mobile number or whatsapp number here">
+												<button id="add-button-one" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+											</div>
 											@else
-											<button class="btn btn-addons btn-close-one" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											<div class="input-group mb-2">
+												<input name="mobile[]" id="mobile" type="text" class="form-control" value="{{ $list }}" placeholder="Type mobile number or whatsapp number here">
+												<button class="btn btn-addons btn-close-one" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											</div>
 											@endif
-										</div>
 										@endforeach
+									@else
+									<div class="input-group mb-2">
+										<input name="mobile[]" id="mobile" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here">
+										<button id="add-button-one" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+									</div>
 									@endif
 								</div>
 							</div>
-							<div class="row">
+							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label">Phone</label>
 								<div id="multiInputPhone" class="col">
-									@if (count($phone) == 0)
-										<div class="input-group mb-2">
-											<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here">
-											<button class="btn btn-addons add-button-two" type="button"><i class="ri-add-line custom-icon-min"></i></button>
-										</div>
-									@else
-										@foreach ($phone as $i => $item)
-										<div class="input-group mb-2">
-											<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $item }}">
-											@if ($i == 0)
-											<button class="btn btn-addons add-button-two" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+									@if (count($phone)>0)
+										@foreach ($phone as $key => $list)
+											@if ($key === 0)
+											<div class="input-group mb-2">
+												<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button id="add-button-two" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+											</div>
 											@else
-											<button class="btn btn-addons btn-close-two" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											<div class="input-group mb-2">
+												<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button class="btn btn-addons btn-close-two" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											</div>	
 											@endif
-										</div>
 										@endforeach
+									@else
+									<div class="input-group mb-2">
+										<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here">
+										<button id="add-button-two" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+									</div>
 									@endif
 								</div>
 							</div>
-							<div class="row">
+							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label">Email</label>
 								<div id="multiInputEmail" class="col">
-									@if (count($email) == 0)
-										<div class="input-group mb-2">
-											<input name="email[]" id="email" type="email" class="form-control" placeholder="Type email address here" value="">
-											<button class="btn btn-addons add-button-three" type="button"><i class="ri-add-line custom-icon-min"></i></button>
-										</div>
-									@else
-										@foreach ($email as $i => $item)
-										<div class="input-group mb-2">
-											<input name="email[]" id="email" type="email" class="form-control" placeholder="Type email address here" value="{{ $item }}">
-											@if ($i == 0)
-											<button class="btn btn-addons add-button-three" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+									@if (count($email)>0)
+										@foreach ($email as $key => $list)
+											@if ($key === 0)
+											<div class="input-group mb-2">
+												<input name="email[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button id="add-button-three" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+											</div>
 											@else
-											<button class="btn btn-addons btn-close-three" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											<div class="input-group mb-2">
+												<input name="email[]" id="phone" type="text" class="form-control" placeholder="Type phone number here" value="{{ $list }}">
+												<button class="btn btn-addons btn-close-three" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button>
+											</div>	
 											@endif
-										</div>
 										@endforeach
+									@else
+										<div class="input-group mb-2">
+											<input name="email[]" id="email" type="email" class="form-control" placeholder="Type email address here">
+											<button id="add-button-three" class="btn btn-addons" type="button"><i class="ri-add-line custom-icon-min"></i></button>
+										</div>	
 									@endif
 								</div>
 							</div>
-							<div class="mb-3 row" id="web-name-area" style="display: none;">
+							<div class="mb-3 row" id="web-name-area">
 								<label class="col-3 col-form-label custom-label">Web</label>
 								<div class="col">
-									<input name="web" id="web" type="text" class="form-control" placeholder="Type web address here" >
+									<input name="web" id="web" type="text" class="form-control" value="{{ $customer->ins_web }}" placeholder="Type web address here" >
+								</div>
+							</div>
+							<div class="mb-3 row" id="web-name-area">
+								<label class="col-3 col-form-label custom-label">Notes</label>
+								<div class="col">
+									<textarea rows="5" class="form-control" name="note" placeholder="Here can be your description">{{ $customer->ins_note }}</textarea>
 								</div>
 							</div>
 						</div>
-						<div class="col-xl-6">
+						<div class="col">
 							<div class="mb-3 row">
 								<label class="col-3 col-form-label custom-label required">Address</label>
 								<div class="col">
-									<input type="text" class="form-control mb-2" name="addr_street" placeholder="Street" autocomplete="off" 
-									@if (isset($location->loc_street))
-										value="{{ $location->loc_street }}"
-									@endif >
-									<div id="district-option-area">
-										<select type="text" id="select-district" class="form-select mb-2 cls-district" name="district" placeholder="Select district ..">
-											@if (isset($location->loc_district))
-												@if ($location->loc_district != null OR $location->loc_district != '')
-												<option value="Test">{{ $location->loc_district }}</option>
-												@endif
-											@endif
+									@if (isset($location))
+										<select type="text" class="form-select mb-2 " name="addr_province" placeholder="Select province" id="addr-province" value="">
+											<option value="{{ $location->loc_province }}">{{ $location->loc_province }}</option>
+											@foreach ($provincies as $list)
+											<option value="{{ $list->prov_name }}">{{ $list->prov_name }}</option>
+											@endforeach
 										</select>
-									</div>
-									<select type="text" id="select-city" class="form-select mb-2" name="city" placeholder="Select city ..">
-										@if (isset($location->loc_city))
-											@if ($location->loc_city != null OR $location->loc_city != '')
-												<option value="Test">{{ $location->loc_city }}</option>
-											@endif
-										@endif
+									@else
+										<select type="text" class="form-select mb-2 " name="addr_province" placeholder="Select province" id="addr-province" value="">
+											<option value="{{ null }}"></option>
+											@foreach ($provincies as $list)
+											<option value="{{ $list->prov_name }}">{{ $list->prov_name }}</option>
+											@endforeach
+										</select>
+									@endif
+									@if (isset($location))
+									<select type="text" class="form-select mb-2" name="addr_city" placeholder="Select city" id="addr-city" value="">
+										<option value="{{ $location->loc_city }}">{{ $location->loc_city }}</option>
+									</select>	
+									@else
+									<select type="text" class="form-select mb-2" name="addr_city" placeholder="Select city" id="addr-city" value="">
+										<option value="{{ null }}"></option>
 									</select>
-									<select type="text" id="select-province" class="form-select mb-2" name="province" placeholder="Select province ..">
-										@if (isset($location->loc_province))
-											@if ($location->loc_province != null OR $location->loc_province != '')
-												<option value="Test">{{ $location->loc_province }}</option>
-											@endif
-										@endif
+									@endif
+									@if (isset($location))
+									<select type="text" class="form-select mb-2" name="addr_district" placeholder="Select district" id="addr-district" value="">
+										<option value="{{ $location->loc_district }}">{{ $location->loc_district }}</option>
+									</select>	
+									@else
+									<select type="text" class="form-select mb-2" name="addr_district" placeholder="Select district" id="addr-district" value="">
+										<option value="{{ null }}"></option>
 									</select>
+									@endif
+									@if (isset($location))
+									<input id="addr-street" name="addr_street" type="text" class="form-control mb-2" placeholder="Street" value="{{ $location->loc_street }}" autocomplete="off">	
+									@else
+									<input id="addr-street" name="addr_street" type="text" class="form-control mb-2" placeholder="Street" autocomplete="off">	
+									@endif
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<div class="card" style="border: none;">
-					<div class="card-header">
-						<ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
-							<li id="button-three" class="nav-item" role="presentation">
-								<button type="button" href="#tabs-notes" class="nav-link nav-button-tab @if ($a == 'tab3') active @endif" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">
-									<i class="ri-file-text-line" style="margin-right: 6px;"></i> Notes
-								</button>
-							</li>
-							<li id="button-setting" class="nav-item ms-auto" role="presentation">
-								<button type="button" href="#tabs-setting" class="nav-link nav-button-tab  @if ($a == 'set') active @endif" title="Settings" data-bs-toggle="tab"aria-selected="false" tabindex="-1" role="tab" style="padding-top: 5px;padding-bottom: 11px;">
-									<i class="ri-settings-3-line icon"></i>
-								</button>
-							</li>
-						</ul>
-					</div>
-					<div class="card-body" id="tab-card-body" style="@if ($a == 'none') display:none; @endif">
-						<div class="tab-content">
-							<div class="tab-pane @if ($a == 'tab3') active show @endif" id="tabs-notes" role="tabpanel">
-								<div class="mb-3">
-									<h4>Add a Note About This Customer</h4>
-									<textarea id="notesInput">{{ $company->cst_notes }}</textarea>
-								</div>
-							</div>
-							<div class="tab-pane @if ($a == 'set') active show @endif" id="tabs-setting"	role="tabpanel">
-								<div class="mb-3">
-                  <div class="form-label">Setting for data view customrt</div>
-									<select type="text" class="form-select val-input-option mb-2" name="view_option" placeholder="Select lead status for now ..." id="select-option-view" value="">
-										<option value="{{ $company->view_option }}">{{ Str::of($company->view_option)->title() }}</option>
-										<option value="MODERATE">Moderate</option>
-										<option value="PRIVATE">Private</option>
-										<option value="PUBLIC">Public</option>
-									</select>
-									<span id="opt_public" @if ($company->view_option == 'PUBLIC') style="display: true;" @else style="display: none;" @endif >
-										Other marketers can view data customer including your activities, your leads, your opportunity, and your sales with this customer.
-									</span>
-									<span id="opt_moderate" @if ($company->view_option == 'MODERATE') style="display: true;" @else style="display: none;" @endif>
-										Other marketers can view data customer but they can not view activities, your leads, your opportunity, and your sales with this customer.
-									</span>
-									<span id="opt_private" @if ($company->view_option == 'PRIVATE') style="display: true;" @else style="display: none;" @endif>
-										This Customer Profile is only visible to the marketer who created this customer profile.
-									</span>
-								</div>
-							</div>
+					
+					{{-- <div class="row">
+						<div class="col-5"></div>
+						<div class="col">
+							<div class="form-label" style="text-align: right;">Setting for data view custom</div>
+							<select type="text" class="form-select val-input-option mb-2" name="view_option" placeholder="Select lead status for now ..." id="select-option-view" value="">
+								<option value="{{ null }}">Select lead status for now ...</option>
+								<option value="MODERATE">Moderate</option>
+								<option value="PRIVATE">Private</option>
+								<option value="PUBLIC">Public</option>
+							</select>
+							<span id="opt_public" style="display: none;">
+								Other marketers can view data customer including your activities, your leads, your opportunity, and your sales with this customer.
+							</span>
+							<span id="opt_moderate" style="display: none;">
+								Other marketers can view data customer but they can not view activities, your leads, your opportunity, and your sales with this customer.
+							</span>
+							<span id="opt_private" style="display: none;">
+							</span>
 						</div>
-					</div>
+					</div> --}}
 				</div>
 			</form>
 		</div>
@@ -349,410 +350,425 @@
 		.custom-label {
 			text-align: right;
 		}
+
+		.typeahead__field .typeahead__hint,
+		.typeahead__field [contenteditable],
+		.typeahead__field input,
+		.typeahead__field textarea {
+			display: block;
+			width: 100%;
+			padding: 0.4375rem 0.75rem;
+			font-family: var(--tblr-font-sans-serif);
+			font-size: .875rem;
+			font-weight: 400;
+			line-height: 1.4285714286;
+			color: inherit;
+			background-color: var(--tblr-bg-forms);
+			background-clip: padding-box;
+			border: var(--tblr-border-width) solid var(--tblr-border-color);
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			appearance: none;
+			border-radius: 0px;
+			transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+		}
+
+		.typeahead__container button {
+			display: inline-block;
+			margin-bottom: 0;
+			text-align: center;
+			-ms-touch-action: manipulation;
+			touch-action: manipulation;
+			cursor: pointer;
+			background-color: #fff;
+			border: 1px solid #e6e7e9;
+			line-height: 1.25;
+			/* padding: 0.5rem 0.75rem; */
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			color: #555;
+			padding: 6.5px 7px;
+		}
+
+		.typeahead__button button {
+			border-top-right-radius: 0px;
+			border-bottom-right-radius: 0px;
+		}
 	</style>
 @endpush
 @push('script')
-<script type="text/javascript" src="{{ asset('plugins/jquery-confirm/jquery-confirm.min.js') }}"></script>
-<script type="text/javascript" src="{{ asset('plugins/jquery-session/jquery.session.js') }}"></script>
-<script type="text/javascript" src="{{ asset('plugins/tom-select/dist/js/tom-select.base.js') }}"></script>
-<script type="text/javascript" src="{{ asset('plugins/tinymce/tinymce.min.js') }}"> </script>
+<script src="{{ asset('plugins/jquery-typeahead/jquery.typeahead.min.js') }}"></script>
+<script src="{{ asset('plugins/jquery-confirm/jquery-confirm.min.js') }}"></script>
+<script src="{{ asset('plugins/jquery-session/jquery.session.js') }}"></script>
+<script src="{{ asset('plugins/tom-select/dist/js/tom-select.base.js') }}"></script>
+<script src="{{ asset('plugins/summernote/summernote-lite.min.js') }}"></script>
+{{-- Varibles --}}
 <script>
+/************************************************************************/
+
+var select_category = new TomSelect("#select-category",{
+	create: true,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="select-category">'+escape(data.title)+'</div>';
+		}
+	}
+});
+
+var addr_province = new TomSelect("#addr-province",{
+	create: true,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="addr-province">'+escape(data.title)+'</div>';
+		}
+	}
+});
+var addr_city = new TomSelect("#addr-city",{
+	create: true,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="addr-city">'+escape(data.title)+'</div>';
+		}
+	}
+});
+var addr_district = new TomSelect("#addr-district",{
+	create: true,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="addr-district">'+escape(data.title)+'</div>';
+		}
+	}
+});
+
+/************************************************************************/
+
+addr_province.on('change',function () {
+	var prov_id = addr_province.getValue();
+	actionGetCity(prov_id);
+});
+addr_city.on('change',function () {
+	var city_id = addr_city.getValue();
+	actionGetDistrict(city_id);
+});
 </script>
-{{-- Editor Text --}}
+{{-- Class/Function --}}
 <script type="text/javascript">
-	var notesStoredLOC =  localStorage.getItem('notesValue');
-	var notesEitor = ""; 
-	var x = tinymce.init({
-		selector: 'textarea#notesInput',
-		promotion: false,
-		statusbar: false,
-		setup: function(editor) {
-			editor.on('init',function(e) {
-				if (notesStoredLOC != null) {
-					editor.setContent(notesStoredLOC);
-				}
-			});
-			editor.on('input', function(e) {
-				notes = editor.getContent();
-				localStorage.setItem('notesValue', notes);
-			});
+function preventPage(p) {
+	if (p == 1) {
+		window.addEventListener('beforeunload', function(e) {
+			e.preventDefault();
+			e.returnValue = '';
+		});
+	}
+}
+function actionGetCustomer(id) {
+	var dataOption_1 = [];  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 		}
 	});
-</script>
-<script type="text/javascript">
-	$('#btn-action-reset').click(function () {
-		document.getElementById("formContent1").reset();
-		localStorage.removeItem("notesValue");
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('sub-customers') }}",
+		async: false,
+		data: {
+			"id": id
+		},
+		success: function(result) {
+			for (let n = 0; n < result.data.length; n++) {
+				dataOption_1.push({
+					id:result.data[n].id,
+					title:result.data[n].title
+				});
+			}
+		}
 	});
+	select_customer.clear();
+	select_customer.clearOptions();
+	select_customer.addOptions(dataOption_1);
+};
+function actionGetCity(id) {  
+	var dataOption_2 = [];  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('action-get-city-select') }}",
+		async: false,
+		data: {
+			"id": id
+		},
+		success: function(result) {
+			for (let n = 0; n < result.data.length; n++) {
+				dataOption_2.push({
+					id:result.data[n].id,
+					title:result.data[n].title
+				});
+			}
+		}
+	});
+	addr_city.clear();
+	addr_city.clearOptions();
+	addr_city.addOptions(dataOption_2);
+};
+function actionGetDistrict(id) {
+	var dataOption_3 = [];  
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	var response = $.ajax({
+		type: 'POST',
+		url: "{{ route('action-get-district-select') }}",
+		async: false,
+		data: {
+			"id": id
+		},
+		success: function(result) {
+			for (let n = 0; n < result.data.length; n++) {
+				dataOption_3.push({
+					id:result.data[n].id,
+					title:result.data[n].title
+				});
+			}
+		}
+	});
+	addr_district.clear();
+	addr_district.clearOptions();
+	addr_district.addOptions(dataOption_3);
+};
 </script>
-{{-- Tabs --}}
-	<script>
-		$('.nav-button-tab').click(function () {
-			$('#tab-card-body').show();
-		});
-	</script>
-	<script>
-		$('#button-one').on('click', function() {
-			window.history.replaceState(null, null, "?act=tab1");
-		});
-		$('#button-two').on('click', function() {
-			window.history.replaceState(null, null, "?act=tab2");
-		});
-		$('#button-three').on('click', function() {
-			window.history.replaceState(null, null, "?act=tab3");
-		});
-		$('#button-setting').on('click', function() {
-			window.history.replaceState(null, null, "?act=set");
-		});
-	</script>
-	<script>
-		$('.opt-status').click(function() {
-			var optVal1 = $("input[name='cststatus']:checked").val();
-			if (optVal1 == 'institution') {
-				$('#person-name-area').slideUp();
-				$('#job-position-area').slideUp();
-				$('#person-name').prop('disabled',true);
-				$('#institution-category-area').slideDown();
-				$('#select-category-ts-control').prop('disabled',false);
-				$('#web-name-area').slideDown();
-				$('#web').prop('disabled', false);
-				$('#idperson').prop('disabled', true);
-			} else {
-				$('#person-name-area').slideDown();
-				$('#person-name').prop('disabled', false);
-				$('#institution-category-area').slideUp();
-				$('#select-category-ts-control').prop('disabled',true);
-				$('#job-position-area').slideDown();
-				$('#web-name-area').slideUp();
-				$('#web').prop('disabled', true);
-				$('#idperson').prop('disabled', false);
-			}
-		});
-	</script>
-	{{-- Picture Logo --}}
-	<script>
-		$(document).on("click", ".browse", function() {
-			var file = $(this)
-				.parent()
-				.parent()
-				.parent()
-				.find("#inputFile");
-			file.trigger("click");
-		});
-		$('input[class=input_file]').change(function(e) {
-			$('#inputPreview').fadeIn();
-			$('#closeImageProfile').fadeIn();
-			$('#inputAvatar').hide();
-			var fileName = e.target.files[0].name;
-			$("#inputFileName").val(fileName);
-			var reader = new FileReader();
-			reader.onload = function(e) {
-				document.getElementById("inputPreview").src = e.target.result;
-			};
-			reader.readAsDataURL(this.files[0]);
-		});
-		$('#closeImageProfile').on("click", function() {
-			$('#inputPreview').hide();
-			$('#inputAvatar').fadeIn();
-			$('#inputFile').val("");
-			$('#closeImageProfile').hide();
-		});
-	</script>
-	<script>
-		$('#product-quantity').on('input',function () {
-			var productVal;
-			var idproduct = $("#select-product-interest").val();
-			var ctproduct = $("#product-quantity").val();
-			$.ajaxSetup({
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-				}
-			});
-			$.ajax({
-				type: 'POST',
-				url: "{{ route('ajaxlink-product-value') }}",
-				data: {id:idproduct,cnt:ctproduct},
-				success: function(result) {
-					$("#estimate-base-value").html(result);
-				}
-			});
-		});
-		$('#select-product-interest').on('change',function () {
-			var productVal;
-			var idproduct = $("#select-product-interest option:selected").val();
-			var ctproduct = $("#product-quantity").val();
-			$.ajaxSetup({
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-				}
-			});
-			$.ajax({
-				type: 'POST',
-				url: "{{ route('ajaxlink-product-value') }}",
-				data: {id:idproduct,cnt:ctproduct},
-				success: function(result) {
-					$("#estimate-base-value").html(result);
-				}
-			});
-		});
-		
-	</script>
-	<script>
-		$(document).ready(function() {
-			$('#formContent1').submit(function(e) {
-				e.preventDefault();
-				var formData = new FormData(this);
-				formData.append('notes', tinymce.get("notesInput").getContent());
-				$.ajaxSetup({
-					headers: {
-						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-					}
-				});
-				$.ajax({
-					type: 'POST',
-					url: "{{ route('store-update-customer',['id'=>$id]) }}",
-					data: formData,
-					cache: false,
-					contentType: false,
-					processData: false,
-					success: function(result) {
-						if (result == true) {
-							$.alert({
-								type: 'green',
-								title: 'Success',
-								content: 'Data stored in database.',
-								animateFromElement: false,
-								animation: 'opacity',
-								closeAnimation: 'opacity'
-							});
+{{-- Action Trigger --}}
+<script>
+$('.nav-button-tab').click(function () {
+	$('#tab-card-body').show();
+});
+/***********************************************************************/
+$('#button-one').on('click', function() {
+	window.history.replaceState(null, null, "?act=tab1");
+});
+$('#button-two').on('click', function() {
+	window.history.replaceState(null, null, "?act=tab2");
+});
+$('#button-three').on('click', function() {
+	window.history.replaceState(null, null, "?act=tab3");
+});
+$('#button-setting').on('click', function() {
+	window.history.replaceState(null, null, "?act=set");
+});
+/***********************************************************************/
+$('.opt-status').click(function() {
+	var optVal1 = $("input[name='cststatus']:checked").val();
+	if (optVal1 == 'institution') {
+		$('#person-name-area').slideUp();
+		$('#job-position-area').slideUp();
+		$('#person-name').prop('disabled',true);
+		$('#institution-category-area').slideDown();
+		$('#select-category-ts-control').prop('disabled',false);
+		$('#web-name-area').slideDown();
+		$('#web').prop('disabled', false);
+		$('#idperson').prop('disabled', true);
+	} else {
+		$('#person-name-area').slideDown();
+		$('#person-name').prop('disabled', false);
+		$('#institution-category-area').slideUp();
+		$('#select-category-ts-control').prop('disabled',true);
+		$('#job-position-area').slideDown();
+		$('#web-name-area').slideUp();
+		$('#web').prop('disabled', true);
+		$('#idperson').prop('disabled', false);
+	}
+});
+$(document).on("click", ".browse", function() {
+	var file = $(this)
+	.parent()
+	.parent()
+	.parent()
+	.find("#inputFile");
+	file.trigger("click");
+});
+/****************************************************************************/
+$('input[class=input_file]').change(function(e) {
+	$('#inputPreview').fadeIn();
+	$('#closeImageProfile').fadeIn();
+	$('#inputAvatar').hide();
+	var fileName = e.target.files[0].name;
+	$("#inputFileName").val(fileName);
+	var reader = new FileReader();
+	reader.onload = function(e) {
+	document.getElementById("inputPreview").src = e.target.result;
+	};
+	reader.readAsDataURL(this.files[0]);
+});
+/****************************************************************************/
+$('#closeImageProfile').on("click", function() {
+	$('#inputPreview').hide();
+	$('#inputAvatar').fadeIn();
+	$('#inputFile').val("");
+	$('#closeImageProfile').hide();
+});
+/****************************************************************************/
+$('#product-quantity').on('input',function () {
+	var productVal;
+	var idproduct = $("#select-product-interest").val();
+	var ctproduct = $("#product-quantity").val();
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('ajaxlink-product-value') }}",
+		data: {id:idproduct,cnt:ctproduct},
+		success: function(result) {
+			$("#estimate-base-value").html(result);
+		}
+	});
+});
+/****************************************************************************/
+$('#select-product-interest').on('change',function () {
+	var productVal;
+	var idproduct = $("#select-product-interest option:selected").val();
+	var ctproduct = $("#product-quantity").val();
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('ajaxlink-product-value') }}",
+		data: {id:idproduct,cnt:ctproduct},
+		success: function(result) {
+			$("#estimate-base-value").html(result);
+		}
+	});
+});
+/****************************************************************************/
+$('#select-option-view').on('change', function () {
+	var idoption = $("#select-option-view option:selected").val();
+	if (idoption == 'PUBLIC') {
+		$('#opt_public').fadeIn();
+		$('#opt_moderate').hide();
+		$('#opt_private').hide();
+	}else if(idoption == 'MODERATE'){
+		$('#opt_moderate').fadeIn();
+		$('#opt_public').hide();
+		$('#opt_private').hide();
+	}else if(idoption == 'PRIVATE'){
+		$('#opt_private').fadeIn();
+		$('#opt_public').hide();
+		$('#opt_moderate').hide();
+	}
+});
+/****************************************************************************/
+$('#add-button-one').click(function() {
+	$("#multiInputMobile").append(
+	'<div class="input-group mt-2">' +
+	'<input name="mobile[]" id="phone" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here">' +
+	'<button class="btn btn-addons btn-close-one" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
+	);
+});
+$(document).on('click', '.btn-close-one', function() {
+	$(this).parents('div.input-group').remove();
+});
+$('#add-button-two').click(function() {
+	$("#multiInputPhone").append(
+	'<div class="input-group mt-2">' +
+	'<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here">' +
+	'<button class="btn btn-addons btn-close-two" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
+	);
+});
+$(document).on('click', '.btn-close-two', function() {
+	$(this).parents('div.input-group').remove();
+});
+$('#add-button-three').click(function() {
+	$("#multiInputEmail").append(
+	'<div class="input-group mt-2">' +
+	'<input name="email[]" id="email" type="text" class="form-control" placeholder="Type email address here">' +
+	'<button class="btn btn-addons btn-close-three" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
+	);
+});
+$(document).on('click', '.btn-close-three', function() {
+	$(this).parents('div.input-group').remove();
+});
+</script>
+{{-- Form Action --}}
+<script>
+$(document).ready(function() {
+	$('#formContent1').submit(function(e) {
+		e.preventDefault();
+		var formData = new FormData(this);
+		$.ajax({
+			type: 'POST',
+			url: "{{ route('store-update-customer') }}",
+			data: formData,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function(result) {
+				if (result.param == true) {
+					$.confirm({
+						type: 'green',
+						title: 'Success',
+						content: 'Data stored in database.',
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity',
+						buttons: {
+							goToLead:{
+								text:"Go To Customer",
+								action:function () {  
+									window.location.href = "{{ url('customer/detail-customer') }}/"+result.id+"?extpg=information";
+								}
+							}
 						}
-					}
-				});
-			});
-		});
-	</script>
-	<script>
-		$('#select-option-view').on('change', function () {
-			var idoption = $("#select-option-view option:selected").val();
-			if (idoption == 'PUBLIC') {
-				$('#opt_public').fadeIn();
-				$('#opt_moderate').hide();
-				$('#opt_private').hide();
-			}else if(idoption == 'MODERATE'){
-				$('#opt_moderate').fadeIn();
-				$('#opt_public').hide();
-				$('#opt_private').hide();
-			}else if(idoption == 'PRIVATE'){
-				$('#opt_private').fadeIn();
-				$('#opt_public').hide();
-				$('#opt_moderate').hide();
-			}
-		});
-	</script>
-	{{-- Add new input service --}}
-	<script>
-		$('.add-button-one').click(function() {
-			$("#multiInputMobile").append(
-				'<div class="input-group mb-2">' +
-				'<input name="mobile[]" id="phone" type="text" class="form-control" placeholder="Type mobile number or whatsapp number here">' +
-				'<button class="btn btn-addons btn-close-one" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
-			);
-		});
-		$(document).on('click', '.btn-close-one', function() {
-			$(this).parents('div.input-group').remove();
-		});
-		$('.add-button-two').click(function() {
-			$("#multiInputPhone").append(
-				'<div class="input-group mb-2">' +
-				'<input name="phone[]" id="phone" type="text" class="form-control" placeholder="Type phone number here">' +
-				'<button class="btn btn-addons btn-close-two" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
-			);
-		});
-		$(document).on('click', '.btn-close-two', function() {
-			$(this).parents('div.input-group').remove();
-		});
-		$('.add-button-three').click(function() {
-			$("#multiInputEmail").append(
-				'<div class="input-group mb-2">' +
-				'<input name="email[]" id="email" type="text" class="form-control" placeholder="Type email address here">' +
-				'<button class="btn btn-addons btn-close-three" type="button"><i class="ri-close-fill custom-icon-min-add"></i></button></div>'
-			);
-		});
-		$(document).on('click', '.btn-close-three', function() {
-			$(this).parents('div.input-group').remove();
-		});
-	</script>
-	{{-- Tom Select Service --}}
-	<script>
-		var option_districts = [];
-		var districts = new TomSelect("#select-district",{
-			create: true,
-			valueField: 'id',
-			labelField: 'title',
-			searchField: 'title',
-			render: {
-				option: function(data, escape) {
-					return '<div>' +
-					'<span class="title">' + escape(data.title) + '</span>' +
-					'</div>';
-				},
-				item: function(data, escape) {
-					return '<div id="district-selected">' + escape(data.title) + '</div>';
+					});
+				} else{
+					$.alert({
+						type: 'red',
+						title: 'Warning',
+						content: 'Your input something wrong',
+						animateFromElement: false,
+						animation: 'opacity',
+						closeAnimation: 'opacity'
+					});
 				}
 			}
 		});
-		document.getElementById('select-district-ts-control').addEventListener('click', function() {
-			districts.refreshItems();
-			var varcity = $('#city-selected').attr('data-value');
-			var varprovince = $('#province-selected').attr('data-value');
-			$.ajaxSetup({
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-				}
-			});
-			$.ajax({
-				type: 'POST',
-				url: "{{ route('source-addr-districts') }}",
-				data: {
-					city: varcity,
-					province: varprovince
-				},
-				cache: false,
-				success: function (data) {
-					for (let index = 0; index < data.length; index++) {
-						option_districts.push({id:data[index].id,title:data[index].title}) ;
-					}
-					districts.addOption(option_districts);
-				}
-			});
-		});
-
-		var option_cities = [];
-		var cities = new TomSelect("#select-city",{
-			create: true,
-			valueField: 'id',
-			labelField: 'title',
-			searchField: 'title',
-			render: {
-				option: function(data, escape) {
-					return '<div>' +
-					'<span class="title">' + escape(data.title) + '</span>' +
-					'</div>';
-				},
-				item: function(data, escape) {
-					return '<div id="city-selected">' + escape(data.title) + '</div>';
-				}
-			}
-		});
-		document.getElementById('select-city-ts-control').addEventListener('click', function() {
-			var vardistrict = $('#district-selected').attr('data-value');
-			var varprovince = '';
-			$.ajaxSetup({
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-				}
-			});
-			$.ajax({
-				type: 'POST',
-				url: "{{ route('source-addr-cities') }}",
-				data: {
-					district: vardistrict,
-					province: varprovince
-				},
-				cache: false,
-				success: function (data) {
-					for (let index = 0; index < data.length; index++) {
-						option_cities.push({id:data[index].id,title:data[index].title}) ;
-					}
-					cities.addOption(option_cities);
-				}
-			});
-		});
-
-		var option_province = [];
-		var provincies = new TomSelect("#select-province",{
-			create: true,
-			valueField: 'id',
-			labelField: 'title',
-			searchField: 'title',
-			render: {
-				option: function(data, escape) {
-					return '<div>' +
-					'<span class="title">' + escape(data.title) + '</span>' +
-					'</div>';
-				},
-				item: function(data, escape) {
-					return '<div id="province-selected">' + escape(data.title) + '</div>';
-				}
-			}
-		});
-		document.getElementById('select-province-ts-control').addEventListener('click', function() {
-			var vardistrict = $('#district-selected').attr('data-value');
-			var varcity = $('#city-selected').attr('data-value');
-			$.ajaxSetup({
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-				}
-			});
-			$.ajax({
-				type: 'POST',
-				url: "{{ route('source-addr-province') }}",
-				data: {
-					district: vardistrict,
-					city: varcity
-				},
-				cache: false,
-				success: function (data) {
-					for (let index = 0; index < data.length; index++) {
-						option_province.push({id:data[index].id,title:data[index].title}) ;
-					}
-					provincies.addOption(option_province);
-				}
-			});
-		});
-		var optionSeting = new TomSelect("#select-option-view",{
-			copyClassesToDropdown: false,
-			dropdownClass: 'dropdown-menu ts-dropdown',
-			optionClass: 'dropdown-item',
-			controlInput: '<input>',
-			render: {
-				item: function(data, escape) {
-					if (data.customProperties) {
-						return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' +escape(data.text) + '</div>';
-					}
-					return '<div>' + escape(data.text) + '</div>';
-				},
-				option: function(data, escape) {
-					if (data.customProperties) {
-						return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-					}
-					return '<div>' + escape(data.text) + '</div>';
-				},
-			},
-		});
-		var bussinesCategory = new TomSelect("#select-category",{
-			copyClassesToDropdown: false,
-			dropdownClass: 'dropdown-menu ts-dropdown',
-			optionClass: 'dropdown-item',
-			controlInput: '<input>',
-			create: true,
-			render: {
-				create: function(input){
-					return {value:input,text:input}
-				},
-				item: function(data, escape) {
-					if (data.customProperties) {
-						return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-					}
-					return '<div>' + escape(data.text) + '</div>';
-				},
-				option: function(data, escape) {
-					if (data.customProperties) {
-						return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-					}
-					return '<div>' + escape(data.text) + '</div>';
-				},
-			},
-		});
-	</script>
+	});
+});
+</script>
 @endpush

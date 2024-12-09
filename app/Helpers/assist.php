@@ -204,5 +204,15 @@ function getIdCustomer($id)
 {
   $customer = Cst_customer::where('cst_id', $id)
   ->first();
-  return $customer->cst_institution;
+  return $customer->cst_name;
+}
+function getNameSubcustomer($id)
+{
+  $customer = Cst_customer::where('cst_id', $id)
+  ->first();
+  if ($customer === null) {
+    return '-';
+  }else{
+    return $customer->cst_name;
+  }
 }

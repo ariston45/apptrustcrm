@@ -31,6 +31,23 @@ class ManagementController extends Controller
 	/* Tags:... */
 	public function viewManagingUsers(Request $request)
 	{
+		$team = checkTeamMgr(3);
+		// $users = User::whereIn('id',$team)->get();
+		// foreach ($users as $key => $value) {
+		// 	$lead[$key] = Prs_accessrule::where('slm_user',$value->id)
+		// 	->where('slm_rules','master')
+		// 	->get();
+		// 	foreach ($lead[$key] as $skey => $svalue) {
+		// 		$lead_id[$value->id][$skey] = $svalue->slm_lead;
+		// 	}
+		// 	$data[$key] = [
+		// 		'id' => $value->id,
+		// 		'name' => $value->name,
+		// 		'lead' => count($lead[$key]),
+		// 	]; 
+		// }
+		// dd($data);
+		// die();
 		return view('contents.page_management.all_users');
 	}
 
@@ -70,60 +87,36 @@ class ManagementController extends Controller
 			->select('act_id','aat_type_code')
 			->get();
 		} elseif(checkRule(array('MGR'))) {
-			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['colaborator', 'manager'])
+			->where('slm_user', $user->id)
+			->select('slm_lead')
+			->get()
+			->toArray();
 			$lds_idr = array();
 			foreach ($lead_data as $key => $value) {
 				$lds_idr[$key] = $value['slm_lead'];
 			}
 			$lds_ids = array_unique($lds_idr);
-			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-      ->where('act_cst', $id)
-			->whereIn('act_activities.act_lead_id',$lds_ids)
-			->select('act_id','aat_type_code')
-			->get();
-		} elseif(checkRule(array('STF'))) {
-			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
-			$lds_idr = array();
-			foreach ($lead_data as $key => $value) {
-				$lds_idr[$key] = $value['slm_lead'];
-			}
-			$lds_ids = array_unique($lds_idr);
-			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-      ->where('act_cst', $id)
-			->whereIn('act_activities.act_lead_id',$lds_ids)
-			->select('act_id','aat_type_code')
+			$all_activities = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+			->whereIn('act_activities.act_lead_id', $lds_ids)
+			->where('act_label_category', 'ACTIVITY')
+			->select('act_id', 'aat_type_code')
 			->get();
 		} elseif(checkRule(array('MGR.TCH'))) {
-			$user = Auth::user();
-			$tech_team = checkTeamMgr($user->id);
-			$act_access = Act_activity_access::whereIn('acs_user_id',$tech_team)->select('acs_act_id')->get();
+			$act_access = Act_activity_access::whereIn('acs_user_id',$id)
+			->select('acs_act_id')
+			->get();
 			$act_idr = array();
 			foreach ($act_access as $key => $value) {
 				$act_idr[$key] = $value->acs_act_id;
 			}
 			$act_ids = array_unique($act_idr);
-			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			$all_activities = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
       ->where('act_cst', $id)
 			->whereIn('act_activities.act_id',$act_ids)
 			->select('act_id','aat_type_code')
 			->get();
-		} elseif(checkRule(array('STF.TCH','STF'))) {
-			$act_access = Act_activity_access::where('acs_user_id',$user->id)->select('acs_act_id')->get();
-			$act_idr = array();
-			foreach ($act_access as $key => $value) {
-				$act_idr[$key] = $value->acs_act_id;
-			}
-			$act_ids = array_unique($act_idr);
-			$all_activities = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-      ->where('act_cst', $id)
-			->whereIn('act_activities.act_id',$act_ids)
-			->select('act_id','aat_type_code')
-			->get();
-		}
+		} 
 		$cnt_todo = $all_activities->where('aat_type_code','act_todo')->count();
 		$cnt_phone = $all_activities->where('aat_type_code','act_phone')->count();
 		$cnt_email = $all_activities->where('aat_type_code','act_email')->count();
@@ -177,8 +170,7 @@ class ManagementController extends Controller
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$colect_data = User_structure::join('users','user_structures.usr_user_id','=','users.id')
 			->join('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
-			->leftJoin(DB::raw('(SELECT aa.slm_user,COUNT( aa.slm_lead ) AS count_prs FROM prs_accessrules aa JOIN prs_leads bb ON bb.lds_id WHERE aa.slm_rules = "master" 
-				AND bb.lds_stage_opr = "false" GROUP BY aa.slm_user ) leads'),
+			->leftJoin(DB::raw('(SELECT aa.slm_user,COUNT(aa.slm_id) AS count_prs FROM prs_accessrules aa WHERE aa.slm_rules = "master" GROUP BY aa.slm_user ) leads'),
 				function ($join){
 					$join->on('user_structures.usr_user_id','=','leads.slm_user');				
 				})
@@ -212,8 +204,7 @@ class ManagementController extends Controller
 		}elseif (checkRule(array('MGR','MGR.TCH'))) {
 			$colect_data = User_structure::join('users','user_structures.usr_user_id','=','users.id')
 			->join('user_teams','user_structures.usr_team_id','=','user_teams.uts_id')
-			->leftJoin(DB::raw('(SELECT aa.slm_user,COUNT( aa.slm_lead ) AS count_prs FROM prs_accessrules aa JOIN prs_leads bb ON bb.lds_id WHERE aa.slm_rules = "master" 
-				AND bb.lds_stage_opr = "false" GROUP BY aa.slm_user ) leads'),
+			->leftJoin(DB::raw('(SELECT aa.slm_user,COUNT(aa.slm_id) AS count_prs FROM prs_accessrules aa WHERE aa.slm_rules = "master" GROUP BY aa.slm_user ) leads'),
 				function ($join){
 					$join->on('user_structures.usr_user_id','=','leads.slm_user');				
 				})

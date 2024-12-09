@@ -51,8 +51,13 @@ class CustomerController extends Controller
     $company = Cst_institution::where('ins_id', $request->id)
     ->select('ins_business_field', 'ins_web', 'ins_note', 'ins_name')
     ->first();
+    $bf = explode(',', $company->ins_business_field);
+    $str_bf ="";
+    foreach ($bf as $key => $value) {
+      $str_bf.= "<b>-</b> ". $value."<br>";
+    }
     $location = Cst_location::where('loc_cst_id', $id)
-    ->where('loc_represent', 'INSTITUTION')
+    ->where('loc_represent', 'CUSTOMER')
     ->select('loc_street', 'loc_district', 'loc_city', 'loc_province')
     ->first();
     if ($location == null) {
@@ -65,27 +70,27 @@ class CustomerController extends Controller
         3 => Str::title($location->loc_province),
       ];
     }
+    
     $email = Cst_contact_email::where('eml_cnt_id', $id)
-    ->where('eml_param', 'INSTITUTION')
+    ->where('eml_param', 'CUSTOMER')
     ->select('eml_address')
     ->get();
     $phone = Cst_contact_phone::where('pho_cnt_id', $id)
-    ->where('pho_param', 'INSTITUTION')
+    ->where('pho_param', 'CUSTOMER')
     ->select('pho_number')
     ->get();
-    $last_lead = Prs_lead::where('lds_customer', $id)->select('lds_id')->orderBy('lds_close_date','desc')->first();
+    $last_lead = Prs_lead::where('lds_subcustomer', $id)->select('lds_id')->orderBy('lds_close_date','desc')->first();
     if ($last_lead == null) {
       $lastproject_data = null;
     }else{
       $last_oppor = Opr_opportunity::where('opr_lead_id',$last_lead->lds_id)->first();
-      // dd($last_oppor);
       if ($last_oppor == null) {
         $pro_data = Prs_accessrule::join('users','prs_accessrules.slm_user','=','users.id')
         ->join('prs_leads','prs_accessrules.slm_lead','=','prs_leads.lds_id')
         ->join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
         ->where('slm_rules','master')
         ->orderBy('lds_close_date','desc')
-        ->select('name','lds_title as title','lds_close_date as close_date','pls_status_name as status')
+        ->select('slm_lead', 'name','lds_title as title','lds_close_date as close_date','pls_status_name as status')
         ->first();
         $lastproject_data = $pro_data;
       }else{
@@ -95,7 +100,8 @@ class CustomerController extends Controller
           ->join('opr_opportunities','prs_accessrules.slm_lead','opr_opportunities.opr_lead_id')
           ->join('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
           ->where('slm_rules','master')
-          ->select('name','opr_title as title','opr_close_date as close_date','oss_status_name as status')
+          ->orderBy('opr_close_date','desc')
+          ->select('slm_lead','name','opr_title as title','opr_close_date as close_date','oss_status_name as status')
           ->first();
           $lastproject_data = $pro_data;
         }else{
@@ -103,7 +109,8 @@ class CustomerController extends Controller
           ->join('opr_opportunities','prs_accessrules.slm_lead','opr_opportunities.opr_lead_id')
           ->join('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
           ->where('slm_rules','master')
-          ->select('name','opr_title as title','opr_close_date as close_date','oss_status_name as status')
+          ->orderBy('opr_close_date', 'desc')
+          ->select('slm_lead', 'name','opr_title as title','opr_close_date as close_date','oss_status_name as status')
           ->first();
           $lastproject_data = $pro_data;
         }
@@ -162,20 +169,22 @@ class CustomerController extends Controller
           break;
       }
     }
-    return view('contents.page_customer.detail_customer', compact('cstId', 'id', 'company', 'location_ar', 'email', 'phone', 'dataContact'));
+    return view('contents.page_customer.detail_customer', 
+    compact('cstId', 'str_bf','id', 'company', 'location_ar', 'email', 'phone', 'dataContact', 'lastproject_data'));
   }
-
   public function detailSubCustomer(Request $request)
   {
-    // die();
-    $cstId = $request->id;
     $auth = Auth::user();
     $id = $request->id;
     $company = Cst_customer::join('cst_institutions', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
     ->leftjoin('users', 'cst_customers.created_by', '=', 'users.id')
     ->where('cst_id', $request->id)
-    // ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes', 'ins_name')
     ->first();
+    $bf = explode(',', $company->ins_business_field);
+    $str_bf = "";
+    foreach ($bf as $key => $value) {
+      $str_bf .= "<b>-</b> " . $value . "<br>";
+    }
     $location = Cst_location::where('loc_cst_id', $id)
     ->where('loc_represent', 'SUBCUSTOMER')
     ->select('loc_street', 'loc_district', 'loc_city', 'loc_province')
@@ -231,9 +240,9 @@ class CustomerController extends Controller
           ->join('opr_opportunities', 'prs_accessrules.slm_lead', 'opr_opportunities.opr_lead_id')
           ->join('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
           ->where('slm_rules', 'master')
-          // ->select('name', 'opr_title as title', 'opr_close_date as close_date', 'oss_status_name as status')
+          ->orderBy('opr_close_date', 'desc')
+          ->select('name', 'opr_title as title', 'opr_close_date as close_date', 'oss_status_name as status')
           ->first();
-          dd($pro_data);
           $lastproject_data = [
             'salesperson ' => $pro_data->name,
             'project' => $pro_data->title,
@@ -245,18 +254,18 @@ class CustomerController extends Controller
           ->join('opr_opportunities', 'prs_accessrules.slm_lead', 'opr_opportunities.opr_lead_id')
           ->join('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
           ->where('slm_rules', 'master')
+          ->orderBy('opr_close_date', 'desc')
           ->select('name', 'opr_title as title', 'opr_close_date as close_date', 'oss_status_name as status')
           ->first();
           $lastproject_data = [
-            'salesperson ' => null,
-            'project' => null,
-            'date' => null,
-            'closing' => null,
+            'salesperson ' => $pro_data->name,
+            'project' => $pro_data->title,
+            'date' => $pro_data->opr_close_status,
+            'closing' => $pro_data->status,
           ];
         }
       }
     }
-    dd($lastproject_data);
     $person_ar = array();
     $colect_person = Cst_personal::where('cnt_subcst_id', $id)->get();
     $dataContact = array();
@@ -266,8 +275,8 @@ class CustomerController extends Controller
           $dataContact[$key] = [
             'name' => $value->cnt_fullname,
             'role' => $value->cnt_company_position,
-            'phone' => $this->dataMobile($value->cnt_id, 'INDIVIDUAL'),
-            'email' => $this->dataEmail($value->cnt_id, 'INDIVIDUAL'),
+            'phone' => $this->dataMobile($value->cnt_id, 'SUBCUSTOMER'),
+            'email' => $this->dataEmail($value->cnt_id, 'SUBCUSTOMER'),
             'option' => '<div style="display:flex;"> 
               <button type="button" onclick="previewContactCustomer(' . $value->cnt_id . ')" class="badge" style="margin-right:3px;"><i class="ri-eye-line"></i> </button>
               <a href="' . url('customer/detail-customer/person-update/' . $value->cnt_id) . '"><button type="button" class="badge bg-green"><i class="ri-edit-2-line"></i></button></a>
@@ -279,16 +288,16 @@ class CustomerController extends Controller
             $dataContact[$key] = [
               'name' => $value->cnt_fullname,
               'role' => $value->cnt_company_position,
-              'phone' => $this->dataMobile($value->cnt_id, 'INDIVIDUAL'),
-              'email' => $this->dataEmail($value->cnt_id, 'INDIVIDUAL'),
+              'phone' => $this->dataMobile($value->cnt_id, 'SUBCUSTOMER'),
+              'email' => $this->dataEmail($value->cnt_id, 'SUBCUSTOMER'),
               'option' => 'Edit'
             ];
           } else {
             $dataContact[$key] = [
               'name' => $value->cnt_fullname,
               'role' => $value->cnt_company_position,
-              'phone' => $this->dataMobile($value->cnt_id, 'INDIVIDUAL'),
-              'email' => $this->dataEmail($value->cnt_id, 'INDIVIDUAL'),
+              'phone' => $this->dataMobile($value->cnt_id, 'SUBCUSTOMER'),
+              'email' => $this->dataEmail($value->cnt_id, 'SUBCUSTOMER'),
               'option' => '-'
             ];
           }
@@ -298,21 +307,19 @@ class CustomerController extends Controller
             $dataContact[$key] = [
               'name' => $value->cnt_fullname,
               'role' => $value->cnt_company_position,
-              'phone' => $this->dataMobile($value->cnt_id, 'INDIVIDUAL'),
-              'email' => $this->dataEmail($value->cnt_id, 'INDIVIDUAL'),
+              'phone' => $this->dataMobile($value->cnt_id, 'SUBCUSTOMER'),
+              'email' => $this->dataEmail($value->cnt_id, 'SUBCUSTOMER'),
               'option' => 'Edit'
             ];
           }
           break;
-
         default:
           # code...
           break;
       }
     }
-    return view('contents.page_customer.detail_subcustomer', compact('cstId', 'id', 'company', 'location_ar', 'email', 'phone', 'dataContact'));
+    return view('contents.page_customer.detail_subcustomer', compact( 'id', 'str_bf','company', 'location_ar', 'email', 'phone', 'dataContact'));
   }
-
   /* Tags:... */
   public function viewContactCustomer(Request $request)
   {
@@ -326,9 +333,7 @@ class CustomerController extends Controller
     $id = $request->id;
     $data_personal = Cst_personal::join('cst_institutions', 'cst_personals.cnt_cst_id','=', 'cst_institutions.ins_id')
     ->where('cnt_id',$request->id)
-    // ->select('cst_name', 'cnt_fullname', 'cnt_company_position', 'view_option', 'cnt_notes')
     ->first();
-    // dd($data_personal);
     #telephon
     $data_telephone = Cst_contact_phone::where('pho_cnt_id',$request->id)
     ->get();
@@ -348,9 +353,8 @@ class CustomerController extends Controller
     foreach ($data_email as $key => $value) {
       $str_email .= "- " . $value->eml_address . "<br>";
     }
-    // dd($data_personal);
-    // die();
-    return view('contents.page_customer.contact_info', compact('id','data_personal', 'str_phone', 'str_mobile', 'str_email'));
+    $data_loc = Cst_location::where('loc_cst_id',$id)->where('loc_represent', 'INDIVIDUAL')->first();
+    return view('contents.page_customer.contact_info', compact('id','data_personal', 'str_phone', 'str_mobile', 'str_email', 'data_loc'));
   }
   /* Tags:... */
   public function deleteContact(Request $request)
@@ -542,7 +546,6 @@ class CustomerController extends Controller
       'company'
     ));
   }
-  
   ###
   public function viewCustomerLead(Request $request)
   {
@@ -902,74 +905,180 @@ class CustomerController extends Controller
     return view('contents.page_customer.form_create_customer_fixed', compact('business_fields', 'lead_status', 'products', 'company','id', 'subcustomer', 'provincies'));
   }
   ###
-  public function updateCompanyData(Request $request)
+  public function updateCustomerData(Request $request)
   {
+    $auth = Auth::user();
     $id = $request->id;
-    $lead_status = Prs_lead_status::get();
+    $customer = Cst_institution::where('ins_id', $request->id)
+    ->select('ins_business_field', 'ins_web', 'ins_note', 'ins_name')
+    ->first();
+    $fields = [];
+    $bf_data = explode(',',$customer->ins_business_field);
+    foreach ($bf_data  as $key => $value) {
+      $fields[$key] = $value;
+    }
+    $mobile = $this->dataMobile($request->id, 'CUSTOMER');
+    $email = $this->dataEmail($request->id, 'CUSTOMER');
+    $phone = $this->dataPhone($request->id, 'CUSTOMER');
+    $location = Cst_location::where('loc_cst_id', $id)
+    ->where('loc_represent', 'CUSTOMER')
+    ->select('loc_id','loc_street', 'loc_district', 'loc_city', 'loc_province')
+    ->first();
+    $provincies = Addr_province::get();
     $business_fields = Cst_bussiness_field::get();
-    $company = Cst_customer::where('cst_id', $request->id)->first();
-    $phone = $this->dataPhone($request->id,'INSTITUTION');
-    $email = $this->dataEmail($request->id,'INSTITUTION');
-    $mobile = $this->dataMobile($request->id,'INSTITUTION');
+    #
+    return view('contents.page_customer.form_update_customer', compact('id', 'fields','customer', 'business_fields', 'mobile', 'email', 'phone', 'provincies', 'location'));
+  }
+  public function updateSubcustomerData(Request $request)
+  {
+    $auth = Auth::user();
+    $id = $request->id;
+    $customer = Cst_customer::where('cst_id', $request->id)
+    ->select('cst_business_field', 'cst_web', 'cst_notes', 'cst_name')
+    ->first();
+    $fields = [];
+    $bf_data = explode(',', $customer->cst_business_field);
+    foreach ($bf_data  as $key => $value) {
+      $fields[$key] = $value;
+    }
+    $mobile = $this->dataMobile($request->id, 'SUBCUSTOMER');
+    $phone = $this->dataPhone($request->id, 'SUBCUSTOMER');
+    $email = $this->dataEmail($request->id, 'SUBCUSTOMER');
+    $location = Cst_location::where('loc_cst_id', $id)->first();
+
+    $business_fields = Cst_bussiness_field::get();
     $district = Addr_district::get();
-    $location = Cst_location::where('loc_cst_id',$id)->first();
-    return view('contents.page_customer.form_update_customer',compact('id','business_fields', 'company','phone','email','mobile','location','district'));
+    $provincies = Addr_province::get();
+    return view('contents.page_customer.form_update_subcustomer', 
+    compact('id', 'fields','business_fields', 'customer', 'phone', 'email', 'mobile', 'location', 'district', 'provincies'));
   }
   ###
   public function storeUpdateCustomer(Request $request)
   {
-    $id_cst = $request->id;
+    $id_cst = $request->ins_id;
     $user = Auth::user();
+    $business_categories = [];
+    foreach ($request->business_category as $key => $value) {
+      $business_categories[$key] = $value;
+    }
+    $business_category = implode(',', $business_categories);
     $data = [
-      'cst_name' => $request->institution_name,
-      'cst_web' => '',
-      'cst_business_field' => $request->business_category,
-      'cst_notes' => $request->notes,
-      'view_option' => $request->view_option,
+      'ins_name' => $request->customer_name,
+      'ins_web' => $request->web,
+      'ins_business_field' => $business_category,
+      'ins_note' => $request->note,
     ];
-    $store_update_companies = Cst_customer::where('cst_id',$id_cst)->update($data);
+    $store_update_companies = Cst_institution::where('ins_id',$id_cst)->update($data);
     foreach ($request->mobile as $key => $value) {
       $mobiles[$key] = [
         'mob_cnt_id' => $id_cst,
-        'mob_param' => 'INSTITUTION',
+        'mob_param' => 'CUSTOMER',
         'mob_number' => $value,
         'created_by' => $user->id
       ];
     }
-    $delete_stored_mobile = Cst_contact_mobile::where('mob_param','INSTITUTION')->where('mob_cnt_id',$id_cst)->delete();
+    $delete_stored_mobile = Cst_contact_mobile::where('mob_param', 'CUSTOMER')->where('mob_cnt_id',$id_cst)->delete();
     $store_new_mobile = Cst_contact_mobile::insert($mobiles);
     foreach ($request->phone as $key => $value) {
       $phones[$key] = [
         'pho_cnt_id' => $id_cst,
-        'pho_param' => 'INSTITUTION',
+        'pho_param' => 'CUSTOMER',
         'pho_number' => $value,
         'created_by' => $user->id
       ];
     }
-    $delete_stored_phone = Cst_contact_phone::where('pho_param','INSTITUTION')->where('pho_cnt_id',$id_cst)->delete();
+    $delete_stored_phone = Cst_contact_phone::where('pho_param', 'CUSTOMER')->where('pho_cnt_id',$id_cst)->delete();
     $store_new_phone = Cst_contact_phone::insert($phones);
     foreach ($request->email as $key => $value) {
       $emails[$key] = [
         'eml_cnt_id' => $id_cst,
-        'eml_param' => 'INSTITUTION',
+        'eml_param' => 'CUSTOMER',
         'eml_address' => $value,
         'created_by' => $user->id
       ];
-      $delete_stored_email = Cst_contact_email::where('eml_param','INSTITUTION')->where('eml_cnt_id',$id_cst)->delete();
+      $delete_stored_email = Cst_contact_email::where('eml_param', 'CUSTOMER')->where('eml_cnt_id',$id_cst)->delete();
       $store_new_email = Cst_contact_email::insert($emails);
     }
     $location = [
       'loc_cst_id' => $id_cst,
-      'loc_represent' => 'INSTITUTION',
+      'loc_represent' => 'CUSTOMER',
       'loc_street' => $request->addr_street,
-      'loc_district' => $request->district,
-      'loc_city' => $request->city,
-      'loc_province' => $request->province,
+      'loc_district' => $request->addr_district,
+      'loc_city' => $request->addr_city,
+      'loc_province' => $request->addr_province,
       'created_by' => $user->id
     ];
-    $delete_stored_address = Cst_location::where('loc_represent','INSTITUTION')->where('loc_cst_id',$id_cst)->delete();
+    $delete_stored_address = Cst_location::where('loc_represent', 'CUSTOMER')->where('loc_cst_id',$id_cst)->delete();
     $store_new_address = Cst_location::insert($location);
-    return 1;
+    $data = [
+      "param" => true,
+      "id" => $id_cst,
+    ];
+    return $data;
+  }
+  public function storeUpdateSubCustomer(Request $request)
+  {
+    $id_cst = $request->cst_id;
+    $user = Auth::user();
+    $business_categories = [];
+    foreach ($request->business_category as $key => $value) {
+      $business_categories[$key] = $value;
+    }
+    $business_category = implode(',', $business_categories);
+    $data = [
+      'cst_name' => $request->subcustomer_name,
+      'cst_web' => $request->web,
+      'cst_business_field' => $business_category,
+      'cst_notes' => $request->note,
+      'view_option' => $request->view_option,
+    ];
+    $store_update_companies = Cst_customer::where('cst_id', $id_cst)->update($data);
+    foreach ($request->mobile as $key => $value) {
+      $mobiles[$key] = [
+        'mob_cnt_id' => $id_cst,
+        'mob_param' => 'SUBCUSTOMER',
+        'mob_number' => $value,
+        'created_by' => $user->id
+      ];
+    }
+    $delete_stored_mobile = Cst_contact_mobile::where('mob_param', 'SUBCUSTOMER')->where('mob_cnt_id', $id_cst)->delete();
+    $store_new_mobile = Cst_contact_mobile::insert($mobiles);
+    foreach ($request->phone as $key => $value) {
+      $phones[$key] = [
+        'pho_cnt_id' => $id_cst,
+        'pho_param' => 'SUBCUSTOMER',
+        'pho_number' => $value,
+        'created_by' => $user->id
+      ];
+    }
+    $delete_stored_phone = Cst_contact_phone::where('pho_param', 'SUBCUSTOMER')->where('pho_cnt_id', $id_cst)->delete();
+    $store_new_phone = Cst_contact_phone::insert($phones);
+    foreach ($request->email as $key => $value) {
+      $emails[$key] = [
+        'eml_cnt_id' => $id_cst,
+        'eml_param' => 'SUBCUSTOMER',
+        'eml_address' => $value,
+        'created_by' => $user->id
+      ];
+      $delete_stored_email = Cst_contact_email::where('eml_param', 'SUBCUSTOMER')->where('eml_cnt_id', $id_cst)->delete();
+      $store_new_email = Cst_contact_email::insert($emails);
+    }
+    $location = [
+      'loc_cst_id' => $id_cst,
+      'loc_represent' => 'SUBCUSTOMER',
+      'loc_street' => $request->addr_street,
+      'loc_district' => $request->addr_district,
+      'loc_city' => $request->addr_city,
+      'loc_province' => $request->addr_province,
+      'created_by' => $user->id
+    ];
+    $delete_stored_address = Cst_location::where('loc_represent', 'SUBCUSTOMER')->where('loc_cst_id', $id_cst)->delete();
+    $store_new_address = Cst_location::insert($location);
+    $data = [
+      "param" => true,
+      "id" => $id_cst,
+    ];
+    return $data;
   }
   ###
   public function storeUpdatePersonal(Request $request)
@@ -1031,22 +1140,26 @@ class CustomerController extends Controller
   public function updatePersonData(Request $request)
   {
     $id = $request->id;
-    $dataperson = Cst_personal::join('cst_customers','cst_personals.cnt_cst_id','=', 'cst_customers.cst_id')
+    $dataperson = Cst_personal::join('cst_institutions','cst_personals.cnt_cst_id','=', 'cst_institutions.ins_id')
       ->where('cnt_id',$id)
-      ->select('cst_personals.view_option as view_option_individu','cnt_id', 'cnt_fullname', 'cnt_company_position', 'cnt_notes', 'cnt_cst_id', 'cst_name')
+      ->select('cst_personals.view_option as view_option_individu','cnt_id', 'cnt_fullname', 'cnt_company_position', 'cnt_notes', 'cnt_cst_id', 'ins_name', 'cnt_cst_id', 'cnt_subcst_id')
       ->first();
-    $company = Cst_customer::select('cst_id','cst_name')->get();
-    $lead_status = Prs_lead_status::get();
-    $business_fields = Cst_bussiness_field::get();
+    $company = Cst_institution::where('ins_id', $dataperson->cnt_cst_id)
+    ->select('ins_id','ins_name')
+    ->first();
+    $subcustomer = Cst_customer::where('cst_institution', $company->ins_id)
+    ->select('cst_id','cst_name')
+    ->get();
+    $provincies = Addr_province::get();
     // $products = Prd_subproduct::get();
     $phone = $this->dataPhone($request->id, 'INDIVIDUAL');
     $email = $this->dataEmail($request->id, 'INDIVIDUAL');
     $mobile = $this->dataMobile($request->id, 'INDIVIDUAL');
-    // echo $dataperson;
-    // die();
-    $district = Addr_district::get();
-    $location = Cst_location::where('loc_cst_id', $id)->where('loc_represent','INDIVIDUAL')->first();
-    return view('contents.page_customer.form_update_person', compact('id','location','company', 'dataperson','mobile','phone','email'));
+    $location = Cst_location::where('loc_cst_id', $id)
+    ->where('loc_represent','INDIVIDUAL')
+    ->first();
+    // dd($location);
+    return view('contents.page_customer.form_update_person', compact('id','location','company', 'dataperson','mobile','phone','email', 'subcustomer', 'provincies'));
   }
   ###
   ###
@@ -1164,6 +1277,92 @@ class CustomerController extends Controller
     ];
     return $result;
   }
+  public function updateContact(Request $request)
+  {
+    $user = Auth::user();
+    $cnt_id = $request->person_id;
+    $id_cst = $request->cst_id;
+    $id_subcst = $request->sub_customer;
+    $loc_id = $request->loc_id;
+    $data = [
+      'cnt_cst_id' => $id_cst,
+      'cnt_subcst_id' => $id_subcst,
+      'cnt_fullname' => $request->person_name,
+      'cnt_nickname' => null,
+      'cnt_company_position' => $request->job_position,
+      'cnt_notes' => $request->note,
+      'cnt_priv_address' => null,
+      'view_option' => 'PUBLIC',
+      'created_by' => $user->id,
+      'cnt_img' => null,
+    ];
+    Cst_personal::where('cnt_id',$cnt_id)->update($data);
+    if ($request->addr_street != null || $request->addr_district != null || $request->addr_city != null || $request->addr_province != null) {
+      $new_data_address = [
+        'loc_cst_id' => $cnt_id,
+        'loc_represent' => Str::upper($request->cststatus),
+        'loc_street' => $request->addr_street,
+        'loc_district' => $request->addr_district,
+        'loc_city' => $request->addr_city,
+        'loc_province' => $request->addr_province,
+      ];
+      Cst_location::where('loc_id',$loc_id)->update($new_data_address);
+    } else {
+      $result = [
+        'param' => false,
+      ];
+      return $result;
+    }
+    $first_val_mobile = head($request->mobile);
+    if ($first_val_mobile != null or $first_val_mobile != "") {
+      foreach ($request->mobile as $key => $value) {
+        $data_mobile[$key] = [
+          'mob_cnt_id' => $cnt_id,
+          'mob_param' => Str::upper($request->cststatus),
+          'mob_label' => null,
+          'mob_number' => $value,
+          'created_by' => $user->id
+        ];
+      }
+      Cst_contact_mobile::where('mob_cnt_id', $cnt_id)->where('mob_param', 'INDIVIDUAL')->delete();
+      $res_cst_mobile = Cst_contact_mobile::insert($data_mobile);
+    }
+
+    $first_val_email = head($request->email);
+    if ($first_val_email != null or $first_val_email != "") {
+      foreach ($request->email as $key => $value) {
+        $data_email[$key] = [
+          'eml_cnt_id' => $cnt_id,
+          'eml_param' => Str::upper($request->cststatus),
+          'eml_label' => null,
+          'eml_address' => $value,
+          'created_by' => $user->id
+        ];
+      }
+      Cst_contact_email::where('eml_cnt_id', $cnt_id)->where('eml_param', 'INDIVIDUAL')->delete();
+      $res_cst_mobile = Cst_contact_email::insert($data_email);
+    }
+    $first_val_phone = head($request->phone);
+    if ($first_val_phone != null or $first_val_phone != "") {
+      foreach ($request->phone as $key => $value) {
+        $data_phone[$key] = [
+          'pho_cnt_id' => $cnt_id,
+          'pho_param' =>  Str::upper($request->cststatus),
+          'pho_label' => null,
+          'pho_number' => $value,
+          'created_by' => $user->id
+        ];
+      }
+      Cst_contact_phone::where('pho_cnt_id', $cnt_id)->where('pho_param', 'INDIVIDUAL')->delete();
+      $res_cst_phone = Cst_contact_phone::insert($data_phone);
+    }
+    $result = [
+      'param' => true,
+      'idcnt' => $cnt_id,
+      'cst_id' => $id_cst
+    ];
+    return $result;
+  }
   public function storeCreateCustomer(Request $request)
   {
     $user = Auth::user();
@@ -1249,6 +1448,93 @@ class CustomerController extends Controller
     ];
     return $result;
   }
+  public function storeCreateSubCustomer(Request $request)
+  {
+    $user = Auth::user();
+    $cst_id = genIdCompany();
+    $tmp_cst_name = $request->customer_name;
+    if ($tmp_cst_name == null) {
+      $result = [
+        'param' => false,
+      ];
+      return $result;
+    } else {
+      // $business_field = implode(',', $request->business_category);
+      $new_data_customer = [
+        'cst_id' => $cst_id,
+        'cst_name' => $request->customer_name,
+        'cst_web' => $request->web,
+        'cst_institution' => $request->customer,
+        'cst_business_field' =>  null,
+        'cst_notes' => $request->cst_notes,
+        'view_option' =>'PUBLIC                                                                      ',
+        'created_by' => $user->id,
+      ];
+      Cst_customer::insert($new_data_customer);
+    }
+    if ($request->addr_street != null || $request->addr_district != null || $request->addr_city != null || $request->addr_province != null) {
+      $new_data_address = [
+        'loc_cst_id' => $cst_id,
+        'loc_represent' => Str::upper($request->cststatus),
+        'loc_street' => $request->addr_street,
+        'loc_district' => $request->addr_district,
+        'loc_city' => $request->addr_city,
+        'loc_province' => $request->addr_province,
+        // 'created_by' => $user->id
+      ];
+      Cst_location::insert($new_data_address);
+    } else {
+      $result = [
+        'param' => false,
+      ];
+      return $result;
+    }
+    $first_val_mobile = head($request->mobile);
+    if ($first_val_mobile != null or $first_val_mobile != "") {
+      foreach ($request->mobile as $key => $value) {
+        $data_mobile[$key] = [
+          'mob_cnt_id' => $cst_id,
+          'mob_param' => Str::upper($request->cststatus),
+          'mob_label' => null,
+          'mob_number' => $value,
+          'created_by' => $user->id
+        ];
+      }
+      $res_cst_mobile = Cst_contact_mobile::insert($data_mobile);
+    }
+
+    $first_val_email = head($request->email);
+    if ($first_val_email != null or $first_val_email != "") {
+      foreach ($request->email as $key => $value) {
+        $data_email[$key] = [
+          'eml_cnt_id' => $cst_id,
+          'eml_param' => Str::upper($request->cststatus),
+          'eml_label' => null,
+          'eml_address' => $value,
+          'created_by' => $user->id
+        ];
+      }
+      $res_cst_mobile = Cst_contact_email::insert($data_email);
+    }
+    $first_val_phone = head($request->phone);
+    if ($first_val_phone != null or $first_val_phone != "") {
+      foreach ($request->phone as $key => $value) {
+        $data_phone[$key] = [
+          'pho_cnt_id' => $cst_id,
+          'pho_param' =>  Str::upper($request->cststatus),
+          'pho_label' => null,
+          'pho_number' => $value,
+          'created_by' => $user->id
+        ];
+      }
+      $res_cst_phone = Cst_contact_phone::insert($data_phone);
+    }
+    $result = [
+      'param' => true,
+      'cst_id' => $cst_id
+    ];
+    return $result;
+  }
   ###
   /* Tags:... */
   public function actionGetPersonContact(Request $request)
@@ -1318,6 +1604,22 @@ class CustomerController extends Controller
     ];
     return $result;
   }
+  public function actionGetCustomer()
+  {
+    $customer = Cst_institution::get();
+    foreach ($customer as $key => $value) {
+      $data[$key] = [
+        'id' => $value->ins_id,
+        'title' => $value->ins_name
+      ];
+    }
+    $result = [
+      'param' => true,
+      'data' => $data
+    ];
+    return $result;
+  }
+  
   /* Tags:... */
   public function actionGetCity(Request $request)
   {

@@ -52,6 +52,14 @@ opportunitys
 								</div>
 								<div class="row pb-2">
 									<div class="col-3">
+										<strong>Sub Cst.</strong>
+									</div>
+									<div class="col-auto">
+										<p id="value-act-subcustomer">-</p>
+									</div>
+								</div>
+								<div class="row pb-2">
+									<div class="col-3">
 										<strong>Activity</strong>
 									</div>
 									<div class="col-auto">
@@ -247,8 +255,16 @@ opportunitys
 									<select type="text" id="select-customer" class="form-select ts-input-custom" name="customer" placeholder="Select customer"  value="">
 										<option value="{{ null }}"></option>
 										@foreach ($customer_all as $list)
-											<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
+											<option value="{{ $list->ins_id }}">{{ $list->ins_name }}</option>
 										@endforeach
+									</select>
+								</div>
+							</div>
+							<div class="mb-2 row" style="margin-right: 0px;">
+								<label class="col-3 col-form-label">Sub Customer</label>
+								<div class="col" style="padding: 0px;">
+									<select type="text" id="select-subcustomer" class="form-select ts-input-custom" name="sub_customer" placeholder="Select sub customer"  value="">
+										<option value="{{ null }}"></option>
 									</select>
 								</div>
 							</div>
@@ -533,9 +549,24 @@ var select_customer = new TomSelect("#select-customer",{
 	}
 });
 select_customer.on('change',function () {
-	var idcst = select_customer.getValue();  
+	var idcst = select_customer.getValue();
+	actionGetsubcustomer(idcst);  
 	actionObtainProject(idcst);
 	actionGetDataContact(idcst);
+});
+var select_subcustomer = new TomSelect("#select-subcustomer",{
+	create: false,			
+	valueField: 'id',
+	labelField: 'title',
+	searchField: 'title',
+	render: {
+		option: function(data, escape) {
+			return '<div><span class="title">'+escape(data.title)+'</span></div>';
+		},
+		item: function(data, escape) {
+			return '<div id="select-signed-user">'+escape(data.title)+'</div>';
+		}
+	}
 });
 /*===============================================================================================*/
 var select_project_name = new TomSelect("#select-project-name",{
@@ -554,8 +585,6 @@ var select_project_name = new TomSelect("#select-project-name",{
 		}
 	}
 });
-/*===============================================================================================*/
-
 /*===============================================================================================*/
 var select_team_user = new TomSelect("#select-team-user",{
 	create: false,
@@ -621,6 +650,33 @@ var select_act_status = new TomSelect("#select-act-status",{
 {{-- ============================================================================================ --}}
 {{-- Class Function --}}
 <script>
+function actionGetsubcustomer(id) {
+	var subCstData = [];
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'POST',
+		url: "{{ route('sub-customers') }}",
+		async: false,
+		data: {
+			'id':id
+		},
+		success: function(result) {
+			for (let n = 0; n < result.data.length; n++) {
+				subCstData.push({
+					id:result.data[n].id,
+					title:result.data[n].title
+				});
+			}
+		}
+	});
+	select_subcustomer.clear();
+	select_subcustomer.clearOptions();
+	select_subcustomer.addOptions(subCstData);
+};
 function mainDataActivity(val_type,val_status,val_user) {
 	var id = "";
 	$('#myTable_filter input').addClass('form-control custom-datatables-filter');
@@ -828,6 +884,7 @@ function actionViewMiniDetail(id) {
 		},
 		success: function(result) {
 			$('#value-act-customer').html(result.data_act_name);
+			$('#value-act-subcustomer').html(result.data_act_subname);
 			$('#value-act-type').html(result.data_act_type);
 			$('#value-act-due-date').html(result.data_act_due_date);
 			$('#value-act-assign').html(result.data_act_assign);
@@ -1041,7 +1098,7 @@ $(document).ready(function() {
 			contentType: false,
 			processData: false,
 			success: function(result) {
-				actionLoadActivities('act-total');
+				actionLoadActivities('act_total');
 				if (result.param == true) {
 					$.confirm({
 						type: 'green',
@@ -1094,7 +1151,7 @@ $(document).ready(function() {
 						animation: 'opacity',
 						closeAnimation: 'opacity'
 					});
-					actionLoadActivities('act-total');
+					actionLoadActivities('act_total');
 				}else{
 					$.alert({
 						type: 'red',

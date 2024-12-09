@@ -82,12 +82,14 @@ Leads
 		<div class="row mb-3">
 			<div class="col-6">
 				<h2 class=" mb-1">{{ $lead->lds_title }}</h2>
-				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
-				<div class="page-pretitle-custom mb-2">{{ html_entity_decode($institution_names) }}</div>
 				<em class="text-muted lh-base mb-1"><i>Customer</i></em>
-				@foreach ($lead_customer as $list)
-					<div class="page-pretitle-custom">{{ $list->cst_name }}</div>
-				@endforeach
+				<div class="page-pretitle-custom mb-2">{{ html_entity_decode($institution_names->ins_name) }}</div>
+				<em class="text-muted lh-base mb-1"><i>Sub Customer</i></em>
+				@if ($sub_customer === null)
+					<div class="page-pretitle-custom mb-2">-</div>
+				@else
+					<div class="page-pretitle-custom mb-2">{{ html_entity_decode($sub_customer->cst_name) }}</div>		
+				@endif
 			</div>
 			<div class="col-auto">
 			</div>
@@ -205,9 +207,7 @@ Leads
 								<div class="col text-truncate" style="padding-left: 0px;">
 									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
 										<strong>{{ $list->cnt_fullname }}</strong>
-									</a>
-									<a href="{{ url('customer/detail-customer/'.$list->plc_customer_id.'?extpg=information') }}">
-										<div class="text-muted text-truncate">{{ $list->cst_name }}</div>
+										<div class="text-muted text-truncate">{{ $list->cnt_company_position }}</div>
 									</a>
 								</div>
 								<div class="col-auto align-self-center">
@@ -397,20 +397,12 @@ Leads
 								<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
 								@endforeach
 							</select>
+							<input type="hidden" name="lds_id" value="{{ $lead->lds_id }}">
+							<input type="hidden" name="id_cst" value="{{ $lead->lds_customer }}">
+							<input type="hidden" name="id_subcst" value="{{ $lead->lds_subcustomer }}">
 						</div>
 					</div>
 					<span id="additional-form-contact" style="display: none;">
-						<div class="row mb-2">
-							<label class="col-3 col-form-label" >Customer</label>
-							<div class="col">
-								<select type="text" class="form-select select-sales" name="customer" id="select-customer" value="">
-									<option value="{{ null }}"></option>
-									@foreach ($lead_customer as $list)
-									<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
-									@endforeach
-								</select>
-							</div>
-						</div>
 						<div class="row mb-2">
 							<label class="col-3 col-form-label" >Contact</label>
 							<div class="col">
@@ -983,65 +975,6 @@ var select_act_status = new TomSelect("#select-act-status",{
 		}
 	}
 });
-/*
-var select_principles = new TomSelect("#select-principles",{
-	persist: false,
-	createOnBlur: true,
-	create: false,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-principles">'+escape(data.title)+'</div>';
-		}
-	}
-});
-var select_products = new TomSelect("#select-product",{
-	persist: false,
-	createOnBlur: true,
-	create: false,
-	maxItems: 10,			
-	valueField: 'id',
-	labelField: 'title',
-	searchField: 'title',
-	render: {
-		option: function(data, escape) {
-			return '<div><span class="title">'+escape(data.title)+'</span></div>';
-		},
-		item: function(data, escape) {
-			return '<div id="select-product">'+escape(data.title)+'</div>';
-		}
-	}
-});
-*/
-/*================================================================================================*/
-/*
-select_principles.on('change',function () {
-	var prd_id = select_principles.getValue();
-	actionGetProduct(prd_id);
-});
-/*
-const picker_a = new easepick.create({
-	element: "#datepicker_start",
-	css: [ "{{ asset('plugins/litepicker/bundle/index.css') }}" ],
-	zIndex: 10,
-	format: "YYYY-MM-DD hh:mm a",
-	plugins: [
-		"TimePlugin","AmpPlugin"
-	],
-	TimePlugin: {
-		format12: true
-	},
-	AmpPlugin: {
-		resetButton: true,
-		darkMode: false
-	},
-});
-*/
 const picker_b = new easepick.create({
 	element: "#datepicker_due",
 	css: [ "{{ asset('plugins/litepicker/bundle/index.css') }}" ],
@@ -1272,8 +1205,8 @@ function actionAddCardAvatar(params) {
 				+'<div class="card-body card-body-contact" style="">'
 					+'<div class="row">'
 						+'<div class="col-auto"><a href="{!! url("customer/contacts/detail/'+params.cnt_id+'") !!}"><span class="avatar"><i class="ri-user-line"></i></span></div>'
-						+'<div class="col text-truncate" style="padding-left: 0px;"><a href="{!! url("customer/contacts/detail/'+params.personal_id+'") !!}"><strong>'+params.name_cnt+'</strong></a>'
-							+'<div class="text-muted text-truncate"><a href="{!! url("customer/detail-customer/'+params.plc_customer_id+'?extpg=information") !!}">'+params.name_cst+'</a></div>'
+						+'<div class="col text-truncate" style="padding-left: 0px;"><a href="{!! url("customer/contacts/detail/'+params.personal_id+'") !!}"><strong>'+params.name_cnt+'</strong>'
+							+'<div class="text-muted text-truncate">'+params.name_cst+'</div></a>'
 					+'</div>'
 					+'<div class="col-auto align-self-center">'
 						+'<div class="dropdown">'

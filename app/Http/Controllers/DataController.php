@@ -258,7 +258,7 @@ class DataController extends Controller
 	# <===========================================================================================================================================================>
 	public function sourceDataCustomer(Request $request)
 	{
-		$colect_data = Cst_institution::join('cst_customers','cst_institutions.ins_id','=','cst_customers.cst_institution')
+		$colect_data = Cst_institution::leftjoin('cst_customers','cst_institutions.ins_id','=','cst_customers.cst_institution')
 		->leftJoin(DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
 			function ($join){
 				$join->on('cst_customers.cst_id','=','locations.loc_cst_id');
@@ -289,7 +289,11 @@ class DataController extends Controller
 			return '<di><b><a href="' . url('customer/detail-customer/' . $colect_data->ins_id . '?extpg=information') . '">' . $colect_data->ins_name . '</a></b></di>';
 		})
 		->addColumn('sub_customer', function ($colect_data) {
-			return '<di><a href="' . url('customer/detail-sub-customer/' . $colect_data->cst_id . '?extpg=information') . '">' . $colect_data->cst_name . '</a></di>';
+			if ($colect_data->cst_id != null) {
+				return '<di><a href="' . url('customer/detail-sub-customer/' . $colect_data->cst_id . '?extpg=information') . '">' . $colect_data->cst_name . '</a></di>';
+			} else {
+				return '-';
+			}
 		})
 		->addColumn('category', function ($colect_data) {
 			if ($colect_data->cst_business_field == null) {
@@ -451,7 +455,7 @@ class DataController extends Controller
 		$user = Auth::user();
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
 				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
@@ -464,7 +468,7 @@ class DataController extends Controller
 					$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 				})
 			->where('lds_stage_opr','false')
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
+			->select('lds_id', 'lds_subcustomer','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','act_id','last_todo','last_date','aat_type_button')
 			->get();
 		}elseif (checkRule(array('MGR'))) {
 			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master','manager'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
@@ -474,7 +478,7 @@ class DataController extends Controller
 			}
 			$lead_id = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
 				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
@@ -488,7 +492,7 @@ class DataController extends Controller
 				})
 			->whereIn('lds_id',$lead_id)
 			->where('lds_stage_opr','false')
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
+			->select('lds_id', 'lds_subcustomer','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','act_id','last_todo','last_date','aat_type_button')
 			->get();
 		}elseif (checkRule(array('MGR.TCH'))) {
 			# code...
@@ -500,7 +504,7 @@ class DataController extends Controller
 			}
 			$lds_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
 				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
@@ -514,7 +518,7 @@ class DataController extends Controller
 				})
 			->whereIn('lds_id',$lds_ids)
 			->where('lds_stage_opr','false')
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
+			->select('lds_id', 'lds_subcustomer','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','act_id','last_todo','last_date','aat_type_button')
 			->get();
 		}elseif(checkRule(array('STF'))){
 			$lead_data = Prs_accessrule::whereIn('slm_rules',['colaborator','master'])->where('slm_user',$user->id)->select('slm_lead')->get()->toArray();
@@ -524,7 +528,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
 				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
@@ -538,7 +542,7 @@ class DataController extends Controller
 				})
 			->where('lds_stage_opr','false')
 			->whereIn('lds_id',$lead_ids)
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
+			->select('lds_id', 'lds_subcustomer','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','act_id','last_todo','last_date','aat_type_button')
 			->get();
 		}elseif(checkRule(array('STF.TCH'))){
 			$lead_user_master = Prs_accessrule::where('slm_rules','technical')->where('slm_user',$user->id)->select('slm_lead')->get();
@@ -548,7 +552,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($ids);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
 				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
@@ -562,7 +566,7 @@ class DataController extends Controller
 				})
 			->where('lds_stage_opr','false')
 			->whereIn('lds_id',$lead_ids)
-			->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','last_todo','last_date','aat_type_button')
+			->select('lds_id', 'lds_subcustomer','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','act_id','last_todo','last_date','aat_type_button')
 			->get();
 		}
 		return DataTables::of($lead_data)
@@ -587,7 +591,14 @@ class DataController extends Controller
 			return $lead_data->lds_title;
 		})
 		->addColumn('customer', function ($lead_data) {
-			return $lead_data->cst_name;
+			$res="";
+			if ($lead_data->lds_subcustomer == null) {
+				$res.='<b>'.$lead_data->ins_name.'</b>';
+			}else{
+				$res.='<b>'.$lead_data->ins_name.'</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: '. getNameSubcustomer($lead_data->lds_subcustomer).'<span>';
+			}
+			return $res;
 		})
 		->addColumn('status', function ($lead_data) {
 			if ($lead_data->pls_code_name == 'prospecting') {
@@ -634,7 +645,7 @@ class DataController extends Controller
 		}
 		$lead_ids = array_unique($ids);
 		$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-		->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+		->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 		->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 			RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
 			GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
@@ -648,7 +659,7 @@ class DataController extends Controller
 			})
 		->where('lds_stage_opr','false')
 		->whereIn('lds_id',$lead_ids)
-		->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','act_id','aat_type_button','last_date')
+		->select('lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','act_id','aat_type_button','last_date', 'lds_subcustomer', 'lds_customer')
 		->get();
 		return DataTables::of($lead_data)
 		->addIndexColumn()
@@ -672,7 +683,14 @@ class DataController extends Controller
 			return '<a href="'.url('leads/detail-lead').'/'.$lead_data->lds_id.'"><b>'.$lead_data->lds_title.'</b></a>';
 		})
 		->addColumn('customer', function ($lead_data) {
-			return $lead_data->cst_name;
+			$res = "";
+			if ($lead_data->lds_subcustomer == null) {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($lead_data->lds_subcustomer) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('status', function ($lead_data) {
 			if ($lead_data->pls_code_name == 'prospecting') {
@@ -907,7 +925,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
@@ -924,7 +942,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}elseif(checkRule(array('MGR'))){
@@ -935,7 +953,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
@@ -952,7 +970,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 			// die('-');
@@ -964,7 +982,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
@@ -981,7 +999,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}elseif(checkRule(array('MGR.TCH'))){
@@ -992,7 +1010,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
@@ -1009,7 +1027,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}elseif(checkRule(array('STF.TCH'))){
@@ -1020,7 +1038,7 @@ class DataController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
@@ -1037,7 +1055,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}
@@ -1063,7 +1081,14 @@ class DataController extends Controller
 			return '<a href="'.url('opportunities/detail-opportunity').'/'.$lead_data->opr_id.'"><b>'.$lead_data->lds_title.'</b></a>';
 		})
 		->addColumn('customer', function ($lead_data) {
-			return $lead_data->cst_name;
+			$res = "";
+			if ($lead_data->lds_subcustomer == null) {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($lead_data->lds_subcustomer) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('status', function ($lead_data) {
 			if ($lead_data->oss_status_name == null || $lead_data->oss_status_name == "" ) {
@@ -1108,8 +1133,8 @@ class DataController extends Controller
 		}
 		$lead_ids = array_unique($lds_idr);
 		$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-		->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
 		->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
+		->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 		->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 		->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 			RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
@@ -1125,8 +1150,9 @@ class DataController extends Controller
 		->whereIn('lds_id',$lead_ids)
 		->where('lds_stage_opr','true')
 		->where('opr_close_status',null)
-		->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name',
-		'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
+		->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name',
+		'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id',
+			'lds_subcustomer')
 		->get();
 		return DataTables::of($lead_data)
 		->addIndexColumn()
@@ -1150,7 +1176,14 @@ class DataController extends Controller
 			return '<a href="'.url('opportunities/detail-opportunity').'/'.$lead_data->opr_id.'"><b>'.$lead_data->lds_title.'</b></a>';
 		})
 		->addColumn('customer', function ($lead_data) {
-			return $lead_data->cst_name;
+			$res = "";
+			if ($lead_data->lds_subcustomer == null) {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($lead_data->lds_subcustomer) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('status', function ($lead_data) {
 			if ($lead_data->oss_status_name == null || $lead_data->oss_status_name == "" ) {
@@ -1194,9 +1227,9 @@ class DataController extends Controller
 			$lds_idr[$key] = $value['slm_lead'];
 		}
 		$lead_ids = array_unique($lds_idr);
-		$lead_data = Prs_lead::join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
-		->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
+		$lead_data = Prs_lead::join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 		->join('ord_purchases','opr_opportunities.opr_id','=','ord_purchases.pur_oppr_id')
+		->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 		->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 		->leftjoin(DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
 			RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
@@ -1212,7 +1245,7 @@ class DataController extends Controller
 		->whereIn('lds_id',$lead_ids)
 		->where('lds_stage_opr','true')
 		->where('opr_close_status','WIN')
-		->select('opr_id','lds_id','pur_id','slm_lead','slm_user','name','lds_title','cst_name',
+		->select('opr_id','lds_id','pur_id','slm_lead','slm_user','name','lds_title','ins_name','lds_subcustomer',
 		'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 		->get();
 		return DataTables::of($lead_data)
@@ -1237,7 +1270,14 @@ class DataController extends Controller
 			return '<a href="'.url('opportunities/detail-opportunity').'/'.$lead_data->opr_id.'"><b>'.$lead_data->lds_title.'</b></a>';
 		})
 		->addColumn('customer', function ($lead_data) {
-			return $lead_data->cst_name;
+			$res = "";
+			if ($lead_data->lds_subcustomer == null) {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($lead_data->lds_subcustomer) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('status', function ($lead_data) {
 			if ($lead_data->oss_status_name == null || $lead_data->oss_status_name == "" ) {
@@ -1506,26 +1546,26 @@ class DataController extends Controller
 		$user = Auth::user();
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				$colect_data = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('cst_institutions','act_activities.act_cst','=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1537,28 +1577,28 @@ class DataController extends Controller
 			}
 			$lds_id = array_unique($lds_idr);
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->whereIn('prs_leads.lds_id',$lds_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
+				->where('act_label_category', 'ACTIVITY')
+				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
-				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1570,28 +1610,28 @@ class DataController extends Controller
 			}
 			$lds_id = array_unique($lds_idr);
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1603,28 +1643,28 @@ class DataController extends Controller
 				$act_id[$key] = $value->acs_act_id;
 			}
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_id',$act_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_id',$act_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1635,28 +1675,28 @@ class DataController extends Controller
 				$act_id[$key] = $value->acs_act_id;
 			}
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_id',$act_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_id',$act_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category', 'ACTIVITY')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','cst_id','lds_stage_opr')
+				->select('act_id','ins_name','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title','lds_id','lds_stage_opr')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1683,7 +1723,14 @@ class DataController extends Controller
 			return $colect_data->aat_type_button;
 		})
 		->addColumn('customer', function ($colect_data) {
-			return '<a href="'.url('customer/detail-customer/'.$colect_data->cst_id.'?extpg=information').'"><b>'.$colect_data->cst_name.'</b></a>';
+			$res = "";
+			if ($colect_data->act_subcst == null) {
+				$res .= '<b>' . $colect_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $colect_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($colect_data->act_subcst) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('due_date', function ($colect_data) {
 			$date = date('d/M y, h:i a', strtotime($colect_data->act_task_times_due));
@@ -1740,26 +1787,25 @@ class DataController extends Controller
 		$user = Auth::user();
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				$colect_data = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('cst_institutions','act_activities.act_cst','=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id','ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
-				->where('act_activity_types.aat_type_code',$request->act_param)
-				->whereIn('act_user_assigned',$user_param)
-				->whereIn('act_run_status',$status)
-				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
+				->whereIn('act_user_assigned', $user_param)
+				->whereIn('act_run_status', $status)
+				->where('act_label_category', 'TICKET')
+				->select('act_id', 'ins_name', 'act_cst', 'act_subcst', 'aat_type_button', 'act_activities.act_task_times_due', 'act_todo_result', 'users.name as assign', 'act_todo_result', 'act_run_status', 'lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1771,28 +1817,28 @@ class DataController extends Controller
 			}
 			$lds_id = array_unique($lds_idr);
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+				$colect_data = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+				->leftjoin('cst_institutions','act_activities.act_cst','=', 'cst_institutions.ins_id')
 				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id','ins_name','act_cst','act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id', 'ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1804,28 +1850,28 @@ class DataController extends Controller
 			}
 			$lds_id = array_unique($lds_idr);
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id','ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('prs_leads.lds_id',$lds_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id','ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1837,28 +1883,28 @@ class DataController extends Controller
 				$act_id[$key] = $value->acs_act_id;
 			}
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('act_id',$act_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id', 'ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('act_id',$act_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id', 'ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1869,28 +1915,28 @@ class DataController extends Controller
 				$act_id[$key] = $value->acs_act_id;
 			}
 			if ($request->act_param == 'act_total' || $request->act_param == null) {
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('act_id',$act_id)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id', 'ins_name', 'act_cst', 'act_subcst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}else{
-				$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-				->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
-				->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
-				->leftjoin('users','act_activities.act_user_assigned','=','users.id')
+				$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
+				->join('prs_leads', 'act_activities.act_lead_id', '=', 'prs_leads.lds_id')
+				->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
+				->leftjoin('users', 'act_activities.act_user_assigned', '=', 'users.id')
 				->whereIn('act_id',$act_id)
 				->where('act_activity_types.aat_type_code',$request->act_param)
 				->whereIn('act_user_assigned',$user_param)
 				->whereIn('act_run_status',$status)
 				->where('act_label_category','TICKET')
-				->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+				->select('act_id', 'ins_name', 'act_cst', 'act_subcst', 'aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 				->orderByDesc('act_activities.act_task_times_due')
 				->get();
 			}
@@ -1916,7 +1962,14 @@ class DataController extends Controller
 			return $colect_data->aat_type_button;
 		})
 		->addColumn('customer', function ($colect_data) {
-			return $colect_data->cst_name;
+			$res = "";
+			if ($colect_data->act_subcst == null) {
+				$res .= '<b>' . $colect_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $colect_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($colect_data->act_subcst) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('due_date', function ($colect_data) {
 			$date = date('d/M y, h:i a', strtotime($colect_data->act_task_times_due));
@@ -2609,24 +2662,24 @@ class DataController extends Controller
 		}
 		$lds_id = array_unique($lds_idr);
 		if ($request->act_param == 'act_total' || $request->act_param == null) {
-			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			$colect_data = Act_activity::join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
 			->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+			->leftjoin('cst_institutions','act_activities.act_cst','=', 'cst_institutions.ins_id')
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('prs_leads.lds_id',$lds_id)
 			->whereIn('act_run_status',$status)
-			->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+			->select('act_id', 'ins_name', 'act_subcst', 'act_cst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 			->orderByDesc('act_activities.act_task_times_due')
 			->get();
 		}else{
-			$colect_data = Act_activity::join('cst_customers','act_activities.act_cst','=','cst_customers.cst_id')
-			->join('act_activity_types','act_activities.act_todo_type_id','=','act_activity_types.aat_id')
+			$colect_data = Act_activity::join('act_activity_types', 'act_activities.act_todo_type_id', '=', 'act_activity_types.aat_id')
 			->join('prs_leads','act_activities.act_lead_id','=','prs_leads.lds_id')
+			->leftjoin('cst_institutions', 'act_activities.act_cst', '=', 'cst_institutions.ins_id')
 			->leftjoin('users','act_activities.act_user_assigned','=','users.id')
 			->whereIn('prs_leads.lds_id',$lds_id)
 			->where('act_activity_types.aat_type_code',$request->act_param)
 			->whereIn('act_run_status',$status)
-			->select('act_id','cst_name','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
+			->select('act_id','ins_name', 'act_subcst', 'act_cst','aat_type_button','act_activities.act_task_times_due','act_todo_result','users.name as assign','act_todo_result','act_run_status','lds_title')
 			->orderByDesc('act_activities.act_task_times_due')
 			->get();
 		}
@@ -2652,7 +2705,14 @@ class DataController extends Controller
 			return '<style="text-align:center;">'. $colect_data->aat_type_button.'</style>';
 		})
 		->addColumn('customer', function ($colect_data) {
-			return $colect_data->cst_name;
+			$res = "";
+			if ($colect_data->act_subcst == null) {
+				$res .= '<b>' . $colect_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $colect_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($colect_data->act_subcst) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('due_date', function ($colect_data) {
 			$date = date('d/M y, H:i', strtotime($colect_data->act_task_times_due));

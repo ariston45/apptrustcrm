@@ -18,6 +18,7 @@ use App\Models\Addr_district;
 use App\Models\Addr_province;
 use App\Models\Cst_bussiness_field;
 use App\Models\Cst_customer;
+use App\Models\Cst_institution;
 use App\Models\Cst_personal;
 use App\Models\Opr_opportunity;
 use App\Models\Ord_purchase;
@@ -53,7 +54,7 @@ class PurchaseController extends Controller
 		$user = Auth::user();
 		if (checkRule(array('ADM','AGM','MGR.PAS'))) {
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions','prs_leads.lds_customer','=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->join('ord_purchases','opr_opportunities.opr_id','=','ord_purchases.pur_oppr_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
@@ -62,7 +63,7 @@ class PurchaseController extends Controller
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			// ->where('lds_customer',$request->id)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','oss_id','oss_status_code','oss_status_name','oss_status_name','pur_id')
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer','oss_id','oss_status_code','oss_status_name','oss_status_name','pur_id')
 			// ->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif(checkRule(array('MGR'))){
@@ -73,7 +74,7 @@ class PurchaseController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->join('ord_purchases','opr_opportunities.opr_id','=','ord_purchases.pur_oppr_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
@@ -82,7 +83,7 @@ class PurchaseController extends Controller
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			// ->where('lds_customer',$request->id)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','oss_id','oss_status_code','oss_status_name','oss_status_name','pur_id')
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name', 'ins_name', 'lds_subcustomer','oss_id','oss_status_code','oss_status_name','oss_status_name','pur_id')
 			->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif(checkRule(array('STF'))){
@@ -93,7 +94,7 @@ class PurchaseController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->join('ord_purchases','opr_opportunities.opr_id','=','ord_purchases.pur_oppr_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
@@ -102,7 +103,7 @@ class PurchaseController extends Controller
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			// ->where('lds_customer',$request->id)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','oss_id','oss_status_code','oss_status_name','oss_status_name','pur_id')
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name', 'ins_name', 'lds_subcustomer','oss_id','oss_status_code','oss_status_name','oss_status_name','pur_id')
 			->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif(checkRule(array('MGR.TCH'))){
@@ -113,7 +114,7 @@ class PurchaseController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
@@ -121,7 +122,7 @@ class PurchaseController extends Controller
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			// ->where('lds_customer',$request->id)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','oss_id','oss_status_code','oss_status_name','oss_status_name')
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name', 'ins_name', 'lds_subcustomer','oss_id','oss_status_code','oss_status_name','oss_status_name')
 			->whereIn('lds_id',$lead_ids)
 			->get();
 		}elseif(checkRule(array('STF.TCH'))){
@@ -132,7 +133,7 @@ class PurchaseController extends Controller
 			}
 			$lead_ids = array_unique($lds_idr);
 			$lead_data = Prs_lead::join('prs_lead_statuses','prs_leads.lds_status','=','prs_lead_statuses.pls_id')
-			->join('cst_customers','prs_leads.lds_customer','=','cst_customers.cst_id')
+			->leftjoin('cst_institutions', 'prs_leads.lds_customer', '=', 'cst_institutions.ins_id')
 			->join('opr_opportunities','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
 			->leftjoin('opr_stage_statuses','opr_opportunities.opr_status','=','opr_stage_statuses.oss_id')
 			->leftJoin(DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
@@ -140,7 +141,7 @@ class PurchaseController extends Controller
 				$join->on('prs_leads.lds_id','=','salesperson.slm_lead');
 			})
 			// ->where('lds_customer',$request->id)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','cst_name','oss_id','oss_status_code','oss_status_name','oss_status_name')
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name', 'ins_name', 'lds_subcustomer','oss_id','oss_status_code','oss_status_name','oss_status_name')
 			->whereIn('lds_id',$lead_ids)
 			->get();
 		}
@@ -166,7 +167,14 @@ class PurchaseController extends Controller
 			return $lead_data->lds_title;
 		})
 		->addColumn('customer', function ($lead_data) {
-			return $lead_data->cst_name;
+			$res = "";
+			if ($lead_data->lds_subcustomer == null) {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+			} else {
+				$res .= '<b>' . $lead_data->ins_name . '</b>';
+				$res .= '<br><span style="text-size:7px;">Sub: ' . getNameSubcustomer($lead_data->lds_subcustomer) . '<span>';
+			}
+			return $res;
 		})
 		->addColumn('status', function ($lead_data) {
 			if ($lead_data->oss_status_name == null || $lead_data->oss_status_name == "" ) {
@@ -686,7 +694,9 @@ class PurchaseController extends Controller
 		$id_oppor = $purchase_data->pur_oppr_id;
 		$allproduct = Prd_principle::get();
 		$opportunity = Opr_opportunity::join('prs_leads','prs_leads.lds_id','=','opr_opportunities.opr_lead_id')
-		->where('opr_id',$id_oppor)->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes','opr_estimate_closing')->first();
+		->where('opr_id',$id_oppor)
+		->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer','opr_status','opr_notes','opr_estimate_closing', 'lds_subcustomer')
+		->first();
 		$closing = date('d M/Y',strtotime($opportunity->opr_estimate_closing));
 		// $id_lead = $opportunity->lds_id;
 		$opportunity_value = Opr_value::where('ovs_opr_id',$id_oppor)->first();
@@ -699,16 +709,14 @@ class PurchaseController extends Controller
 				"opr_revenue" =>null
 			];
 		}
-		$cst_ids= explode(',',$opportunity->lds_customer);
-		$lead_customer = Cst_customer::join('cst_institutions','cst_customers.cst_institution','=', 'cst_institutions.ins_id')
-		->whereIn('cst_id', $cst_ids)
-		->select('cst_id','ins_id', 'ins_name', 'cst_name', 'view_option')
-		->get();
-		$opportunity_customer = array();
-		foreach ($lead_customer as $key => $value) {
-			$opportunity_customer[$key] = $value->cst_name;
-		}
+		#********************************
+		$lead_customer = Cst_institution::where('ins_id', $opportunity->lds_customer)
+		->first();
+		$lead_subcustomer = Cst_customer::where('cst_id', $opportunity->lds_subcustomer)
+		->first();
+		// dd($lead_subcustomer);
 		$institution_names = Str::title($lead_customer->first()->ins_name);
+		// die();
 		$opr_value = Opr_value::where('ovs_opr_id',$id_purchase)->first();
 		$opr_product_src = Opr_value_product::where('opr_value_products.por_opr_id',$id_purchase)
 		->select('por_id','por_principle_name','por_product_name','por_note','por_quantity','por_unit_value','por_total_value')
@@ -750,7 +758,7 @@ class PurchaseController extends Controller
 		$purchase_data = Ord_purchase::where("pur_id",$id_purchase)->first();
 		return view('contents.page_purchase.purchase_detail',compact(
 			'id_oppor','id_purchase','opr_product','opr_other','opr_value','other_value','tab_row','allproduct','purchase_data',
-			'opportunity','opportunity_customer','institution_names','opportunity_value'
+			'opportunity','institution_names','opportunity_value','lead_subcustomer'
 		));
 	}
 	/* Tags:... */

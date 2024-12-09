@@ -80,11 +80,9 @@ opportunitys
 			</div>
 			<div class="col-6">
 				<em class="text-muted lh-base mb-1"><i>Customer</i></em>
-				@foreach ($opportunity_customer as $list)
-					<div class="page-pretitle-custom">{{ $list }}</div>
-				@endforeach
-				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
 				<div class="page-pretitle-custom">{{ html_entity_decode($institution_names) }}</div>
+				<em class="text-muted lh-base mb-1"><i>Sub Customer</i></em>
+				<div class="page-pretitle-custom">{{ html_entity_decode($lead_subcustomer->cst_name) }}</div>
 			</div>
 			<div class="col-6" style="text-align: right;">
 				<div class="mb-0">

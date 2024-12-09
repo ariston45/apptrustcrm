@@ -83,11 +83,13 @@ opportunitys
 			</div>
 			<div class="col-auto">
 				<em class="text-muted lh-base mb-1"><i>Customer</i></em>
-				@foreach ($opportunity_customer as $list)
-					<div class="page-pretitle-custom">{{ $list }}</div>
-				@endforeach
-				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
 				<div class="page-pretitle-custom mb-1">{{ html_entity_decode($institution_names) }}</div>
+				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
+				@if ($lead_subcustomer === null)
+					<div class="page-pretitle-custom mb-1">-</div>
+				@else
+					<div class="page-pretitle-custom mb-1">{{ html_entity_decode($lead_subcustomer->cst_name) }}</div>
+				@endif
 				<em class="text-muted lh-base mb-0"><i>Salesperson</i></em>
 				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
 				<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
@@ -282,11 +284,15 @@ opportunitys
 						<div class="card-body card-body-contact" style="">
 							<div class="row">
 								<div class="col-auto">
-									<span class="avatar"><i class="ri-user-line"></i></span>
+									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
+										<span class="avatar"><i class="ri-user-line"></i></span>
+									</a>
 								</div>
 								<div class="col text-truncate" style="padding-left: 0px;">
-									<strong>{{ $list->cnt_fullname }}</strong>
-									<div class="text-muted text-truncate">{{ $list->cst_name }}</div>
+									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
+										<strong>{{ $list->cnt_fullname }}</strong>
+										<div class="text-muted text-truncate">{{ $list->cnt_company_position }}</div>
+									</a>
 								</div>
 								<div class="col-auto align-self-center">
 									<div class="dropdown">
@@ -561,26 +567,17 @@ opportunitys
 							Name
 						</label>
 						<div class="col">
-							<select type="text" class="form-select" name="contact" id="select-contact" value="" required>
+							<select type="text" class="form-select select-sales" name="contact" id="select-contact" value="" required>
 								<option value="{{ null }}"></option>
 								@foreach ($all_contacts as $list)
 								<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
 								@endforeach
 							</select>
+							<input type="hidden" name="id_cst" value="{{ $opportunity->lds_customer }}">
+							<input type="hidden" name="id_subcst" value="{{ $opportunity->lds_subcustomer }}">
 						</div>
 					</div>
 					<span id="additional-form-contact" style="display: none;">
-						<div class="row mb-2">
-							<label class="col-3 col-form-label" >Customer</label>
-							<div class="col">
-								<select type="text" class="form-select select-sales" name="customer" id="select-customer" value="">
-									<option value="{{ null }}"></option>
-									{{-- @foreach ($opportunity_customer as $list)
-									<option value="{{ $list->cst_id }}">{{ $list->cst_name }}</option>
-									@endforeach --}}
-								</select>
-							</div>
-						</div>
 						<div class="row mb-2">
 							<label class="col-3 col-form-label" >Contact</label>
 							<div class="col">
@@ -1913,8 +1910,9 @@ function actionAddCardAvatar(params) {
 				+'<div class="card-status-start bg-primary"></div>'
 				+'<div class="card-body card-body-contact" style="">'
 					+'<div class="row">'
-						+'<div class="col-auto"><span class="avatar"><i class="ri-user-line"></i></span></div>'
-						+'<div class="col text-truncate" style="padding-left: 0px;"><strong>'+params.name_cnt+'</strong><div class="text-muted text-truncate">'+params.name_cst+'</div>'
+						+'<div class="col-auto"><a href="{!! url("customer/contacts/detail/'+params.cnt_id+'") !!}"><span class="avatar"><i class="ri-user-line"></i></span></div>'
+						+'<div class="col text-truncate" style="padding-left: 0px;"><a href="{!! url("customer/contacts/detail/'+params.personal_id+'") !!}"><strong>'+params.name_cnt+'</strong>'
+							+'<div class="text-muted text-truncate">'+params.name_cst+'</div></a>'
 					+'</div>'
 					+'<div class="col-auto align-self-center">'
 						+'<div class="dropdown">'
