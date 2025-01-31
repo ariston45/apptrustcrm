@@ -258,13 +258,27 @@ class DataController extends Controller
 	# <===========================================================================================================================================================>
 	public function sourceDataCustomer(Request $request)
 	{
-		$colect_data = Cst_institution::leftjoin('cst_customers','cst_institutions.ins_id','=','cst_customers.cst_institution')
-		->leftJoin(DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
-			function ($join){
-				$join->on('cst_customers.cst_id','=','locations.loc_cst_id');
+		$user = Auth::user();
+		if (checkRule(['MGR','MGR.PAS','ADM','AGM'])) {
+			$colect_data = Cst_institution::leftjoin('cst_customers', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
+			->leftJoin(
+				DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
+				function ($join) {
+						$join->on('cst_customers.cst_id', '=', 'locations.loc_cst_id');
+				}
+			)
+			->select('ins_id', 'cst_id', 'ins_name', 'cst_name', 'ins_business_field', 'cst_business_field', 'loc_city', 'cst_customers.created_at')
+			->get();
+		}elseif(checkRule(['STF'])){
+			$colect_data = Cst_institution::leftjoin('cst_customers','cst_institutions.ins_id','=','cst_customers.cst_institution')
+			->leftJoin(DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
+				function ($join){
+					$join->on('cst_customers.cst_id','=','locations.loc_cst_id');
 			})
-		->select('ins_id','cst_id','ins_name','cst_name','ins_business_field','cst_business_field','loc_city','cst_customers.created_at')
-		->get();
+			->where('cst_customers.created_by',$user->id)
+			->select('ins_id','cst_id','ins_name','cst_name','ins_business_field','cst_business_field','loc_city','cst_customers.created_at')
+			->get();
+		}
 		$num = 1;
 		return DataTables::of($colect_data)
 		->addIndexColumn()

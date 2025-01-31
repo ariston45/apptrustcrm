@@ -250,15 +250,17 @@ class SettingController extends Controller
 			'usr_str_level' => $str_access,
 			'created_by' => $user->id
 		];
-		if ($request->access == 'MGR' || $request->access == 'MGR.PAS') {
+		if ($request->access == 'MGR' || $request->access == 'MGR.PAS' || $request->access == 'MGR.TCH') {
 			$check_user_mgr = User_structure::where('usr_team_id',$request->team)->where('usr_str_level','manager')->first();
 			if ($check_user_mgr != null) {
 				#note : run when the team already manager user
-				$result = [
-					'param'=>'manager_already',
-					'id_user' => $request->id
-				];
-				return $result;
+				// $result = [
+				// 	'param'=>'manager_already',
+				// 	'id_user' => $request->id
+				// ];
+				// return $result;
+				User_structure::where('usr_user_id', $request->id)->update($data_usr_str);
+				User::where('id', $request->id)->update($data_user);
 			}else {
 				#note : run wehen codition mgr mutation manager
 				User_structure::where('usr_user_id',$request->id)->update($data_usr_str);
