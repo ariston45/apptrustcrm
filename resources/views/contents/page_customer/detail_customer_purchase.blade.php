@@ -6,8 +6,8 @@ $activePage = app('request')->input('extpg');
 Customer
 @endsection
 @section('pagetitle')
-<div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->ins_name }}</h4>
+<h4 class="page-title">Sub Customer : {{ $company->cst_name }}</h4>
+<div class="page-pretitle">Customer : {{ $company->ins_name }}</div>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -137,7 +137,7 @@ function mainDataPurchase() {
 			search: "Find Lead"
 		},
 		ajax: {
-			'url': '{!! route("source-data-purchased-bycst") !!}',
+			'url': '{!! route("source-data-purchased-bysubcst") !!}',
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',

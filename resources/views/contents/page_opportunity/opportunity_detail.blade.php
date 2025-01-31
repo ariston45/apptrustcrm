@@ -84,7 +84,7 @@ opportunitys
 			<div class="col-auto">
 				<em class="text-muted lh-base mb-1"><i>Customer</i></em>
 				<div class="page-pretitle-custom mb-1">{{ html_entity_decode($institution_names) }}</div>
-				<em class="text-muted lh-base mb-1"><i>Institution</i></em>
+				<em class="text-muted lh-base mb-1"><i>Sub Customer</i></em>
 				@if ($lead_subcustomer === null)
 					<div class="page-pretitle-custom mb-1">-</div>
 				@else

@@ -912,6 +912,215 @@ class DataController extends Controller
 		->rawColumns(['number_index','title', 'customer','status', 'salesperson','menu','last_activity','activity'])
 		->make('true');
 	}
+	public function sourceDataLeadSubCst(Request $request)
+	{
+		$id = $request->id;
+		$user = Auth::user();
+		// $ids_cst = getIdSubcustomer($id);
+		if (checkRule(array('ADM', 'AGM', 'MGR.PAS'))) {
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->where('cst_id', $id)
+				->where('lds_stage_opr', 'false')
+				->select('lds_id', 'slm_lead', 'slm_user', 'name', 'lds_title', 'pls_status_name', 'pls_code_name', 'cst_name', 'act_id', 'last_todo', 'last_date', 'aat_type_button')
+				->get();
+		} elseif (checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['master', 'manager','colaborator', ])
+			->where('slm_user', $user->id)
+			->select('slm_lead')->get()
+			->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_id = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+			->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+			->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+			->where('lds_subcustomer', $id)
+			->whereIn('lds_id', $lead_id)
+			->where('lds_stage_opr', 'false')
+			->select('lds_id', 'slm_lead', 'slm_user', 'name', 'lds_title', 'pls_status_name', 'pls_code_name', 'cst_name', 'act_id', 'last_todo', 'last_date', 'aat_type_button')
+			->get();
+		} elseif (checkRule(array('MGR.TCH'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['technical'])->select('slm_lead')->get();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				# code...
+				$lds_idr[$key] = $value->slm_lead;
+			}
+			$lds_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->whereIn('lds_id', $lds_ids)
+				->where('lds_stage_opr', 'false')
+				->select('lds_id', 'slm_lead', 'slm_user', 'name', 'lds_title', 'pls_status_name', 'pls_code_name', 'cst_name', 'act_id', 'last_todo', 'last_date', 'aat_type_button')
+				->get();
+		} elseif (checkRule(array('STF'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['colaborator', 'master'])->where('slm_user', $user->id)->select('slm_lead')->get()->toArray();
+			$ids = array();
+			foreach ($lead_data as $key => $value) {
+				$ids[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($ids);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->where('lds_subcustomer', $id)
+				->where('lds_stage_opr', 'false')
+				->whereIn('lds_id', $lead_ids)
+				->select('lds_id', 'slm_lead', 'slm_user', 'name', 'lds_title', 'pls_status_name', 'pls_code_name', 'cst_name', 'act_id', 'last_todo', 'last_date', 'aat_type_button')
+				->get();
+		} elseif (checkRule(array('STF.TCH'))) {
+			$lead_user_master = Prs_accessrule::where('slm_rules', 'technical')->where('slm_user', $user->id)->select('slm_lead')->get();
+			$ids = array();
+			foreach ($lead_user_master as $key => $value) {
+				$ids[$key] = $value->slm_lead;
+			}
+			$lead_ids = array_unique($ids);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->where('lds_subcustomer', $id)
+				->where('lds_stage_opr', 'false')
+				->whereIn('lds_id', $lead_ids)
+				->select('lds_id', 'slm_lead', 'slm_user', 'name', 'lds_title', 'pls_status_name', 'pls_code_name', 'cst_name', 'act_id', 'last_todo', 'last_date', 'aat_type_button')
+				->get();
+		}
+		return DataTables::of($lead_data)
+			->addIndexColumn()
+			->addColumn('empty_str', function ($k) {
+				return '';
+			})
+			->addColumn('menu', function ($lead_data) {
+				return '
+			<div style="text-align:center;">
+			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
+			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
+			<a class="dropdown-item" href="' . url('leads/detail-lead') . '/' . $lead_data->lds_id . '"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Lead</a>
+      </div>
+			</div>
+			';
+			})
+			->addColumn('number_index', function () {
+				return 1;
+			})
+			->addColumn('title', function ($lead_data) {
+				return '<a href="' . url('leads/detail-lead/' . $lead_data->lds_id) . '"><b>' . $lead_data->lds_title . '</b></a>';
+			})
+			->addColumn('customer', function ($lead_data) {
+				return $lead_data->cst_name;
+			})
+			->addColumn('created', function ($lead_data) {
+				$date = date('d M/Y', strtotime($lead_data->created));
+				return $date;
+			})
+			->addColumn('status', function ($lead_data) {
+				if ($lead_data->pls_code_name == 'prospecting') {
+					return '<span class="badge bg-blue-lt">Prospecting</span>';
+				} elseif ($lead_data->pls_code_name == 'qualifying') {
+					return '<span class="badge bg-azure-lt">Qualifying</span>';
+				} else {
+					return '<span class="badge bg-green-lt">Opportunity</span>';
+				}
+			})
+			->addColumn('salesperson', function ($lead_data) {
+				if ($lead_data->name == "" || $lead_data->name == null) {
+					return '<i>-</i>';
+				} else {
+					return '<style="text-align:center;">' . $lead_data->name . '</style>';
+				}
+			})
+			->addColumn("last_activity", function ($lead_data) {
+				if ($lead_data->last_date == null || $lead_data->last_date == "") {
+					return "-";
+				} else {
+					$date = date("d/m/y, h:ia", strtotime($lead_data->last_date));
+					return $date;
+				}
+			})
+			->addColumn("activity", function ($lead_data) {
+				if ($lead_data->aat_type_button == null || $lead_data->aat_type_button == "") {
+					return "-";
+				} else {
+					return '<a href="' . url('activity/activity-detail') . '/' . $lead_data->act_id . '" title="Go to activity" data-bs-toggle="tooltip" data-bs-placement="bottom">' . $lead_data->aat_type_button . '</a>';
+				}
+			})
+			->rawColumns(['number_index', 'title', 'customer', 'status', 'salesperson', 'menu', 'last_activity', 'activity'])
+			->make('true');
+	}
 	# <===========================================================================================================================================================>
 	/* Tags:... */
 	public function sourceDataOpportunities(Request $request)
@@ -942,7 +1151,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','opr_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}elseif(checkRule(array('MGR'))){
@@ -970,7 +1179,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','opr_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 			// die('-');
@@ -999,7 +1208,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','opr_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}elseif(checkRule(array('MGR.TCH'))){
@@ -1027,7 +1236,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','opr_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}elseif(checkRule(array('STF.TCH'))){
@@ -1055,7 +1264,7 @@ class DataController extends Controller
 			->whereIn('lds_id',$lead_ids)
 			->where('lds_stage_opr','true')
 			->where('opr_close_status',null)
-			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
+			->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','opr_title','pls_status_name','pls_code_name','ins_name','lds_subcustomer',
 			'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id')
 			->get();
 		}
@@ -1078,7 +1287,7 @@ class DataController extends Controller
 			return 1;
 		})
 		->addColumn('title', function ($lead_data) {
-			return '<a href="'.url('opportunities/detail-opportunity').'/'.$lead_data->opr_id.'"><b>'.$lead_data->lds_title.'</b></a>';
+			return '<a href="'.url('opportunities/detail-opportunity').'/'.$lead_data->opr_id.'"><b>'.$lead_data->opr_title.'</b></a>';
 		})
 		->addColumn('customer', function ($lead_data) {
 			$res = "";
@@ -1150,7 +1359,7 @@ class DataController extends Controller
 		->whereIn('lds_id',$lead_ids)
 		->where('lds_stage_opr','true')
 		->where('opr_close_status',null)
-		->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','pls_status_name','pls_code_name','ins_name',
+		->select('opr_id','lds_id','slm_lead','slm_user','name','lds_title','opr_title','pls_status_name','pls_code_name','ins_name',
 		'oss_id','oss_status_code','oss_status_name','oss_status_name','last_date','aat_type_button','act_id',
 			'lds_subcustomer')
 		->get();
@@ -1519,6 +1728,303 @@ class DataController extends Controller
 		})
 		->rawColumns(['number_index','title', 'customer','status', 'salesperson','menu','last_activity','activity'])
 		->make('true');
+	}
+	public function sourceDataOpportunitiesSubCst(Request $request)
+	{
+		$customer_id = $request->id;
+		
+		$cst_ids = getIdSubcustomer($customer_id);
+		$user = Auth::user();
+		if (checkRule(array('ADM', 'AGM', 'MGR.PAS'))) {
+			$lead_data = Prs_accessrule::where('slm_rules', 'master')->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->join('opr_opportunities', 'prs_leads.lds_id', '=', 'opr_opportunities.opr_lead_id')
+			->leftjoin('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+			RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+			GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->whereIn('lds_id', $lead_ids)
+				->where('lds_subcustomer', $customer_id)
+				->where('lds_stage_opr', 'true')
+				->where('opr_close_status', null)
+				->select(
+					'opr_id',
+					'lds_id',
+					'slm_lead',
+					'slm_user',
+					'name',
+					'lds_title',
+					'pls_status_name',
+					'pls_code_name',
+					'cst_name',
+					'oss_id',
+					'oss_status_code',
+					'oss_status_name',
+					'oss_status_name',
+					'last_date',
+					'aat_type_button',
+					'act_id'
+				)
+				->get();
+		} elseif (checkRule(array('MGR'))) {
+			$lead_data = Prs_accessrule::where('slm_user', $user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->join('opr_opportunities', 'prs_leads.lds_id', '=', 'opr_opportunities.opr_lead_id')
+			->leftjoin('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
+			->leftjoin(
+					DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+					RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+					GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+					}
+				)
+			->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+			->leftJoin(
+				DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+				}
+			)
+			->whereIn('lds_id', $lead_ids)
+			->where('lds_subcustomer', $customer_id)
+			->where('lds_stage_opr', 'true')
+			->where('opr_close_status', null)
+			->select(
+					'opr_id',
+					'lds_id',
+					'slm_lead',
+					'slm_user',
+					'name',
+					'lds_title',
+					'pls_status_name',
+					'pls_code_name',
+					'cst_name',
+					'oss_id',
+					'oss_status_code',
+					'oss_status_name',
+					'last_date',
+					'aat_type_button',
+					'act_id'
+				)
+			->get();
+		} elseif (checkRule(array('STF'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['colaborator', 'master'])->where('slm_user', $user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->join('opr_opportunities', 'prs_leads.lds_id', '=', 'opr_opportunities.opr_lead_id')
+			->leftjoin('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->where('lds_subcustomer', $customer_id)
+				->whereIn('lds_id', $lead_ids)
+				->where('lds_stage_opr', 'true')
+				->where('opr_close_status', null)
+				->select(
+					'opr_id',
+					'lds_id',
+					'slm_lead',
+					'slm_user',
+					'name',
+					'lds_title',
+					'pls_status_name',
+					'pls_code_name',
+					'cst_name',
+					'oss_id',
+					'oss_status_code',
+					'oss_status_name',
+					'oss_status_name',
+					'last_date',
+					'aat_type_button',
+					'act_id'
+				)
+				->get();
+		} elseif (checkRule(array('MGR.TCH'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['technical'])->select('slm_lead')->get();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->join('opr_opportunities', 'prs_leads.lds_id', '=', 'opr_opportunities.opr_lead_id')
+			->leftjoin('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->where('lds_subcustomer', $customer_id)
+				->whereIn('lds_id', $lead_ids)
+				->where('lds_stage_opr', 'true')
+				->where('opr_close_status', null)
+				->select(
+					'opr_id',
+					'lds_id',
+					'slm_lead',
+					'slm_user',
+					'name',
+					'lds_title',
+					'pls_status_name',
+					'pls_code_name',
+					'cst_name',
+					'oss_id',
+					'oss_status_code',
+					'oss_status_name',
+					'oss_status_name',
+					'last_date',
+					'aat_type_button',
+					'act_id'
+				)
+				->get();
+		} elseif (checkRule(array('STF.TCH'))) {
+			$lead_data = Prs_accessrule::whereIn('slm_rules', ['technical'])->where('slm_user', $user->id)->select('slm_lead')->get()->toArray();
+			$lds_idr = array();
+			foreach ($lead_data as $key => $value) {
+				$lds_idr[$key] = $value['slm_lead'];
+			}
+			$lead_ids = array_unique($lds_idr);
+			$lead_data = Prs_lead::join('prs_lead_statuses', 'prs_leads.lds_status', '=', 'prs_lead_statuses.pls_id')
+			->join('cst_customers', 'prs_leads.lds_subcustomer', '=', 'cst_customers.cst_id')
+			->join('opr_opportunities', 'prs_leads.lds_id', '=', 'opr_opportunities.opr_lead_id')
+			->leftjoin('opr_stage_statuses', 'opr_opportunities.opr_status', '=', 'opr_stage_statuses.oss_id')
+			->leftjoin(
+				DB::raw('(SELECT a.act_id,a.act_lead_id AS lead_id,a.act_todo_type_id AS last_todo,b.last_date FROM act_activities a 
+				RIGHT JOIN ( SELECT MAX( bb.act_task_times_due ) AS last_date FROM act_activities bb GROUP BY bb.act_lead_id ) b ON a.act_task_times_due = b.last_date 
+				GROUP BY a.act_lead_id ORDER BY a.act_task_times_due DESC) activity'),
+				function ($join) {
+					$join->on('prs_leads.lds_id', '=', 'activity.lead_id');
+				}
+			)
+				->leftjoin('act_activity_types', 'activity.last_todo', '=', 'act_activity_types.aat_id')
+				->leftJoin(
+					DB::raw('(select slm_lead,slm_user,name from prs_accessrules join users on prs_accessrules.slm_user = users.id where slm_rules="master") salesperson'),
+					function ($join) {
+						$join->on('prs_leads.lds_id', '=', 'salesperson.slm_lead');
+					}
+				)
+				->where('lds_subcustomer', $customer_id)
+				->whereIn('lds_id', $lead_ids)
+				->where('lds_stage_opr', 'true')
+				->where('opr_close_status', null)
+				->select(
+					'opr_id',
+					'lds_id',
+					'slm_lead',
+					'slm_user',
+					'name',
+					'lds_title',
+					'pls_status_name',
+					'pls_code_name',
+					'cst_name',
+					'oss_id',
+					'oss_status_code',
+					'oss_status_name',
+					'oss_status_name',
+					'last_date',
+					'aat_type_button',
+					'act_id'
+				)
+				->get();
+		}
+		return DataTables::of($lead_data)
+			->addIndexColumn()
+			->addColumn('empty_str', function ($k) {
+				return '';
+			})
+			->addColumn('number_index', function () {
+				return 1;
+			})
+			->addColumn('title', function ($lead_data) {
+				return '<a href="' . url('opportunities/detail-opportunity') . '/' . $lead_data->opr_id . '"><b>' . $lead_data->lds_title . '</b></a>';
+			})
+			->addColumn('customer', function ($lead_data) {
+				return $lead_data->cst_name;
+			})
+			->addColumn('status', function ($lead_data) {
+				if ($lead_data->oss_status_name == null || $lead_data->oss_status_name == "") {
+					return "-";
+				} else {
+					return "<strong>" . $lead_data->oss_status_name . "</strong>";
+				}
+			})
+			->addColumn('salesperson', function ($lead_data) {
+				if ($lead_data->name == null || $lead_data->name == "") {
+					return "-";
+				} else {
+					return $lead_data->name;
+				}
+			})
+			->addColumn("last_activity", function ($lead_data) {
+				if ($lead_data->last_date == null || $lead_data->last_date == "") {
+					return "-";
+				} else {
+					$date = date("d/m/y, h:ia", strtotime($lead_data->last_date));
+					return $date;
+				}
+			})
+			->addColumn("activity", function ($lead_data) {
+				if ($lead_data->aat_type_button == null || $lead_data->aat_type_button == "") {
+					return "-";
+				} else {
+					return '<a href="' . url('activity/activity-detail') . '/' . $lead_data->act_id . '" title="Go to activity" data-bs-toggle="tooltip" data-bs-placement="bottom">' . $lead_data->aat_type_button . '</a>';
+				}
+			})
+			->rawColumns(['number_index', 'title', 'customer', 'status', 'salesperson', 'last_activity', 'activity'])
+			->make('true');
 	}
 	/* Tags:... */
 	public function sourceActivities(Request $request)

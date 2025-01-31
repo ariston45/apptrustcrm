@@ -6,8 +6,8 @@ $activePage = app('request')->input('extpg');
 Customer
 @endsection
 @section('pagetitle')
-<div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->cst_name }}</h4>
+<h4 class="page-title">Sub Customer : {{ $company->cst_name }}</h4>
+<div class="page-pretitle">Customer : {{ $company->ins_name }}</div>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -17,7 +17,7 @@ Customer
 <div class="col-md-12 ">
 	<div class="card" style="margin-bottom:150px;">
 		<div class="card-header card-header-custom card-header-light">
-			<h3 class="card-title">Detail Customer</h3>
+			<h3 class="card-title">Detail Sub Customer</h3>
 			<div class="card-actions" style="padding-right: 10px;">
 				<a href="{{ url('customer') }}">
 					<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">

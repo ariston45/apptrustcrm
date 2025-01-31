@@ -570,14 +570,46 @@ class CustomerController extends Controller
       ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes', 'ins_name')
       ->first();
     $leadStatus = Prs_lead_status::get();
-    $company = Cst_customer::leftjoin('users', 'cst_customers.created_by', '=', 'users.id')
-    ->where('cst_id', $request->id)
-      ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes')
-      ->first();
     $all_users = User::get();
     $personal_contact = Cst_personal::where('cnt_cst_id', $id)->get();
     $status_configs = Prs_lead_status::where('pls_user_profile', $user->id)->get();
-    return view('contents.page_customer.detail_customer_lead', compact('id', 'leadStatus', 'status_configs', 'user', 'all_users', 'personal_contact', 'company'));
+    return view('contents.page_customer.detail_subcustomer_lead', compact('id', 'leadStatus', 'status_configs', 'user', 'all_users', 'personal_contact', 'company'));
+  }
+  public function viewSuCustomerOppor(Request $request)
+  {
+    $user = Auth::user();
+    $id = $request->id;
+    $company = Cst_customer::join('cst_institutions', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
+    ->leftjoin('users', 'cst_customers.created_by', '=', 'users.id')
+    ->where('cst_id', $id)
+    ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes', 'ins_name')
+    ->first();
+    $leadStatus = Prs_lead_status::get();
+    $all_users = User::get();
+    $personal_contact = Cst_personal::where('cnt_cst_id', $id)->get();
+    $status_configs = Prs_lead_status::where('pls_user_profile', $user->id)->get();
+    return view('contents.page_customer.detail_subcustomer_opportunity', compact('id', 'leadStatus', 'status_configs', 'user', 'all_users', 'personal_contact', 'company'));
+  }
+  public function viewSuCustomerPurchase(Request $request)
+  {
+    $id = $request->id;
+    $company = Cst_customer::join('cst_institutions', 'cst_institutions.ins_id', '=', 'cst_customers.cst_institution')
+    ->leftjoin('users', 'cst_customers.created_by', '=', 'users.id')
+    ->where('cst_id', $id)
+    ->select('cst_name', 'name as creator', 'cst_business_field', 'cst_web', 'cst_notes', 'ins_name')
+    ->first();
+    $user = Auth::user();
+    $user_all = User::whereIn('level', ['MKT', 'MGR.PAS', 'MGR', 'AGM', 'TCK'])->get();
+    $personal = Cst_personal::where('cnt_cst_id', $id)->get();
+    $project = Prs_lead::where('lds_customer', $id)->where('lds_status', '3')->get();
+    return view('contents.page_customer.detail_customer_purchase', compact(
+      'id',
+      'project',
+      'user_all',
+      'user',
+      'personal',
+      'company'
+    ));
   }
   ###
   public function sourceDataInvidu(Request $request)

@@ -6,8 +6,8 @@ $activePage = app('request')->input('extpg');
 Customer
 @endsection
 @section('pagetitle')
-<div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->ins_name }}</h4>
+<h4 class="page-title">Sub Customer : {{ $company->cst_name }}</h4>
+<div class="page-pretitle">Customer : {{ $company->ins_name }}</div>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -17,7 +17,7 @@ Customer
 <div class="col-md-12 ">
 	<div class="card" style="margin-bottom:150px;">
 		<div class="card-header card-header-custom card-header-light">
-			<h3 class="card-title">Detail Customer</h3>
+			<h3 class="card-title">Detail Sub Customer</h3>
 			<div class="card-actions" style="padding-right: 10px;">
 				<button id="btn-create-lead" class="btn btn-sm btn-default btn-pill" style="vertical-align: middle;">
 					<div style="font-weight: 700;">
@@ -63,10 +63,8 @@ Customer
 									<tr>
 										{{-- <th></th> --}}
 										<th style="text-align: left;width: 35%;">Project Name</th>
-										<th style="text-align: left;width: 10%;">Status</th>
-										<th style="text-align: left;width: 15%;">Salesperson</th>
-										<th style="text-align: left;width: 20%;">Follow Up</th>
-										<th style="text-align: left;width: 20%;">Date</th>
+										<th style="text-align: left;width: 30%;">Status</th>
+										<th style="text-align: left;width: 20%;">Salesperson</th>
 									</tr>
 								</thead>
 								<tbody class="table-tbody"></tbody>
@@ -352,7 +350,7 @@ $(document).ready(function() {
 			search: "Find Lead "
 		},
 		ajax: {
-			'url': '{!! route("source-data-lead-cst") !!}',
+			'url': '{!! route("source-data-lead-sub-cst") !!}',
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',
@@ -360,16 +358,11 @@ $(document).ready(function() {
 			}
 		},
 		order:[[0,'asc']],
-		columnDefs : [
-			{ "type": "datetime ", "targets": 3 }
-		],
 		columns: [
-			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
 			{data: 'title', name: 'title', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
-			{data: 'activity', name: 'activity', orderable: true, searchable: true },
-			{data: 'last_activity', name: 'last_activity', orderable: true, searchable: true },
+			
 		],
 	});
 });

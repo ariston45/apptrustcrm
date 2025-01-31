@@ -6,8 +6,8 @@ $activePage = app('request')->input('extpg');
 Customer
 @endsection
 @section('pagetitle')
-<div class="page-pretitle"></div>
-<h4 class="page-title">Customer : {{ $company->cst_name }}</h4>
+<h4 class="page-title">Sub Customer : {{ $company->cst_name }}</h4>
+<div class="page-pretitle">Customer : {{ $company->ins_name }}</div>
 @endsection
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="#">Step one</a></li>
@@ -17,7 +17,7 @@ Customer
 <div class="col-md-12 ">
 	<div class="card" style="margin-bottom:150px;">
 		<div class="card-header card-header-custom card-header-light">
-			<h3 class="card-title">Detail Customer</h3>
+			<h3 class="card-title">Detail Sub Customer</h3>
 			<div class="card-actions" style="padding-right: 10px;">
 				<a href="{{ url('customer/create-new-opportunity-cst') }}/{{ $id }}">
 					<button class="btn btn-sm btn-default btn-pill" style="vertical-align: middle;">
@@ -57,10 +57,9 @@ Customer
 									<tr>
 										{{-- <th></th> --}}
 										<th style="width: 40%;">Project Title</th>
-										<th style="text-align: center; width: 25%;">Customer</th>
-										<th style="text-align: center; width: 10%;">Status</th>
-										<th style="text-align: center; width: 15%;">Salesperson</th>
-										<th style="text-align: center; width: 10%">Menus</th>
+										{{-- <th style="text-align: left; width: 25%;">Customer</th> --}}
+										<th style="text-align: left; width: 30%;">Status</th>
+										<th style="text-align: left; width: 20%;">Salesperson</th>
 									</tr>
 								</thead>
 								<tbody class="table-tbody"></tbody>
@@ -138,32 +137,21 @@ function mainDataLeads() {
 			search: "Find Opportunity"
 		},
 		ajax: {
-			'url': '{!! route("source-opportunities-cst") !!}',
+			'url': '{!! route("source-opportunities-sub-cst") !!}',
 			'type': 'POST',
 			'data': {
 				'_token': '{{ csrf_token() }}',
 				'id' : id
 			}
 		},
-		columnDefs: [
-			{
-				"targets": 2, 
-        "className": "text-center",
-			},
-			{
-				"targets": 3, 
-        "className": "text-center",
-			}
-		],
 		order:[[0,'asc']],
 		columns: [
 			// {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable:false},
 			{data: 'title', name: 'title', orderable: true, searchable: true },
-			{data: 'customer', name: 'customer', orderable: true, searchable: true },
+			// {data: 'customer', name: 'customer', orderable: true, searchable: true },
 			{data: 'status', name: 'status', orderable: true, searchable: true },
 			// {data: 'datein', name: 'datein', orderable: true, searchable: true },
 			{data: 'salesperson', name: 'salesperson', orderable: true, searchable: true },
-			{data: 'menu', name: 'menu', orderable: false, searchable: false },
 		]
 	});	
 }

@@ -50,6 +50,9 @@ class OpportunityController extends Controller
 		->where('opr_id',$id_oppor)
 		->select('opr_id','opr_status','lds_id','lds_title','lds_status','lds_describe','lds_customer', 'lds_subcustomer','opr_status','opr_notes','opr_estimate_closing')
 		->first();
+		if ($opportunity == null) {
+			return view('errors.404');
+		}
 		$closing = date('d M/Y',strtotime($opportunity->opr_estimate_closing));
 		$id_lead = $opportunity->lds_id;
 		$opportunity_value = Opr_value::where('ovs_opr_id',$id_oppor)->first();
