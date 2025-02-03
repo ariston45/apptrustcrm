@@ -264,7 +264,7 @@ class DataController extends Controller
 			->leftJoin(
 				DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
 				function ($join) {
-						$join->on('cst_customers.cst_id', '=', 'locations.loc_cst_id');
+						$join->on('cst_institutions.cst_id', '=', 'locations.loc_cst_id');
 				}
 			)
 			->select('ins_id', 'cst_id', 'ins_name', 'cst_name', 'ins_business_field', 'cst_business_field', 'loc_city', 'cst_customers.created_at')
@@ -275,7 +275,7 @@ class DataController extends Controller
 			->leftJoin(
 				DB::raw('(select loc_id, loc_represent, loc_cst_id, loc_street, loc_district, loc_city, loc_province from cst_locations where loc_represent="INSTITUTION") locations'),
 				function ($join) {
-					$join->on('cst_customers.cst_id', '=', 'locations.loc_cst_id');
+					$join->on('cst_institutions.cst_id', '=', 'locations.loc_cst_id');
 				}
 			)
 			->whereIn('cst_customers.created_by', $ids)
@@ -287,7 +287,7 @@ class DataController extends Controller
 				function ($join){
 					$join->on('cst_customers.cst_id','=','locations.loc_cst_id');
 			})
-			->where('cst_customers.created_by',$user->id)
+			->where('cst_institutions.created_by',$user->id)
 			->select('ins_id','cst_id','ins_name','cst_name','ins_business_field','cst_business_field','loc_city','cst_customers.created_at')
 			->get();
 		}
