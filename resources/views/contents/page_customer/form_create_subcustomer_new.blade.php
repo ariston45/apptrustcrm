@@ -80,9 +80,9 @@
 						</div>
 						<div class="col-xl-6">
 							<div class="mb-3 row" id="person-name-area">
-								<label class="col-3 col-form-label custom-label">Name</label>
+								<label class="col-3 col-form-label custom-label">Sub Customer Name</label>
 								<div class="col">
-									<input name="customer_name" id="customer-name" type="text" class="form-control" aria-describedby="customerName" placeholder="Name of person" value="{{ old('customer_name') }}" >
+									<input name="customer_name" id="customer-name" type="text" class="form-control" aria-describedby="customerName" placeholder="Name of sub customer" value="{{ old('customer_name') }}" >
 								</div>
 							</div>
 							<div class="mb-3 row" id="institution-category-area">

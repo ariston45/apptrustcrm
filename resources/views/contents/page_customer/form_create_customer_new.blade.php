@@ -1,10 +1,10 @@
 @php
-	$act = Request::get('act');
-	if ($act == null) {
-		$a = 'none';
-	} else {
-		$a = $act;
-	}
+$act = Request::get('act');
+if ($act == null) {
+	$a = 'none';
+} else {
+	$a = $act;
+}
 @endphp
 @extends('layout.app')
 @section('title')
@@ -80,9 +80,9 @@
 						</div>
 						<div class="col-xl-6">
 							<div class="mb-3 row" id="person-name-area">
-								<label class="col-3 col-form-label custom-label">Name</label>
+								<label class="col-3 col-form-label custom-label">Customer Name</label>
 								<div class="col">
-									<input name="customer_name" id="person-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of person" value="{{ old('person_name') }}" >
+									<input name="customer_name" id="person-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Input customer name .." value="{{ old('person_name') }}" >
 									<input type="hidden" name="cststatus" id="cststatus" value="CUSTOMER">
 								</div>
 							</div>
