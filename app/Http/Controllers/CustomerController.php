@@ -1398,7 +1398,7 @@ class CustomerController extends Controller
   public function storeCreateCustomer(Request $request)
   {
     $user = Auth::user();
-    $cst_id = genIdCompany();
+    $cst_id = genIdInstitution();
     $tmp_cst_name = $request->customer_name;
     if ($tmp_cst_name == null) {
       $result = [
