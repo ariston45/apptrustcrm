@@ -63,7 +63,7 @@
 							<div class="mb-3 row" id="person-name-area">
 								<label class="col-3 col-form-label custom-label">Name</label>
 								<div class="col">
-									<input name="subcustomer_name" id="customer-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of customer" value="{{ $customer->ins_name }}" >
+									<input name="customer_name" id="customer-name" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Name of customer" value="{{ $customer->ins_name }}" >
 									<input type="hidden" name="cststatus" value="CUSTOMER">
 									<input type="hidden" name="ins_id" value="{{ $id }}">
 									@if ($location != null)
