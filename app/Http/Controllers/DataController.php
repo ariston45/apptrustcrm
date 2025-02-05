@@ -302,7 +302,7 @@ class DataController extends Controller
 			<div style="text-align:center;">
 			<button type="button" class="badge bg-cyan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ri-list-settings-line"></i></button>
 			<div class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 38px);">
-			<a class="dropdown-item" href="'.url('customer/detail-customer/'.$colect_data->cst_id.'?extpg=information').'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Customer</a>
+			<a class="dropdown-item" href="'.url('customer/detail-customer/'.$colect_data->ins_id.'?extpg=information').'"><i class="ri-folder-user-line" style="margin-right:6px;"></i>Detail Customer</a>
 			<a class="dropdown-item" href="'.url('customer/contacts/'.$colect_data->ins_id).'"><i class="ri-user-add-line" style="margin-right:6px;"></i>Contacts</a>
       </div>
 			</div>
