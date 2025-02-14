@@ -11,1019 +11,1019 @@ opportunitys
 <li class="breadcrumb-item active"><a href="#">Step two</a></li>
 @endsection
 @section('content')
-<div class="card">
-	<div class="card-status-top bg-success"></div>
-	<div class="card-header card-header-custom card-header-light">
-		<h3 class="card-title">Detail Opportunity</h3>
-		<div class="card-actions" style="padding-right: 10px;">
-			<a href="{{ url('opportunities') }}">
-				<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
-					<div style="font-weight: 700;">
-						<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
-					</div>
+	<div class="card">
+		<div class="card-status-top bg-success"></div>
+		<div class="card-header card-header-custom card-header-light">
+			<h3 class="card-title">Detail Opportunity</h3>
+			<div class="card-actions" style="padding-right: 10px;">
+				<a href="{{ url('opportunities') }}">
+					<button class="btn btn-sm btn-danger btn-pill" style="vertical-align: middle;">
+						<div style="font-weight: 700;">
+							<i class="ri-close-circle-line icon" style="font-size: 14px; vertical-align: middle;margin-right: 0px;"></i>
+						</div>
+					</button>
+				</a>
+			</div>
+		</div>
+		{{-- ========================================================================================================= --}}
+		@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+		<div class="card-header card-header-custom" style="background-color: whitesmoke;">
+			@if ($purchase_data == null)
+			<div class="col-8" id="btn-g-status">
+				<div id="btn-opportunity-status" class="btn-group" role="group" style="margin-right: 15px;">
+					@foreach ($status as $list)
+					<input type="button" id="btn-{{ $list->oss_status_code }}" 
+						class="btn active pr-2 pb-1 pt-1 @if ($opportunity->opr_status == $list->oss_id) btn-ghost-primary @else btn-ghost-light bg-blue-lt @endif" 
+						value="{{ $list->oss_status_name }}" onclick="actionChangeStatus('{{ $list->oss_status_code }}','{{ $list->oss_id }}')">
+					</input>
+					@endforeach
+				</div>
+				<button type="button" id="btn-go-po" class="btn active pr-2 pb-1 pt-1 ml-3 btn-ghost-success" onclick="actionCreatePO()" 
+				@if ($opportunity->opr_status == 6) style="display: true;" @else style="display: none;" @endif >
+					Create Purchase Order
 				</button>
-			</a>
-		</div>
-	</div>
-	{{-- ========================================================================================================= --}}
-	@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-	<div class="card-header card-header-custom" style="background-color: whitesmoke;">
-		@if ($purchase_data == null)
-		<div class="col-8" id="btn-g-status">
-			<div id="btn-opportunity-status" class="btn-group" role="group" style="margin-right: 15px;">
-				@foreach ($status as $list)
-				<input type="button" id="btn-{{ $list->oss_status_code }}" 
-					class="btn active pr-2 pb-1 pt-1 @if ($opportunity->opr_status == $list->oss_id) btn-ghost-primary @else btn-ghost-light bg-blue-lt @endif" 
-					value="{{ $list->oss_status_name }}" onclick="actionChangeStatus('{{ $list->oss_status_code }}','{{ $list->oss_id }}')">
+				<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="" style="display: none;">
+					View Purchased Order
+				</button>
+			</div>
+			<div class="col-4" id="btn-g-lock" style="text-align: right">
+				<button type="button" id="btn-lock" class="btn active pr-2 pb-1 pt-1 btn-ghost-light bg-muted-lt" 
+				@if ($opportunity->opr_status == 6) style="display: true;" @else style="display: none;" @endif> <i class="ri-lock-2-line"></i></button>
+				<input type="button" id="btn-opr-status-lose" 
+					class="btn active pr-2 pb-1 pt-1  @if ($opportunity->opr_status == 7) btn-ghost-danger @else btn-ghost-light bg-red-lt @endif" 
+					value="Lose" onclick="actionChangeStatus('opr-status-lose','7')" @if ($opportunity->opr_status == 6) style="display: none;" @else style="display: true;" @endif>
 				</input>
-				@endforeach
 			</div>
-			<button type="button" id="btn-go-po" class="btn active pr-2 pb-1 pt-1 ml-3 btn-ghost-success" onclick="actionCreatePO()" 
-			@if ($opportunity->opr_status == 6) style="display: true;" @else style="display: none;" @endif >
-				Create Purchase Order
-			</button>
-			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="" style="display: none;">
-				View Purchased Order
-			</button>
-		</div>
-		<div class="col-4" id="btn-g-lock" style="text-align: right">
-			<button type="button" id="btn-lock" class="btn active pr-2 pb-1 pt-1 btn-ghost-light bg-muted-lt" 
-			@if ($opportunity->opr_status == 6) style="display: true;" @else style="display: none;" @endif> <i class="ri-lock-2-line"></i></button>
-			<input type="button" id="btn-opr-status-lose" 
-				class="btn active pr-2 pb-1 pt-1  @if ($opportunity->opr_status == 7) btn-ghost-danger @else btn-ghost-light bg-red-lt @endif" 
-				value="Lose" onclick="actionChangeStatus('opr-status-lose','7')" @if ($opportunity->opr_status == 6) style="display: none;" @else style="display: true;" @endif>
-			</input>
-		</div>
-		<div class="col-12" id="btn-g-page-purchase" style="display: none;">
-			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenPO()">
-				View Purchased Order
-			</button>
-		</div>
-		@else
-		<div class="col-12" id="btn-g-page-purchase">
-			<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenPO()">
-				View Purchased Order
-			</button>
-		</div>
-		@endif
-	</div>
-	@endif
-	{{-- ======================================================================================================== --}}
-	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<div class="row mb-1">
-			<div class="col-12">
-				<div class="row">
-					<div class="col">
-						<h3 class=" mb-1"> <b>{{ $opportunity->lds_title }}</b></h3>
-					</div>
-					<div class="col-auto">
-						<span class="text-muted small"><i>Estimated Close: {{ $closing }}</i></span>
-					</div>
-				</div>
-			</div>
-			<div class="col-auto">
-				<em class="text-muted lh-base mb-1"><i>Customer</i></em>
-				<div class="page-pretitle-custom mb-1">{{ html_entity_decode($institution_names) }}</div>
-				<em class="text-muted lh-base mb-1"><i>Sub Customer</i></em>
-				@if ($lead_subcustomer === null)
-					<div class="page-pretitle-custom mb-1">-</div>
-				@else
-					<div class="page-pretitle-custom mb-1">{{ html_entity_decode($lead_subcustomer->cst_name) }}</div>
-				@endif
-				<em class="text-muted lh-base mb-0"><i>Salesperson</i></em>
-				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-				<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
-				@endif
-				<div class="page-pretitle-custom">
-					{{ $sales_selected->name }}
-				</div>
-				<em class="text-muted lh-base mb-0"><i>Colaborator</i></em>
-				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
-				@endif
-				<div class="page-pretitle-custom">
-					@if ($member_name == null || $member_name == "")
-					-
-					@else
-					{{ $member_name }}
-					@endif
-				</div>
-				<em class="text-muted lh-base mb-0"><i>Technical</i></em>
-				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
-				@endif
-				<div class="page-pretitle-custom">
-					@if ($tech_name == null || $tech_name == "")
-					-
-					@else
-					{{ $tech_name }}
-					@endif
-				</div>
-			</div>
-			<div class="col" style="text-align: right;">
-				<div class="row">
-					<div class="col-12" style="text-align: center;">
-						<img id="img-status-1" class="img-status" src="{{ asset('static/opportunity_status/opr-status-new.png') }}" alt="" 
-						@if ($opportunity->opr_status == 1) style="display:true;" @else style="display:none;"	@endif>
-						<img id="img-status-2" class="img-status" src="{{ asset('static/opportunity_status/opr-status-presentation.png') }}" alt="" 
-						@if ($opportunity->opr_status == 2) style="display:true;" @else style="display:none;"	@endif>
-						<img id="img-status-3" class="img-status" src="{{ asset('static/opportunity_status/opr-status-poc.png') }}" alt="" 
-						@if ($opportunity->opr_status == 3) style="display:true;" @else style="display:none;"	@endif>
-						<img id="img-status-4" class="img-status" src="{{ asset('static/opportunity_status/opr-status-proposal.png') }}" alt="" 
-						@if ($opportunity->opr_status == 4) style="display:true;" @else style="display:none;"	@endif>
-						<img id="img-status-5" class="img-status" src="{{ asset('static/opportunity_status/opr-status-negotiation.png') }}" alt="" 
-						@if ($opportunity->opr_status == 5) style="display:true;" @else style="display:none;"	@endif>
-						<img id="img-status-6" class="img-status" src="{{ asset('static/opportunity_status/opr-status-win.png') }}" alt="" 
-						@if ($opportunity->opr_status == 6) style="display:true;" @else style="display:none;"	@endif>
-						<img id="img-status-7" class="img-status" src="{{ asset('static/opportunity_status/opr-status-lose.png') }}" alt="" 
-						@if ($opportunity->opr_status == 7) style="display:true;" @else style="display:none;"	@endif>
-					</div>
-				</div>
-			</div>
-		</div>
-		{{-- <hr class="mt-1 mb-3"> --}}
-	</div>
-	<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<div class="row mb-2">
-			<div class="col" style="padding: auto;">
-				<span class="form-label text-muted mb-0"  style="">Products And Services :</span>
-			</div>
-			<div class="col-auto">
-				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-					<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddProduct()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Product</button>
-				@endif
-			</div>
-		</div>
-		<div class="row mb-0">
-			<div class="col-12">
-				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-				<table id="table-product-detail" class="table table-striped table-responsive">
-					<thead>
-						<tr>
-							<th style="width: 2%"></th>
-							<th style="width: 20%">Principle</th>
-							<th style="width: 35%">Product</th>
-							<th class="text-center" style="width: 5%">Qnt</th>
-							<th class="text-end" style="width: 15%">Unit</th>
-							<th class="text-end" style="width: 15%">Amount</th>
-							<th style="width: 8%"></th>
-						</tr>
-					</thead>
-					<tbody id="tab_products">
-						@php
-							$count_product = count($opr_product);
-							$n_index_product_list = 1 + $count_product;
-						@endphp
-							@foreach ($opr_product as $list)
-							<tr>
-								<td class="text-center">{{ $list['no'] }}</td>
-								<td><span class="strong"><span id="opr_principle_{{ $list['id'] }}">{{ $list['principle'] }}</span></span></td>
-								<td>
-									<div class="strong"><span id="opr_product_{{ $list['id'] }}">{{ $list['product'] }}</span> </div>
-									@if ($list['note'] == ''||$list['note'] == null)
-									<span id="opr_product_note{{ $list['id'] }}" class="text-muted">-</span>
-									@else
-									<span id="opr_product_note{{ $list['id'] }}" class="text-muted">{{ $list['note'] }}</span>
-									@endif
-								</td>
-								<td class="text-center"><span id="opr_quantity{{ $list['id'] }}">{{ $list['quantity'] }}</span></td>
-								<td class="text-end"><span id="opr_unit_{{ $list['id'] }}">{{ rupiahFormat( $list['unit'] ) }}</span></td>
-								<td class="text-end"><span id="opr_total_{{ $list['id'] }}">{{ rupiahFormat( $list['total'] ) }}</span></td>
-								<td class="text-center" style="vertical-align: middle;">
-									<button class="badge bg-blue-lt" onclick="actionUpdateProduct({!! $list['id'] !!})"><i class="ri-edit-2-line"></i></button>
-								</td>
-							</tr>
-							@endforeach
-					</tbody>
-					<tbody id="tab_values">
-						<tr>
-							<td colspan="4" class="strong text-end"><i>Subtotal</i></td>
-							<td class="text-end"></td>
-							<td class="text-end"><span id="opr_suptotal">{{ rupiahFormat($opr_value->ovs_value_subtotal) }}</span></td>
-							<td class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt" onclick="actionChangeSubvalue()"><i class="ri-edit-2-line"></i></button>
-							</td>
-						</tr>
-						<tr>
-							<td colspan="4" class="strong text-end"><i>Tax Rate</i></td>
-							<td class="text-end"><span id="opr_tax_rate">{{ $opr_value->ovs_rate_tax }}</span>%</td>
-							<td class="text-end"><span id="opr_tax_value">{{ rupiahFormat($opr_value->ovs_value_tax) }}</span></td>
-							<td class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt" onclick="actionChangeTax()"><i class="ri-edit-2-line"></i></button>
-							</td>
-						</tr>
-					</tbody>
-					<tbody id="tab_other_values">
-						<tr>
-							<td colspan="4" class="strong text-end"><i>Other Cost</i></td>
-							<td class="text-end"></td>
-							<td rowspan="{{ $tab_row }}" class="text-end" style="vertical-align: middle;"><span id="opr_other_cost"></span>{{ rupiahFormat($opr_value->ovs_value_other_cost) }}</td>
-							<td rowspan="{{ $tab_row }}" class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt" onclick="actionChangeValOther()"><i class="ri-edit-2-line"></i></button>
-							</td>
-						</tr>
-						@foreach ($opr_other as $list)
-						<tr>
-							<td colspan="4" class="text-muted text-end"><i><span id="opr_other_note_{{ $list['id'] }}"></span>{{ $list['note'] }}</i></td>
-							<td class="text-end"><span id="opr_other_cost_{{ $list['id'] }}"></span>{{ rupiahFormat($list['coast'])  }}</td>
-						</tr>
-						@endforeach
-					</tbody>
-					<tbody>
-						<tr>
-							<td colspan="4" class="strong text-end"><i>Total Due</i></td>
-							<td class="text-end"></td>
-							<td class="text-end"><span id="opr_total">{{ rupiahFormat($opr_value->ovs_value_total) }}</span></td>
-							<td class="text-center" style="vertical-align: middle;">
-								<button class="badge bg-blue-lt" onclick="actionChangeValRevenue()"><i class="ri-edit-2-line"></i></button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				@else
-				@endif
-			</div>
-		</div>
-		<div class="row mb-0">
-			<div class="col">
-				<label class="form-label text-muted col-2 pb-0 pt-0">Add Notes :</label>
-			</div>
-			@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
-			<div class="col-auto">
-				<button class="badge bg-blue btn-pill" onclick="actionUpdateNote()">Save Notes</button>
-			</div>
-			<div class="col-12 mb-2">
-				<textarea id="textingContent1" class="form-control" name="identification_needs"
-				rows="3" placeholder="Describe something ..." oninput="actionStoreOpporNotes()">{{ $opportunity->opr_notes }}</textarea>
+			<div class="col-12" id="btn-g-page-purchase" style="display: none;">
+				<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenPO()">
+					View Purchased Order
+				</button>
 			</div>
 			@else
-			<div class="col-12 mb-2">
-				{!! html_entity_decode($opportunity->opr_notes) !!}
+			<div class="col-12" id="btn-g-page-purchase">
+				<button type="button" id="btn-open-po" class="btn pr-2 pb-1 pt-1 ml-3" onclick="actionOpenPO()">
+					View Purchased Order
+				</button>
 			</div>
 			@endif
 		</div>
-	</div>
-	{{-- ======================================================================================================== --}}
-	{{-- <div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
-		<em class="text-muted lh-base mb-1"><i>Technical Report</i></em>
-	</div> --}}
-	{{-- ========================================================================================================= --}}
-	<div class="card-body pt-2 pb-2" style="padding-left: 10px;padding-right: 10px;background-color: whitesmoke;">
-		<div class="row mb-2 mt-2">
-			<em class="col text-muted lh-base mb-1"><i>PIC Contacts</i></em>
-			<div class="col-auto">
-				<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddContactForm()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Contact</button>
+		@endif
+		{{-- ======================================================================================================== --}}
+		<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
+			<div class="row mb-1">
+				<div class="col-12">
+					<div class="row">
+						<div class="col">
+							<h3 class=" mb-1"> <b>{{ $opportunity->lds_title }}</b></h3>
+						</div>
+						<div class="col-auto">
+							<span class="text-muted small"><i>Estimated Close: {{ $closing }}</i></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-auto">
+					<em class="text-muted lh-base mb-1"><i>Customer</i></em>
+					<div class="page-pretitle-custom mb-1">{{ html_entity_decode($institution_names) }}</div>
+					<em class="text-muted lh-base mb-1"><i>Sub Customer</i></em>
+					@if ($lead_subcustomer === null)
+						<div class="page-pretitle-custom mb-1">-</div>
+					@else
+						<div class="page-pretitle-custom mb-1">{{ html_entity_decode($lead_subcustomer->cst_name) }}</div>
+					@endif
+					<em class="text-muted lh-base mb-0"><i>Salesperson</i></em>
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionChangeSales()"><i class="ri-edit-2-line"></i></button>
+					@endif
+					<div class="page-pretitle-custom">
+						{{ $sales_selected->name }}
+					</div>
+					<em class="text-muted lh-base mb-0"><i>Colaborator</i></em>
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTeam()"><i class="ri-edit-2-line"></i></button>
+					@endif
+					<div class="page-pretitle-custom">
+						@if ($member_name == null || $member_name == "")
+						-
+						@else
+						{{ $member_name }}
+						@endif
+					</div>
+					<em class="text-muted lh-base mb-0"><i>Technical</i></em>
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+						<button class="badge bg-blue-lt ms-0 p-0" style="margin-bottom: 1px;" onclick="actionAddTechnical()"><i class="ri-edit-2-line"></i></button>
+					@endif
+					<div class="page-pretitle-custom">
+						@if ($tech_name == null || $tech_name == "")
+						-
+						@else
+						{{ $tech_name }}
+						@endif
+					</div>
+				</div>
+				<div class="col" style="text-align: right;">
+					<div class="row">
+						<div class="col-12" style="text-align: center;">
+							<img id="img-status-1" class="img-status" src="{{ asset('static/opportunity_status/opr-status-new.png') }}" alt="" 
+							@if ($opportunity->opr_status == 1) style="display:true;" @else style="display:none;"	@endif>
+							<img id="img-status-2" class="img-status" src="{{ asset('static/opportunity_status/opr-status-presentation.png') }}" alt="" 
+							@if ($opportunity->opr_status == 2) style="display:true;" @else style="display:none;"	@endif>
+							<img id="img-status-3" class="img-status" src="{{ asset('static/opportunity_status/opr-status-poc.png') }}" alt="" 
+							@if ($opportunity->opr_status == 3) style="display:true;" @else style="display:none;"	@endif>
+							<img id="img-status-4" class="img-status" src="{{ asset('static/opportunity_status/opr-status-proposal.png') }}" alt="" 
+							@if ($opportunity->opr_status == 4) style="display:true;" @else style="display:none;"	@endif>
+							<img id="img-status-5" class="img-status" src="{{ asset('static/opportunity_status/opr-status-negotiation.png') }}" alt="" 
+							@if ($opportunity->opr_status == 5) style="display:true;" @else style="display:none;"	@endif>
+							<img id="img-status-6" class="img-status" src="{{ asset('static/opportunity_status/opr-status-win.png') }}" alt="" 
+							@if ($opportunity->opr_status == 6) style="display:true;" @else style="display:none;"	@endif>
+							<img id="img-status-7" class="img-status" src="{{ asset('static/opportunity_status/opr-status-lose.png') }}" alt="" 
+							@if ($opportunity->opr_status == 7) style="display:true;" @else style="display:none;"	@endif>
+						</div>
+					</div>
+				</div>
+			</div>
+			{{-- <hr class="mt-1 mb-3"> --}}
+		</div>
+		<div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
+			<div class="row mb-2">
+				<div class="col" style="padding: auto;">
+					<span class="form-label text-muted mb-0"  style="">Products And Services :</span>
+				</div>
+				<div class="col-auto">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+						<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddProduct()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Product</button>
+					@endif
+				</div>
+			</div>
+			<div class="row mb-0">
+				<div class="col-12">
+					@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+					<table id="table-product-detail" class="table table-striped table-responsive">
+						<thead>
+							<tr>
+								<th style="width: 2%"></th>
+								<th style="width: 20%">Principle</th>
+								<th style="width: 35%">Product</th>
+								<th class="text-center" style="width: 5%">Qnt</th>
+								<th class="text-end" style="width: 15%">Unit</th>
+								<th class="text-end" style="width: 15%">Amount</th>
+								<th style="width: 8%"></th>
+							</tr>
+						</thead>
+						<tbody id="tab_products">
+							@php
+								$count_product = count($opr_product);
+								$n_index_product_list = 1 + $count_product;
+							@endphp
+								@foreach ($opr_product as $list)
+								<tr>
+									<td class="text-center">{{ $list['no'] }}</td>
+									<td><span class="strong"><span id="opr_principle_{{ $list['id'] }}">{{ $list['principle'] }}</span></span></td>
+									<td>
+										<div class="strong"><span id="opr_product_{{ $list['id'] }}">{{ $list['product'] }}</span> </div>
+										@if ($list['note'] == ''||$list['note'] == null)
+										<span id="opr_product_note{{ $list['id'] }}" class="text-muted">-</span>
+										@else
+										<span id="opr_product_note{{ $list['id'] }}" class="text-muted">{{ $list['note'] }}</span>
+										@endif
+									</td>
+									<td class="text-center"><span id="opr_quantity{{ $list['id'] }}">{{ $list['quantity'] }}</span></td>
+									<td class="text-end"><span id="opr_unit_{{ $list['id'] }}">{{ rupiahFormat( $list['unit'] ) }}</span></td>
+									<td class="text-end"><span id="opr_total_{{ $list['id'] }}">{{ rupiahFormat( $list['total'] ) }}</span></td>
+									<td class="text-center" style="vertical-align: middle;">
+										<button class="badge bg-blue-lt" onclick="actionUpdateProduct({!! $list['id'] !!})"><i class="ri-edit-2-line"></i></button>
+									</td>
+								</tr>
+								@endforeach
+						</tbody>
+						<tbody id="tab_values">
+							<tr>
+								<td colspan="4" class="strong text-end"><i>Subtotal</i></td>
+								<td class="text-end"></td>
+								<td class="text-end"><span id="opr_suptotal">{{ rupiahFormat($opr_value->ovs_value_subtotal) }}</span></td>
+								<td class="text-center" style="vertical-align: middle;">
+									<button class="badge bg-blue-lt" onclick="actionChangeSubvalue()"><i class="ri-edit-2-line"></i></button>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="4" class="strong text-end"><i>Tax Rate</i></td>
+								<td class="text-end"><span id="opr_tax_rate">{{ $opr_value->ovs_rate_tax }}</span>%</td>
+								<td class="text-end"><span id="opr_tax_value">{{ rupiahFormat($opr_value->ovs_value_tax) }}</span></td>
+								<td class="text-center" style="vertical-align: middle;">
+									<button class="badge bg-blue-lt" onclick="actionChangeTax()"><i class="ri-edit-2-line"></i></button>
+								</td>
+							</tr>
+						</tbody>
+						<tbody id="tab_other_values">
+							<tr>
+								<td colspan="4" class="strong text-end"><i>Other Cost</i></td>
+								<td class="text-end"></td>
+								<td rowspan="{{ $tab_row }}" class="text-end" style="vertical-align: middle;"><span id="opr_other_cost"></span>{{ rupiahFormat($opr_value->ovs_value_other_cost) }}</td>
+								<td rowspan="{{ $tab_row }}" class="text-center" style="vertical-align: middle;">
+									<button class="badge bg-blue-lt" onclick="actionChangeValOther()"><i class="ri-edit-2-line"></i></button>
+								</td>
+							</tr>
+							@foreach ($opr_other as $list)
+							<tr>
+								<td colspan="4" class="text-muted text-end"><i><span id="opr_other_note_{{ $list['id'] }}"></span>{{ $list['note'] }}</i></td>
+								<td class="text-end"><span id="opr_other_cost_{{ $list['id'] }}"></span>{{ rupiahFormat($list['coast'])  }}</td>
+							</tr>
+							@endforeach
+						</tbody>
+						<tbody>
+							<tr>
+								<td colspan="4" class="strong text-end"><i>Total Due</i></td>
+								<td class="text-end"></td>
+								<td class="text-end"><span id="opr_total">{{ rupiahFormat($opr_value->ovs_value_total) }}</span></td>
+								<td class="text-center" style="vertical-align: middle;">
+									<button class="badge bg-blue-lt" onclick="actionChangeValRevenue()"><i class="ri-edit-2-line"></i></button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					@else
+					@endif
+				</div>
+			</div>
+			<div class="row mb-0">
+				<div class="col">
+					<label class="form-label text-muted col-2 pb-0 pt-0">Add Notes :</label>
+				</div>
+				@if (checkRule(array('ADM','AGM','MGR.PAS','MGR','STF')))
+				<div class="col-auto">
+					<button class="badge bg-blue btn-pill" onclick="actionUpdateNote()">Save Notes</button>
+				</div>
+				<div class="col-12 mb-2">
+					<textarea id="textingContent1" class="form-control" name="identification_needs"
+					rows="3" placeholder="Describe something ..." oninput="actionStoreOpporNotes()">{{ $opportunity->opr_notes }}</textarea>
+				</div>
+				@else
+				<div class="col-12 mb-2">
+					{!! html_entity_decode($opportunity->opr_notes) !!}
+				</div>
+				@endif
 			</div>
 		</div>
-		<div class="col-12">
-			<div id="contact-area" class="row">
-				@foreach ($lead_contacts as $list)
-				<div id="contact-{{ $list->plc_id }}" class="col-md-6 col-xl-3">
-					<div class="card" style="margin-left: 0px;margin-right: 0px;padding-left: 0px;padding-right: 0px;margin-bottom: 8px;">
-						<div class="card-status-start bg-primary"></div>
-						<div class="card-body card-body-contact" style="">
-							<div class="row">
-								<div class="col-auto">
-									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
-										<span class="avatar"><i class="ri-user-line"></i></span>
-									</a>
-								</div>
-								<div class="col text-truncate" style="padding-left: 0px;">
-									<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
-										<strong>{{ $list->cnt_fullname }}</strong>
-										<div class="text-muted text-truncate">{{ $list->cnt_company_position }}</div>
-									</a>
-								</div>
-								<div class="col-auto align-self-center">
-									<div class="dropdown">
-										<button href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>
-										<div class="dropdown-menu dropdown-menu-end">
-											<a class="dropdown-item" href="#contact-area" onclick="actionRemoveContact({{ $list->plc_id }})"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+		{{-- ======================================================================================================== --}}
+		{{-- <div class="card-body pt-2" style="padding-left: 10px;padding-right: 10px;">
+			<em class="text-muted lh-base mb-1"><i>Technical Report</i></em>
+		</div> --}}
+		{{-- ========================================================================================================= --}}
+		<div class="card-body pt-2 pb-2" style="padding-left: 10px;padding-right: 10px;background-color: whitesmoke;">
+			<div class="row mb-2 mt-2">
+				<em class="col text-muted lh-base mb-1"><i>PIC Contacts</i></em>
+				<div class="col-auto">
+					<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddContactForm()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Contact</button>
+				</div>
+			</div>
+			<div class="col-12">
+				<div id="contact-area" class="row">
+					@foreach ($lead_contacts as $list)
+					<div id="contact-{{ $list->plc_id }}" class="col-md-6 col-xl-3">
+						<div class="card" style="margin-left: 0px;margin-right: 0px;padding-left: 0px;padding-right: 0px;margin-bottom: 8px;">
+							<div class="card-status-start bg-primary"></div>
+							<div class="card-body card-body-contact" style="">
+								<div class="row">
+									<div class="col-auto">
+										<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
+											<span class="avatar"><i class="ri-user-line"></i></span>
+										</a>
+									</div>
+									<div class="col text-truncate" style="padding-left: 0px;">
+										<a href="{{ url('customer/contacts/detail/'.$list->cnt_id) }}">
+											<strong>{{ $list->cnt_fullname }}</strong>
+											<div class="text-muted text-truncate">{{ $list->cnt_company_position }}</div>
+										</a>
+									</div>
+									<div class="col-auto align-self-center">
+										<div class="dropdown">
+											<button href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#contact-area" onclick="actionRemoveContact({{ $list->plc_id }})"><i class="ri-delete-bin-2-line" style="margin-right:6px;"></i>Remove</a>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
+					@endforeach
 				</div>
-				@endforeach
+			</div>
+		</div>
+		{{-- ========================================================================================================= --}}
+		<div class="card-body pt-3 pb-3" style="padding-left: 10px;padding-right: 10px;">
+			<div id="init-page-activities" class="row mb-2">
+				<em class="col text-muted lh-base mb-1"><i>Activities</i></em>
+				<div class="col-auto">
+					<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddActivities()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Activity</button>
+				</div>
+			</div>
+			<div class="col-12 mb-3">
+				<div class="table">
+					<table class="table table-vcenter custom-datatables">
+						<thead>
+							<tr>
+								<th style="width: 1%;"></th>
+								<th style="width: 19%;">Due Date</th>
+								<th style="width: 10%;">Activity</th>
+								<th style="width: 45%;">Update Info</th>
+								<th style="width: 15%;">Date Created</th>
+								<th style="width: 10%;">Complete</th>
+							</tr>
+						</thead>
+						<tbody id="listDataActivitySection1"></tbody>
+						<tbody id="listDataActivitySection2"></tbody>
+						<tbody id="listDataActivitySection3"></tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
-	{{-- ========================================================================================================= --}}
-	<div class="card-body pt-3 pb-3" style="padding-left: 10px;padding-right: 10px;">
-		<div id="init-page-activities" class="row mb-2">
-			<em class="col text-muted lh-base mb-1"><i>Activities</i></em>
-			<div class="col-auto">
-				<button class="btn btn-primary btn-pill btn-sm" onclick="actionAddActivities()" style="width: 130px;"><i class="ri-add-line" style="margin-right: 5px;"></i> Add Activity</button>
-			</div>
-		</div>
-		<div class="col-12 mb-3">
-			<div class="table">
-				<table class="table table-vcenter custom-datatables">
-					<thead>
-						<tr>
-							<th style="width: 1%;"></th>
-							<th style="width: 19%;">Due Date</th>
-							<th style="width: 10%;">Activity</th>
-							<th style="width: 45%;">Update Info</th>
-							<th style="width: 15%;">Date Created</th>
-							<th style="width: 10%;">Complete</th>
-						</tr>
-					</thead>
-					<tbody id="listDataActivitySection1"></tbody>
-					<tbody id="listDataActivitySection2"></tbody>
-					<tbody id="listDataActivitySection3"></tbody>
-				</table>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-subvalue" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Change Subvalue</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						@csrf
+						<input type="text" id="input-base-value" class="form-control pb-1 pt-1" name="opportunity_value" placeholder="Input placeholder" 
+						oninput="fcurrencyInput('input-base-value')" value="{{ fcurrency($opportunity_value->opr_value_dpp) }}">
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-sm btn-primary m-0" form="formContent1" data-bs-dismiss="modal">Save</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-subvalue" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Subvalue</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent1" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					@csrf
-					<input type="text" id="input-base-value" class="form-control pb-1 pt-1" name="opportunity_value" placeholder="Input placeholder" 
-					oninput="fcurrencyInput('input-base-value')" value="{{ fcurrency($opportunity_value->opr_value_dpp) }}">
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" class="btn btn-sm btn-primary m-0" form="formContent1" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-create-purchased" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Create Purchase Order</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
-			</div>
-			<div class="modal-body p-3">
-				<form id="formContent2" name="form_content2" enctype="multipart/form-data" action="javascript:void(0)" method="post">
-					@csrf
-					<div class="row">
-						<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
-						<div class="col-sm-12 col-xl-6">
-							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label pt-1 pb-1">Purchased Date</label>
-								<div class="col" style="padding: 0px;margin-left: 0px;">
-									<div class="input-group">
-										<span class="input-group-text p-1">
-											<i class="ri-calendar-2-line"></i>
-										</span>
-										<input type="text" id="datepicker_purchase" name="date_purchase" class="form-control p-1" placeholder="Purchase date" autocomplete="off">
+	{{-- ===================================================================================================== --}}
+	<div id="modal-create-purchased" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
+					<h5 class="modal-title">Create Purchase Order</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
+				</div>
+				<div class="modal-body p-3">
+					<form id="formContent2" name="form_content2" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+						@csrf
+						<div class="row">
+							<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
+							<div class="col-sm-12 col-xl-6">
+								<div class="mb-2 mt-0 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label pt-1 pb-1">Purchased Date</label>
+									<div class="col" style="padding: 0px;margin-left: 0px;">
+										<div class="input-group">
+											<span class="input-group-text p-1">
+												<i class="ri-calendar-2-line"></i>
+											</span>
+											<input type="text" id="datepicker_purchase" name="date_purchase" class="form-control p-1" placeholder="Purchase date" autocomplete="off">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-12 col-xl-6">
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label pt-1 pb-1">Invoice Number</label>
+									<div class="col" style="padding: 0px;">
+										<input type="text" id="inp_purchase" name="number_invoice" class="form-control p-1" placeholder="Invoice number" autocomplete="off">
 									</div>
 								</div>
 							</div>
 						</div>
-						<div class="col-sm-12 col-xl-6">
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label pt-1 pb-1">Invoice Number</label>
-								<div class="col" style="padding: 0px;">
-									<input type="text" id="inp_purchase" name="number_invoice" class="form-control p-1" placeholder="Invoice number" autocomplete="off">
+						<div class="row">
+							<div class="col-xl-12 col-md-12">
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="col-12 col-form-label">Notes Purchase</label>
+									<textarea id="notesPurchase" name="note_purchase"></textarea>
 								</div>
 							</div>
 						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<div class="col">
 					</div>
-					<div class="row">
-						<div class="col-xl-12 col-md-12">
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Notes Purchase</label>
-								<textarea id="notesPurchase" name="note_purchase"></textarea>
+					<div class="col-auto">
+						<button type="button" id="ResetButtonFormFolUp" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
+						<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent2"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">CREATE</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Change Tax Value</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent3" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						@csrf
+						<div class="row mb-2">
+							<label class="col-3 col-form-label" >Tax Rate</label>
+							<div class="col">
+								<div class="input-icon">
+									<input type="number" id="input-opportunity-tax-rate" class="form-control pb-1 pt-1" name="tax_rate" oninput="actionTriggerTaxVal()">
+					  <span class="input-icon-addon">
+											<i class="ri-percent-line"></i>
+					  </span>
+					</div>
 							</div>
 						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<div class="col">
-				</div>
-				<div class="col-auto">
-					<button type="button" id="ResetButtonFormFolUp" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-					<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent2"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">CREATE</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-tax" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Tax Value</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent3" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					@csrf
-					<div class="row mb-2">
-						<label class="col-3 col-form-label" >Tax Rate</label>
-						<div class="col">
-							<div class="input-icon">
-								<input type="number" id="input-opportunity-tax-rate" class="form-control pb-1 pt-1" name="tax_rate" oninput="actionTriggerTaxVal()">
-                  <span class="input-icon-addon">
-										<i class="ri-percent-line"></i>
-                  </span>
-                </div>
-						</div>
-					</div>
-					<div class="row">
-						<label class="col-3 col-form-label" >Tax Value</label>
-						<div class="col">
-							<input type="text" id="input-opportunity-tax" class="form-control pb-1 pt-1" name="tax_value" placeholder="Input placeholder" 
-							oninput="fcurrencyInput('input-opportunity-tax')" value="{{ fcurrency($opportunity_value->opr_tax) }}">
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent3" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-other-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Other Value</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent4" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					@csrf
-					<table id="table-form-other-cost" class="table table-vcenter card-table table-custom-1">
-						<thead>
-							<tr>
-								<th style="width: 65%;">Other Cost</th>
-								<th style="width: 30%;">Amount</th>
-								<th style="width: 5%;"></th>
-							</tr>
-						</thead>
-						<tbody id="table-body-form-other-value">
-						</tbody>
-					</table>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<div class="col m-0">
-					<button type="button" class="btn btn-sm" onclick="actionChangeValOtherData()" title="Reload other value data." data-bs-toggle="tooltip" data-bs-placement="top">
-						<i class="ri-refresh-line"></i>
-					</button>
-					<button type="button" class="btn btn-sm" onclick="actionAddRowForm4()" title="Add new row field input other value." data-bs-toggle="tooltip" data-bs-placement="top"><i class="ri-add-line" style="margin-right: 2px;"></i> New Row</button>
-				</div>
-				<div class="col-auto m-0">
-					<button type="submit" form="formContent4" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-revenue-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Total Value</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent5" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					@csrf
-					<input type="text" id="input-opportunity-revenue" class="form-control pb-1 pt-1" name="revenue_value" placeholder="Input placeholder" 
-					oninput="fcurrencyInput('input-opportunity-revenue')" value="{{ fcurrency($opportunity_value->opr_revenue) }}">
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent5" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-sale" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Change Salesperson</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent6" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					<select type="text" class="form-select select-sales" name="select_sales" id="select-user-sales" value="">
-						<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
-						@foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}">{{ $list->name }}</option>
-						@endforeach
-					</select>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent6" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-add-team" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Add Teams Sales</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent7" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					<select type="text" class="form-select select-teams" name="select_teams[]" multiple  id="select-user-team" value="">
-						@foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member_id)) selected @endif >
-							{{ $list->name }}
-						</option>
-						@endforeach
-					</select>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent7" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-add-contacts" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Add Contact</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent8" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					<div class="row mb-2">
-						<label class="col-3 col-form-label required" >
-							Name
-						</label>
-						<div class="col">
-							<select type="text" class="form-select select-sales" name="contact" id="select-contact" value="" required>
-								<option value="{{ null }}"></option>
-								@foreach ($all_contacts as $list)
-								<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
-								@endforeach
-							</select>
-							<input type="hidden" name="id_cst" value="{{ $opportunity->lds_customer }}">
-							<input type="hidden" name="id_subcst" value="{{ $opportunity->lds_subcustomer }}">
-						</div>
-					</div>
-					<span id="additional-form-contact" style="display: none;">
-						<div class="row mb-2">
-							<label class="col-3 col-form-label" >Contact</label>
+						<div class="row">
+							<label class="col-3 col-form-label" >Tax Value</label>
 							<div class="col">
-								<select type="text" class="form-select select-sales" name="type" id="select-type" value="">
+								<input type="text" id="input-opportunity-tax" class="form-control pb-1 pt-1" name="tax_value" placeholder="Input placeholder" 
+								oninput="fcurrencyInput('input-opportunity-tax')" value="{{ fcurrency($opportunity_value->opr_tax) }}">
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent3" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-other-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Change Other Value</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent4" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						@csrf
+						<table id="table-form-other-cost" class="table table-vcenter card-table table-custom-1">
+							<thead>
+								<tr>
+									<th style="width: 65%;">Other Cost</th>
+									<th style="width: 30%;">Amount</th>
+									<th style="width: 5%;"></th>
+								</tr>
+							</thead>
+							<tbody id="table-body-form-other-value">
+							</tbody>
+						</table>
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<div class="col m-0">
+						<button type="button" class="btn btn-sm" onclick="actionChangeValOtherData()" title="Reload other value data." data-bs-toggle="tooltip" data-bs-placement="top">
+							<i class="ri-refresh-line"></i>
+						</button>
+						<button type="button" class="btn btn-sm" onclick="actionAddRowForm4()" title="Add new row field input other value." data-bs-toggle="tooltip" data-bs-placement="top"><i class="ri-add-line" style="margin-right: 2px;"></i> New Row</button>
+					</div>
+					<div class="col-auto m-0">
+						<button type="submit" form="formContent4" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-revenue-value" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Change Total Value</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent5" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						@csrf
+						<input type="text" id="input-opportunity-revenue" class="form-control pb-1 pt-1" name="revenue_value" placeholder="Input placeholder" 
+						oninput="fcurrencyInput('input-opportunity-revenue')" value="{{ fcurrency($opportunity_value->opr_revenue) }}">
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent5" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-sale" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Change Salesperson</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent6" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						<select type="text" class="form-select select-sales" name="select_sales" id="select-user-sales" value="">
+							<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
+							@foreach ($user_marketing as $list)
+							<option value="{{ $list->id }}">{{ $list->name }}</option>
+							@endforeach
+						</select>
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent6" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-add-team" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Add Teams Sales</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent7" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						<select type="text" class="form-select select-teams" name="select_teams[]" multiple  id="select-user-team" value="">
+							@foreach ($user_marketing as $list)
+							<option value="{{ $list->id }}" @if (in_array($list->id, $team_member_id)) selected @endif >
+								{{ $list->name }}
+							</option>
+							@endforeach
+						</select>
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent7" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-add-contacts" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Add Contact</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent8" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						<div class="row mb-2">
+							<label class="col-3 col-form-label required" >
+								Name
+							</label>
+							<div class="col">
+								<select type="text" class="form-select select-sales" name="contact" id="select-contact" value="" required>
 									<option value="{{ null }}"></option>
-									<option value="mobile">Mobile</option>
-									<option value="telephone">Telephone</option>
-									<option value="email">Email</option>
+									@foreach ($all_contacts as $list)
+									<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
+									@endforeach
+								</select>
+								<input type="hidden" name="id_cst" value="{{ $opportunity->lds_customer }}">
+								<input type="hidden" name="id_subcst" value="{{ $opportunity->lds_subcustomer }}">
+							</div>
+						</div>
+						<span id="additional-form-contact" style="display: none;">
+							<div class="row mb-2">
+								<label class="col-3 col-form-label" >Contact</label>
+								<div class="col">
+									<select type="text" class="form-select select-sales" name="type" id="select-type" value="">
+										<option value="{{ null }}"></option>
+										<option value="mobile">Mobile</option>
+										<option value="telephone">Telephone</option>
+										<option value="email">Email</option>
+									</select>
+								</div>
+							</div>
+							<div class="row mb-2">
+								<label class="col-3 col-form-label" >Number/Email</label>
+								<div class="col">
+									<input type="text" class="form-control" name="textcontact" value="{{ null }}">
+								</div>
+							</div>
+							<div class="row mb-2">
+								<label class="col-3 col-form-label" >Position</label>
+								<div class="col">
+									<input type="text" class="form-control" name="position" value="{{ null }}">
+								</div>
+							</div>
+						</span>
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent8" class="btn btn-sm btn-primary m-0 pl-3 pr-3" data-bs-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-add-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
+					<h5 class="modal-title">Create Activities</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
+				</div>
+				<div class="modal-body p-3">
+					<form id="formContent9" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+						@csrf
+						<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
+						<input type="hidden" name="customer" value="{{ $opportunity->lds_customer }}" readonly>
+						<input type="hidden" name="lead_status_id" value="{{ $opportunity->lds_status }}" readonly>
+						<div class="row">
+							<div class="col-xl-6 col-md-12">
+								<div class="mb-2 mt-0 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Date</label>
+									<div class="col" style="padding: 0px;margin-left: 0px;">
+										<div class="input-group">
+											<span class="input-group-text p-1">
+												<i class="ri-calendar-2-line"></i>
+											</span>
+											<input type="text" id="datepicker_due" name="due_date" class="form-control p-1" placeholder="Due Date" autocomplete="off">
+										</div>
+									</div>
+								</div>
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Type Activity</label>
+									<div class="col" style="padding: 0px;">
+										<select type="text" id="select-type-activity" class="form-select ts-input-custom" name="action_todo" placeholder="Select your type activity"  value="">
+											<option value="{{ null }}"></option>
+											@foreach ($activity_type as $list)
+												<option value="{{ $list->aat_id }}">{{ $list->aat_type_name }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-6 col-md-12">
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Assigned to</label>
+									<div class="col" style="padding: 0px;">
+										<select type="text" id="select-signed-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
+											<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
+											@foreach ($team_selected as $list)
+											<option value="{{ $list->userid }}">{{ $list->name }}</option>
+											@endforeach
+										</select>
+										<button type="button" id="btn-add-team" class="badge bg-cyan mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
+										<button type="button" id="btn-remove-team" class="badge bg-cyan mt-1 mb-1" style="display: none;">x Close</button>
+										<div id="select-signed-user-team-area" style="display: none;">
+											<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team" value="">
+												<option value="{{ null }}"></option>
+												@foreach ($users as $list)
+												<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+								</div>
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Person in Charge</label>
+									<div class="col" style="padding: 0px;">
+										<select type="text" id="select-pic-user" class="form-select ts-input-custom" multiple name="pic_user[]" placeholder="Select PIC..."  value="">
+											{{-- <option value="{{ null }}">{{ null }}</option> --}}
+											@foreach ($lead_contacts as $list)
+											<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-12 col-md-12">
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="col-12 col-form-label">Activity Describe</label>
+									<textarea id="notesActivitiesDescribe" name="activity_describe"></textarea>
+								</div>
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="col-12 col-form-label">Activity Result</label>
+									<textarea id="notesActivitiesResult" name="activity_result"></textarea>
+								</div>
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="form-check">
+										<input id="todo_done" class="form-check-input" type="checkbox" name="todo_status" value="done" onclick="actionTodo('todo_done')">
+										<span class="form-check-label">It is already done.</span>
+									</label>
+									<label class="form-check">
+										<input id="todo_running" class="form-check-input" type="checkbox" name="todo_status" value="running" onclick="actionTodo('todo_running')">
+										<span class="form-check-label">It is already running.</span>
+									</label>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<div class="col">
+					</div>
+					<div class="col-auto">
+						<button type="button" id="ResetButtonFormFolUp" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
+						<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent9"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">CREATE</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-update-information" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
+					<h5 class="modal-title">Update Info</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
+				</div>
+				<div class="modal-body p-3">
+					<form id="formContent10" name="form_content10" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+						@csrf
+						<input type="hidden" id="opportunity-status-id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
+						<input type="hidden" id="activity-id" name="activity_id" value="" readonly>
+						<div class="mb-2" style="margin-right: 0px;">
+							<label class="col-12 col-form-label">Summary</label>
+							<textarea id="initUpdateInfo" class="notesUpdateInfo" name="activity_summary"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
+					<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
+					<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent10"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-edit-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
+					<h5 class="modal-title">Detail Activity</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
+				</div>
+				<div class="modal-body p-3">
+					<form id="formContent11" name="formContent11" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+						@csrf
+						<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
+						<input type="hidden" id="act-id" name="act_id" value="" readonly>
+						<div class="row">
+							<div class="col-xl-6 col-md-12">
+								<div class="mb-2 mt-0 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Date</label>
+									{{-- <div class="col" style="padding: 0px; margin-right: 10px;">
+										<div class="input-group" id="datetimepicker1">
+											<span class="input-group-text p-1">
+												<i class="ri-calendar-2-line"></i>
+											</span>
+											<input type="text" id="datepicker_start" name="start_date" class="form-control p-1" placeholder="Start Date" autocomplete="off">
+										</div>
+									</div> --}}
+									<div class="col" style="padding: 0px;margin-left: 0px;">
+										<div class="input-group">
+											<span class="input-group-text p-1">
+												<i class="ri-calendar-2-line"></i>
+											</span>
+											<input type="text" id="datepicker_due_edit" name="due_date" class="form-control p-1" placeholder="Due Date" autocomplete="off" value="">
+										</div>
+									</div>
+								</div>
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Type Activity</label>
+									<div class="col" style="padding: 0px;">
+										<select type="text" id="select-type-activity-i" class="form-select ts-input-custom" name="action_todo" placeholder="Select your type activity" >
+											<option value="{{ null }}"></option>
+											@foreach ($activity_type as $list)
+												<option value="{{ $list->aat_id }}">{{ $list->aat_type_name }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-6 col-md-12">
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Assigned to</label>
+									<div class="col" style="padding: 0px;">
+										<select type="text" id="select-signed-user-i" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
+											<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
+											@foreach ($team_selected as $list)
+											<option value="{{ $list->userid }}">{{ $list->name }}</option>
+											@endforeach
+										</select>
+										<button type="button" id="btn-add-team-i" class="badge bg-cyan mt-1 mb-1" onclick="actionViewInputTeamI()">+ Team</button>
+										<button type="button" id="btn-remove-team-i" class="badge bg-cyan mt-1 mb-1" style="display: none;">x Close</button>
+										<div id="select-signed-user-team-area-i" style="display: none;">
+											<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team-i" value="">
+												<option value="{{ null }}"></option>
+												@foreach ($users as $list)
+												<option value="{{ $list->id }}">{{ $list->name }}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+								</div>
+								<div class="mb-2 row" style="margin-right: 0px;">
+									<label class="col-3 col-form-label">Person in Charge</label>
+									<div class="col" style="padding: 0px;">
+										<select type="text" id="select-pic-user-i" class="form-select ts-input-custom" name="pic_user[]" placeholder="Select PIC..."  value="">
+											<option value="{{ null }}"></option>
+											@foreach ($lead_contacts as $list)
+											<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-12 col-md-12">
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="col-12 col-form-label">Activity Describe</label>
+									<textarea id="act-note-describe" name="alt_describe"></textarea>
+								</div>
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="col-12 col-form-label">Activity Result</label>
+									<textarea id="act-note-result" name="alt_result"></textarea>
+								</div>
+								<div class="mb-2" style="margin-right: 0px;">
+									<label class="form-check">
+										<input id="todo_done_i" class="form-check-input" type="checkbox" name="todo_status" value="done" onclick="actionTodo_i('todo_done')">
+										<span class="form-check-label">It is already done.</span>
+									</label>
+									<label class="form-check">
+										<input id="todo_running_i" class="form-check-input" type="checkbox" name="todo_status" value="running" onclick="actionTodo_i('todo_running')">
+										<span class="form-check-label">It is already running.</span>
+									</label>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<div class="col">
+					</div>
+					<div class="col-auto">
+						<button type="button" id="ResetButtonFormFolUp" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
+						<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent11"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-activity-status" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
+					<h5 class="modal-title">Change Activity Status</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
+				</div>
+				<div class="modal-body p-3">
+					<form id="formContent12" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
+						@csrf
+						<input type="hidden" id="activity_id_i" name="act_id" value="">
+						<select type="text" class="form-select select-sales" name="status" id="select-act-status" value="">
+							<option value="{{ null }}">{{ null }}</option>
+							<option value="beready">Beready</option>
+							<option value="running">Running</option>
+							<option value="finished">Finish</option>
+						</select>
+					</form>
+				</div>
+				<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
+					<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
+					<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent12"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-change-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Edit Products Opportunity</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent13" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						@csrf
+						<input type="text" id="prd-id" name="prd_id" value="">
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Set Product Priciple</label>
+							<div class="col" style="padding: 0px;">
+								<select type="text" id="select-principles-update" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple">
+									<option value="{{ null }}">Select principle</option>
+									@foreach ($allproduct as $list)
+										<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
+									@endforeach
 								</select>
 							</div>
 						</div>
-						<div class="row mb-2">
-							<label class="col-3 col-form-label" >Number/Email</label>
-							<div class="col">
-								<input type="text" class="form-control" name="textcontact" value="{{ null }}">
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Set Product</label>
+							<div class="col" style="padding: 0px;">
+								<select type="text" id="select-product-update" class="form-select ts-input-custom" name="product" placeholder="Select your type activity">
+								</select>
 							</div>
 						</div>
-						<div class="row mb-2">
-							<label class="col-3 col-form-label" >Position</label>
-							<div class="col">
-								<input type="text" class="form-control" name="position" value="{{ null }}">
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Give Notes</label>
+							<div class="col" style="padding: 0px;">
+								<input type="text" id="prd-product-note-update" name="product_note" class="form-control p-1" placeholder="Product notes.." autocomplete="off" >
 							</div>
 						</div>
-					</span>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent8" class="btn btn-sm btn-primary m-0 pl-3 pr-3" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-add-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Create Activities</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
-			</div>
-			<div class="modal-body p-3">
-				<form id="formContent9" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
-					@csrf
-					<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
-					<input type="hidden" name="customer" value="{{ $opportunity->lds_customer }}" readonly>
-					<input type="hidden" name="lead_status_id" value="{{ $opportunity->lds_status }}" readonly>
-					<div class="row">
-						<div class="col-xl-6 col-md-12">
-							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Date</label>
-								<div class="col" style="padding: 0px;margin-left: 0px;">
-									<div class="input-group">
-										<span class="input-group-text p-1">
-											<i class="ri-calendar-2-line"></i>
-										</span>
-										<input type="text" id="datepicker_due" name="due_date" class="form-control p-1" placeholder="Due Date" autocomplete="off">
-									</div>
-								</div>
-							</div>
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Type Activity</label>
-								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-type-activity" class="form-select ts-input-custom" name="action_todo" placeholder="Select your type activity"  value="">
-										<option value="{{ null }}"></option>
-										@foreach ($activity_type as $list)
-											<option value="{{ $list->aat_id }}">{{ $list->aat_type_name }}</option>
-										@endforeach
-									</select>
-								</div>
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Unit Value</label>
+							<div class="col" style="padding: 0px;">
+								<input type="text" id="prd-unit-value-update" name="unit_value" class="form-control p-1" oninput="fcurrencyInput('prd-unit-value-update')" placeholder="Unit value product">
 							</div>
 						</div>
-						<div class="col-xl-6 col-md-12">
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Assigned to</label>
-								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-signed-user" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
-										<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
-										@foreach ($team_selected as $list)
-										<option value="{{ $list->userid }}">{{ $list->name }}</option>
-										@endforeach
-									</select>
-									<button type="button" id="btn-add-team" class="badge bg-cyan mt-1 mb-1" onclick="actionViewInputTeam()">+ Team</button>
-									<button type="button" id="btn-remove-team" class="badge bg-cyan mt-1 mb-1" style="display: none;">x Close</button>
-									<div id="select-signed-user-team-area" style="display: none;">
-										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team" value="">
-											<option value="{{ null }}"></option>
-											@foreach ($users as $list)
-											<option value="{{ $list->id }}">{{ $list->uts_team_name }} - {{ $list->name }}</option>
-											@endforeach
-										</select>
-									</div>
-								</div>
-							</div>
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Person in Charge</label>
-								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-pic-user" class="form-select ts-input-custom" multiple name="pic_user[]" placeholder="Select PIC..."  value="">
-										{{-- <option value="{{ null }}">{{ null }}</option> --}}
-										@foreach ($lead_contacts as $list)
-										<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
-										@endforeach
-									</select>
-								</div>
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Quantity</label>
+							<div class="col" style="padding: 0px;">
+								<input type="number" id="prd-quantity-update" name="quantity" class="form-control p-1" placeholder="Quantity products.." autocomplete="off" >
 							</div>
 						</div>
-						<div class="col-xl-12 col-md-12">
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Activity Describe</label>
-								<textarea id="notesActivitiesDescribe" name="activity_describe"></textarea>
-							</div>
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Activity Result</label>
-								<textarea id="notesActivitiesResult" name="activity_result"></textarea>
-							</div>
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="form-check">
-									<input id="todo_done" class="form-check-input" type="checkbox" name="todo_status" value="done" onclick="actionTodo('todo_done')">
-									<span class="form-check-label">It is already done.</span>
-								</label>
-								<label class="form-check">
-									<input id="todo_running" class="form-check-input" type="checkbox" name="todo_status" value="running" onclick="actionTodo('todo_running')">
-									<span class="form-check-label">It is already running.</span>
-								</label>
-							</div>
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<div class="col">
+					</form>
 				</div>
-				<div class="col-auto">
-					<button type="button" id="ResetButtonFormFolUp" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-					<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent9"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">CREATE</button>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent13" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-update-information" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Update Info</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
-			</div>
-			<div class="modal-body p-3">
-				<form id="formContent10" name="form_content10" enctype="multipart/form-data" action="javascript:void(0)" method="post">
-					@csrf
-					<input type="hidden" id="opportunity-status-id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
-					<input type="hidden" id="activity-id" name="activity_id" value="" readonly>
-					<div class="mb-2" style="margin-right: 0px;">
-						<label class="col-12 col-form-label">Summary</label>
-						<textarea id="initUpdateInfo" class="notesUpdateInfo" name="activity_summary"></textarea>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
-				<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-				<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent10"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-edit-activities" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-full-width-custom modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Detail Activity</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
-			</div>
-			<div class="modal-body p-3">
-				<form id="formContent11" name="formContent11" enctype="multipart/form-data" action="javascript:void(0)" method="post">
-					@csrf
-					<input type="hidden" id="opportunity_status_id" name="opportunity_status_id" value="{{ $opportunity->lds_status }}" readonly>
-					<input type="hidden" id="act-id" name="act_id" value="" readonly>
-					<div class="row">
-						<div class="col-xl-6 col-md-12">
-							<div class="mb-2 mt-0 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Date</label>
-								{{-- <div class="col" style="padding: 0px; margin-right: 10px;">
-									<div class="input-group" id="datetimepicker1">
-										<span class="input-group-text p-1">
-											<i class="ri-calendar-2-line"></i>
-										</span>
-										<input type="text" id="datepicker_start" name="start_date" class="form-control p-1" placeholder="Start Date" autocomplete="off">
-									</div>
-								</div> --}}
-								<div class="col" style="padding: 0px;margin-left: 0px;">
-									<div class="input-group">
-										<span class="input-group-text p-1">
-											<i class="ri-calendar-2-line"></i>
-										</span>
-										<input type="text" id="datepicker_due_edit" name="due_date" class="form-control p-1" placeholder="Due Date" autocomplete="off" value="">
-									</div>
-								</div>
-							</div>
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Type Activity</label>
-								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-type-activity-i" class="form-select ts-input-custom" name="action_todo" placeholder="Select your type activity" >
-										<option value="{{ null }}"></option>
-										@foreach ($activity_type as $list)
-											<option value="{{ $list->aat_id }}">{{ $list->aat_type_name }}</option>
-										@endforeach
-									</select>
-								</div>
-							</div>
-						</div>
-						<div class="col-xl-6 col-md-12">
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Assigned to</label>
-								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-signed-user-i" class="form-select ts-input-custom" name="assignment_user" placeholder="User assignment..."  value="">
-										<option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option>
-										@foreach ($team_selected as $list)
-										<option value="{{ $list->userid }}">{{ $list->name }}</option>
-										@endforeach
-									</select>
-									<button type="button" id="btn-add-team-i" class="badge bg-cyan mt-1 mb-1" onclick="actionViewInputTeamI()">+ Team</button>
-									<button type="button" id="btn-remove-team-i" class="badge bg-cyan mt-1 mb-1" style="display: none;">x Close</button>
-									<div id="select-signed-user-team-area-i" style="display: none;">
-										<select type="text" class="form-select ts-input-custom" name="assignment_user_team[]" placeholder="User team assignment..." id="select-signed-user-team-i" value="">
-											<option value="{{ null }}"></option>
-											@foreach ($users as $list)
-											<option value="{{ $list->id }}">{{ $list->name }}</option>
-											@endforeach
-										</select>
-									</div>
-								</div>
-							</div>
-							<div class="mb-2 row" style="margin-right: 0px;">
-								<label class="col-3 col-form-label">Person in Charge</label>
-								<div class="col" style="padding: 0px;">
-									<select type="text" id="select-pic-user-i" class="form-select ts-input-custom" name="pic_user[]" placeholder="Select PIC..."  value="">
-										<option value="{{ null }}"></option>
-										@foreach ($lead_contacts as $list)
-										<option value="{{ $list->cnt_id }}">{{ $list->cnt_fullname }}</option>
-										@endforeach
-									</select>
-								</div>
-							</div>
-						</div>
-						<div class="col-xl-12 col-md-12">
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Activity Describe</label>
-								<textarea id="act-note-describe" name="alt_describe"></textarea>
-							</div>
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="col-12 col-form-label">Activity Result</label>
-								<textarea id="act-note-result" name="alt_result"></textarea>
-							</div>
-							<div class="mb-2" style="margin-right: 0px;">
-								<label class="form-check">
-									<input id="todo_done_i" class="form-check-input" type="checkbox" name="todo_status" value="done" onclick="actionTodo_i('todo_done')">
-									<span class="form-check-label">It is already done.</span>
-								</label>
-								<label class="form-check">
-									<input id="todo_running_i" class="form-check-input" type="checkbox" name="todo_status" value="running" onclick="actionTodo_i('todo_running')">
-									<span class="form-check-label">It is already running.</span>
-								</label>
-							</div>
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<div class="col">
+	{{-- ===================================================================================================== --}}
+	<div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Add Technical</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent14" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						<select type="text" class="form-select select-teams" name="select_tech[]" multiple  id="select-user-tech" value="">
+							{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
+							{{-- @foreach ($user_marketing as $list)
+							<option value="{{ $list->id }}" @if (in_array($list->id, $team_member)) selected @endif >
+								{{ $list->name }}
+							</option>
+							@endforeach --}}
+							@foreach ($user_tech as $list)
+							<option value="{{ $list->id }}" @if (in_array($list->id, $team_tech_id)) selected @endif>
+								<b>{{ $list->uts_team_name }}</b> - {{ $list->name }}
+							</option>
+							@endforeach
+						</select>
+					</form>
 				</div>
-				<div class="col-auto">
-					<button type="button" id="ResetButtonFormFolUp" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-					<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent11"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent14" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-activity-status" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-header" style="min-height: 2.5rem;padding-left: 1rem;">
-				<h5 class="modal-title">Change Activity Status</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="height: 2.5rem;"></button>
-			</div>
-			<div class="modal-body p-3">
-				<form id="formContent12" name="form_content9" enctype="multipart/form-data" action="javascript:void(0)" method="post">
-					@csrf
-					<input type="hidden" id="activity_id_i" name="act_id" value="">
-					<select type="text" class="form-select select-sales" name="status" id="select-act-status" value="">
-						<option value="{{ null }}">{{ null }}</option>
-						<option value="beready">Beready</option>
-						<option value="running">Running</option>
-						<option value="finished">Finish</option>
-					</select>
-				</form>
-			</div>
-			<div class="modal-footer" style="padding-left: 16px;padding-right: 16px;padding-bottom: 25px;">
-				<button type="button" id="ResetButtonFormUpdateInfo" class="btn btn-sm me-auto" style="margin: 0px; width: 50px;"><i class="ri-refresh-line"></i></button>
-				<button type="submit" class="btn btn-sm btn-ghost-primary active" form="formContent12"  data-bs-dismiss="modal" style="margin:0px; padding-left: 20px;padding-right: 16px;">UPDATE</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-change-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Edit Products Opportunity</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent13" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					@csrf
-					<input type="text" id="prd-id" name="prd_id" value="">
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Set Product Priciple</label>
-						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-principles-update" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple">
-								<option value="{{ null }}">Select principle</option>
-								@foreach ($allproduct as $list)
-									<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
-								@endforeach
-							</select>
+	{{-- ===================================================================================================== --}}
+	<div id="modal-add-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
+			<div class="modal-content">
+				<div class="modal-body p-3">
+					<h5 class="modal-title">Add Products Opportunity</h5>
+					<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+					<form id="formContent15" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
+						@csrf
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Set Product Priciple</label>
+							<div class="col" style="padding: 0px;">
+								<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple" >
+									<option value="{{ null }}">Select principle</option>
+									@foreach ($allproduct as $list)
+										<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
+									@endforeach
+								</select>
+							</div>
 						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Set Product</label>
-						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-product-update" class="form-select ts-input-custom" name="product" placeholder="Select your type activity">
-							</select>
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Set Product</label>
+							<div class="col" style="padding: 0px;">
+								<select type="text" id="select-product" class="form-select ts-input-custom" name="product" placeholder="Select your type activity">
+								</select>
+							</div>
 						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Give Notes</label>
-						<div class="col" style="padding: 0px;">
-							<input type="text" id="prd-product-note-update" name="product_note" class="form-control p-1" placeholder="Product notes.." autocomplete="off" >
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Give Notes</label>
+							<div class="col" style="padding: 0px;">
+								<input type="text" id="prd-product-note" name="product_note" class="form-control p-1" placeholder="Product notes.." autocomplete="off" >
+							</div>
 						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Unit Value</label>
-						<div class="col" style="padding: 0px;">
-							<input type="text" id="prd-unit-value-update" name="unit_value" class="form-control p-1" oninput="fcurrencyInput('prd-unit-value-update')" placeholder="Unit value product">
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Unit Value</label>
+							<div class="col" style="padding: 0px;">
+								<input type="text" id="prd-unit-value" name="unit_value" class="form-control p-1" oninput="fcurrencyInput('prd-unit-value')" placeholder="Unit value product">
+							</div>
 						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Quantity</label>
-						<div class="col" style="padding: 0px;">
-							<input type="number" id="prd-quantity-update" name="quantity" class="form-control p-1" placeholder="Quantity products.." autocomplete="off" >
+						<div class="mb-2 row" style="margin-right: 0px;">
+							<label class="col-3 col-form-label">Quantity</label>
+							<div class="col" style="padding: 0px;">
+								<input type="number" id="prd-quantity" name="quantity" class="form-control p-1" placeholder="Quantity products.." autocomplete="off" >
+							</div>
 						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent13" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+					</form>
+				</div>
+				<div class="modal-footer p-3 pt-0">
+					<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" form="formContent15" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-add-technical" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Add Technical</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent14" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					<select type="text" class="form-select select-teams" name="select_tech[]" multiple  id="select-user-tech" value="">
-						{{-- <option value="{{ $sales_selected->userid }}">{{ $sales_selected->name }}</option> --}}
-						{{-- @foreach ($user_marketing as $list)
-						<option value="{{ $list->id }}" @if (in_array($list->id, $team_member)) selected @endif >
-							{{ $list->name }}
-						</option>
-						@endforeach --}}
-						@foreach ($user_tech as $list)
-						<option value="{{ $list->id }}" @if (in_array($list->id, $team_tech_id)) selected @endif>
-							<b>{{ $list->uts_team_name }}</b> - {{ $list->name }}
-						</option>
-						@endforeach
-					</select>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent14" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
-{{-- ===================================================================================================== --}}
-<div id="modal-add-product" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered mt-1" role="document">
-		<div class="modal-content">
-			<div class="modal-body p-3">
-				<h5 class="modal-title">Add Products Opportunity</h5>
-				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-				<form id="formContent15" enctype="multipart/form-data" action="javascript:void(0)" method="post" autocomplete="off">
-					@csrf
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Set Product Priciple</label>
-						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-principles" class="form-select ts-input-custom" name="product_principle" placeholder="Select product priciple" >
-								<option value="{{ null }}">Select principle</option>
-								@foreach ($allproduct as $list)
-									<option value="{{ $list->prd_id }}">{{ $list->prd_name }}</option>
-								@endforeach
-							</select>
-						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Set Product</label>
-						<div class="col" style="padding: 0px;">
-							<select type="text" id="select-product" class="form-select ts-input-custom" name="product" placeholder="Select your type activity">
-							</select>
-						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Give Notes</label>
-						<div class="col" style="padding: 0px;">
-							<input type="text" id="prd-product-note" name="product_note" class="form-control p-1" placeholder="Product notes.." autocomplete="off" >
-						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Unit Value</label>
-						<div class="col" style="padding: 0px;">
-							<input type="text" id="prd-unit-value" name="unit_value" class="form-control p-1" oninput="fcurrencyInput('prd-unit-value')" placeholder="Unit value product">
-						</div>
-					</div>
-					<div class="mb-2 row" style="margin-right: 0px;">
-						<label class="col-3 col-form-label">Quantity</label>
-						<div class="col" style="padding: 0px;">
-							<input type="number" id="prd-quantity" name="quantity" class="form-control p-1" placeholder="Quantity products.." autocomplete="off" >
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer p-3 pt-0">
-				<button type="button" class="btn btn-sm btn-link link-secondary me-auto m-0" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" form="formContent15" class="btn btn-sm btn-primary m-0" data-bs-dismiss="modal">Save</button>
-			</div>
-		</div>
-	</div>
-</div>
 @endsection
 @push('style')
 <link rel="stylesheet" href="{{ asset('customs/css/default.css') }}">

@@ -76,7 +76,8 @@ class OpportunityController extends Controller
 		->where('cnt_cst_id', $opportunity->lds_customer)
 		->select('cnt_id','cnt_fullname','ins_name', 'cnt_company_position')
 		->get();
-		$institution_names = Str::title($lead_customer->first()->ins_name);
+		$institution_names = Str::title($lead_customer->ins_name);
+		
 		// $status = Prs_lead_statuses::where('pls_code_name','!=','dead_end')->get();
 		$status = Opr_stage_status::where('oss_id','!=',7)->get();
 		// $status = Prs_lead_statuses::where('pls_code_name','!=','dead_end')->get();
